@@ -1,0 +1,9 @@
+D:\aserfend\workSpace\repos\projects\多开浏览器子线程\多开浏览器子线程\bin\x64\Debug\多开浏览器子线程.exe.config
+D:\aserfend\workSpace\repos\projects\多开浏览器子线程\多开浏览器子线程\bin\x64\Debug\多开浏览器子线程.exe
+D:\aserfend\workSpace\repos\projects\多开浏览器子线程\多开浏览器子线程\bin\x64\Debug\多开浏览器子线程.pdb
+D:\aserfend\workSpace\repos\projects\多开浏览器子线程\多开浏览器子线程\obj\x64\Debug\多开浏览器子线程.FrmMain.resources
+D:\aserfend\workSpace\repos\projects\多开浏览器子线程\多开浏览器子线程\obj\x64\Debug\多开浏览器子线程.Properties.Resources.resources
+D:\aserfend\workSpace\repos\projects\多开浏览器子线程\多开浏览器子线程\obj\x64\Debug\多开浏览器子线程.csproj.GenerateResource.Cache
+D:\aserfend\workSpace\repos\projects\多开浏览器子线程\多开浏览器子线程\obj\x64\Debug\多开浏览器子线程.csproj.CoreCompileInputs.cache
+D:\aserfend\workSpace\repos\projects\多开浏览器子线程\多开浏览器子线程\obj\x64\Debug\多开浏览器子线程.exe
+D:\aserfend\workSpace\repos\projects\多开浏览器子线程\多开浏览器子线程\obj\x64\Debug\多开浏览器子线程.pdb
