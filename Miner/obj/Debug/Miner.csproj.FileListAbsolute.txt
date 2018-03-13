@@ -1,0 +1,14 @@
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\obj\Debug\Miner.csprojResolveAssemblyReference.cache
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\obj\Debug\Interop.WinHttp.dll
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\obj\Debug\Miner.csproj.ResolveComReference.cache
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\obj\Debug\Miner.Util.Input.InputBox.resources
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\obj\Debug\Miner.csproj.GenerateResource.Cache
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\obj\Debug\Miner.csproj.CoreCompileInputs.cache
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Miner.exe
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Miner.pdb
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Interop.MSScriptControl.dll
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Interop.WinHttp.dll
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\obj\Debug\Miner.exe
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\obj\Debug\Miner.pdb
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Newtonsoft.Json.dll
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Newtonsoft.Json.xml
