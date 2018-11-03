@@ -25,6 +25,7 @@ namespace SfTcp
 		{
 			//client = new TcpClient(isLocal? "127.0.0.1": "2y155s0805.51mypc.cn", isLocal?8009: 12895);
 			client = new TcpClient(isLocal ? "127.0.0.1" : "1s68948k74.imwork.net", isLocal ? 8009 : 16397);
+			Console.WriteLine("已成功连接到服务器.");
 			stream = client.GetStream();
 			bw = new BinaryWriter(stream);
 			br = new BinaryReader(stream);
@@ -112,7 +113,6 @@ namespace SfTcp
 					{
 						Disconnected?.Invoke(this);
 						Console.WriteLine("Tcp.Reciving()" + ex.Message);
-						MessageBox.Show("断开连接:" +ex.Message);
 						break;
 					}
 

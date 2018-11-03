@@ -35,59 +35,8 @@ namespace Miner
 				AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 				int systemBegin = Environment.TickCount;
 				Logger.OnLog += (x, xx) => { Console.WriteLine(xx.LogInfo); };
-				var clientId = rootReg.In("Main").In("Setting");
-				var vpsName = clientId.GetInfo("VpsClientId","null");
-
-				Tcp = new SfTcp.SfTcpClient();
-				Tcp.RecieveMessage = (x, xx) =>
-				{
-					if (xx.Contains("<setClientName>"))
-					{
-						setting = new Setting(HttpUtil.GetElementInItem(xx, "setClientName"));
-						clientId.SetInfo("VpsClientId", HttpUtil.GetElementInItem(xx, "clientId"));
-					}
-					if (xx.Contains("<serverRun>"))
-					{
-						ServerRun();
-					}
-					if (xx.Contains("<setting>"))
-					{
-						SynSetting(xx);
-					}
-					
-					if (xx.Contains("<versionCheck>"))
-					{
-						var cstr = new StringBuilder();
-						var verFiles = HttpUtil.GetAllElements(xx, "<file>", "</file>");
-						foreach(var f in verFiles)
-						{
-							var fver = HttpUtil.GetElement(f, "<version>", "</version>");
-							var fname = HttpUtil.GetElement(f, "<name>", "</name>");
-							if (Convert.ToInt32(fver) > Convert.ToInt32(rootReg.In("setting").In("fileVersion").GetInfo(fname,"0"))) {
-								//检测到版本低则更新
-								cstr.Append("<fileRequest>").Append(fname).Append("</fileRequest>");
-							};
-						}
-						if (cstr.Length > 0)
-						{
-							Tcp.Send(cstr.ToString());
-						}
-					}
-					if (xx.Contains("<fileContent>"))
-					{
-						var transFile = HttpUtil.GetAllElements(xx,"<fileContent>","</fileContent>");
-						foreach(var transFileRaw in transFile)
-						{
-							using (var transf = File.Create(HttpUtil.GetElementInItem(transFileRaw, "filePath")))
-							{
-								var data = System.Text.Encoding.Default.GetBytes(HttpUtil.GetElementInItem(transFileRaw,"content"));
-								transf.Write(data, 0, data.Length);
-							}
-						}
-
-					}
-				};
-				Tcp.Send("<connectCmdRequire>"+ vpsName + "</connectCmdRequire>");
+				
+				InitTcp();
 				var mainThreadCounter =  rootReg.In("Main").In("Thread").In("Main");
 				while (true)
 				{
@@ -111,6 +60,71 @@ namespace Miner
 				Clipboard.SetText(info);
 				Thread.Sleep(5000);
 			}
+		}
+		private static Thread MainThread;
+		private static void InitTcp()
+		{
+			var clientId = rootReg.In("Main").In("Setting");
+			var vpsName = clientId.GetInfo("VpsClientId", "null");
+
+			Tcp = new SfTcp.SfTcpClient();
+			Tcp.RecieveMessage = (x, xx) =>
+			{
+				if (xx.Contains("<setClientName>"))
+				{
+					setting = new Setting(HttpUtil.GetElementInItem(xx, "setClientName"));
+					clientId.SetInfo("VpsClientId", HttpUtil.GetElementInItem(xx, "clientId"));
+				}
+				if (xx.Contains("<serverRun>"))
+				{
+					ServerRun();
+				}
+				if (xx.Contains("<setting>"))
+				{
+					SynSetting(xx);
+				}
+
+				if (xx.Contains("<versionCheck>"))
+				{
+					var cstr = new StringBuilder();
+					var verFiles = HttpUtil.GetAllElements(xx, "<file>", "</file>");
+					foreach (var f in verFiles)
+					{
+						var fver = HttpUtil.GetElement(f, "<version>", "</version>");
+						var fname = HttpUtil.GetElement(f, "<name>", "</name>");
+						if (Convert.ToInt32(fver) > Convert.ToInt32(rootReg.In("setting").In("fileVersion").GetInfo(fname, "0")))
+						{
+							//检测到版本低则更新
+							cstr.Append("<fileRequest>").Append(fname).Append("</fileRequest>");
+						};
+					}
+					if (cstr.Length > 0)
+					{
+						Tcp.Send(cstr.ToString());
+					}
+				}
+				if (xx.Contains("<fileContent>"))
+				{
+					var transFile = HttpUtil.GetAllElements(xx, "<fileContent>", "</fileContent>");
+					foreach (var transFileRaw in transFile)
+					{
+						using (var transf = File.Create(HttpUtil.GetElementInItem(transFileRaw, "filePath")))
+						{
+							var data = System.Text.Encoding.Default.GetBytes(HttpUtil.GetElementInItem(transFileRaw, "content"));
+							transf.Write(data, 0, data.Length);
+						}
+					}
+
+				}
+			};
+			Tcp.Disconnected = (x) => {
+				Thread.Sleep(5000);
+				Logger.SysLog("与服务器丢失连接.", "主记录");
+				MainThread = new Thread(() => { InitTcp(); });
+				MainThread.Start();
+				
+			};
+			Tcp.Send("<connectCmdRequire>" + vpsName + "</connectCmdRequire>");
 		}
 		private  static void ServerRun()
 		{
