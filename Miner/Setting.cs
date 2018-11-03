@@ -11,15 +11,18 @@ namespace Miner
 		public ThreadSetting threadSetting;
 		public Setting(string processId=null)
 		{
-			LogInfo("初始化进程");
 			MainReg = new Reg("sfMinerDigger").In("Main");
 			Pid = Process.GetCurrentProcess().Id.ToString();
 			ProcessCmdId = processId?? "Test";
-			Logger.defaultPath = "Thread." + ProcessCmdId;
+			Logger.defaultPath = "log\\Thread." + ProcessCmdId;
 			threadSetting = new ThreadSetting(MainReg.In("Thread").In(ProcessCmdId))
 			{
 				CorePid = Pid
 			};
+			var dataListReg = new Reg("sfMinerDigger").In("Main").In("Data").In("DataList");
+			DataListServerReg = dataListReg.In("Server");
+			DataListCoreReg = dataListReg.In("Core").In("@"+ ProcessCmdId);
+			BrowserServerSeeting =MainReg.In("setting").In("Cmd").In("Server");
 			Init = true;
 		}
 		private bool init;
@@ -27,12 +30,15 @@ namespace Miner
 		private string processCmdId;
 
 		public Reg MainReg;
+		public Reg BrowserServerSeeting;
+		public Reg DataListServerReg;
+		public Reg DataListCoreReg;
 		private string lastInfo;
-		public void LogInfo(string info)
+		public void LogInfo(string info,string CataPath, bool ignoreDuplicate=false)
 		{
-			if (lastInfo == info) return;
+			if (lastInfo == info && !ignoreDuplicate) return;
 			lastInfo = info;
-			Logger.SysLog(Name + info);
+			Logger.SysLog(Name + info, CataPath);
 		}
 		public string Name
 		{
@@ -72,8 +78,31 @@ namespace Miner
 		{
 			get => ThreadReg.GetInfo("Task");
 		}
+		public string Status
+		{
+			set {
+				Program.setting.LogInfo("Status:"+value,"主记录");
+				ThreadReg.SetInfo("Status", value.Length>10?value.Substring(0,10): value);
+			}
+			get => ThreadReg.GetInfo("Status");
+		}
+		public bool NeedNewIp
+		{
+			set {
+				ThreadReg.SetInfo("needNewIp", "1");
+			}
+			get => ThreadReg.GetInfo("needNewIp")=="1";
+		}
+		public string Ip
+		{
+			set
+			{
+				ThreadReg.SetInfo("Ip", value);
+			}
+			get => ThreadReg.GetInfo("Ip");
+		}
 		[DllImport("kernel32")]
-		static extern uint GetTickCount();
+		static  extern uint GetTickCount();
 		public void RefreshRunTime()
 		{
 			ThreadReg.SetInfo("Runtime", GetTickCount());

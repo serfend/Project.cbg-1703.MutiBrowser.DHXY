@@ -1,0 +1,129 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using System.Windows.Forms;
+
+namespace SfTcp
+{
+	public class SfTcpClient
+	{
+		public TcpClient client;
+		private NetworkStream stream;
+		private BinaryReader br;
+		private BinaryWriter bw;
+		public Action<SfTcpClient, string> RecieveMessage;
+		public Action<SfTcpClient> Disconnected;
+		
+		
+		private Thread reporter;
+		private int lastLength, reporterCounter;
+		public SfTcpClient(bool isLocal=false)
+		{
+			//client = new TcpClient(isLocal? "127.0.0.1": "2y155s0805.51mypc.cn", isLocal?8009: 12895);
+			client = new TcpClient(isLocal ? "127.0.0.1" : "1s68948k74.imwork.net", isLocal ? 8009 : 16397);
+			stream = client.GetStream();
+			bw = new BinaryWriter(stream);
+			br = new BinaryReader(stream);
+			var th = new Thread(Reciving) { IsBackground=true};
+			reporter = new Thread(() => {
+				while (true)
+				{
+					var thisLen = cstr.Length;
+					if (thisLen == lastLength && thisLen > 0 && reporterCounter++ > 50)
+					{
+						RecieveComplete();
+					}
+					else
+					{
+						lastLength = thisLen;
+					}
+					Thread.Sleep(10);
+				}
+			})
+			{ IsBackground = true };
+			reporter.Start();
+			th.Start();
+		}
+		private void RecieveComplete(bool getEndPoint = false)
+		{
+			if (getEndPoint) cstr.Replace(this.TcpComplete, "");
+			RecieveMessage?.Invoke(this, cstr.ToString());
+			//Receive.Invoke(cstr.ToString(), this);
+			cstr.Clear();
+			lastLength = 0;
+			reporterCounter = 0;
+			nowCheckIndex = 0;
+		}
+		public virtual bool Send(string info)
+		{
+			return Send(Encoding.UTF8.GetBytes(info + TcpComplete));
+		}
+		public virtual bool Send(byte[] info)
+		{
+			if (client.Connected)
+			{
+				try
+				{
+					bw.Write(info);
+					bw.Flush();
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine("Tcp.Send()" + ex.Message);
+					Disconnected.Invoke(this);
+					return false;
+				}
+				return true;
+			}
+			else return false;
+		}
+		private string TcpComplete
+		{
+			get => "#$%&'";
+		}
+		StringBuilder cstr = new StringBuilder();
+		private int nowCheckIndex =0;
+		private void Reciving()
+		{
+			while (true)
+			{
+				if (client.Connected)
+				{
+					try
+					{
+						var c = br.ReadChar();
+						cstr.Append(c);
+						if (c == '#' + nowCheckIndex)
+						{
+							nowCheckIndex++;
+							if (nowCheckIndex == 5)
+							{
+								RecieveComplete(true);
+								continue;
+							}
+						}
+						
+					}
+					catch (Exception ex)
+					{
+						Disconnected?.Invoke(this);
+						Console.WriteLine("Tcp.Reciving()" + ex.Message);
+						MessageBox.Show("断开连接:" +ex.Message);
+						break;
+					}
+
+				}
+				else
+				{
+					Console.WriteLine("已断开");
+					Disconnected?.Invoke(this);
+					break;
+				}
+			}
+		}
+	}
+}

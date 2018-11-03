@@ -37,10 +37,14 @@
 			this.设置IE版本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.iE9ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.当前版本ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.BtnShowBuyList = new System.Windows.Forms.Button();
 			this.BtnSetBootPage = new System.Windows.Forms.Button();
 			this.LbShowStatus = new System.Windows.Forms.Label();
+			this.GPctlInfo = new System.Windows.Forms.GroupBox();
+			this.ISPrice = new System.Windows.Forms.Label();
+			this.BtnMinimun = new System.Windows.Forms.Button();
+			this.BtnShowBuyList = new System.Windows.Forms.Button();
 			this.menuMain.SuspendLayout();
+			this.GPctlInfo.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// WebShow
@@ -117,18 +121,6 @@
 			this.当前版本ToolStripMenuItem.Text = "当前版本";
 			this.当前版本ToolStripMenuItem.Click += new System.EventHandler(this.当前版本ToolStripMenuItem_Click);
 			// 
-			// BtnShowBuyList
-			// 
-			this.BtnShowBuyList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.BtnShowBuyList.Location = new System.Drawing.Point(830, 35);
-			this.BtnShowBuyList.Margin = new System.Windows.Forms.Padding(2);
-			this.BtnShowBuyList.Name = "BtnShowBuyList";
-			this.BtnShowBuyList.Size = new System.Drawing.Size(68, 22);
-			this.BtnShowBuyList.TabIndex = 4;
-			this.BtnShowBuyList.Text = "立即下单";
-			this.BtnShowBuyList.UseVisualStyleBackColor = true;
-			this.BtnShowBuyList.Click += new System.EventHandler(this.BtnShowBuyList_Click);
-			// 
 			// BtnSetBootPage
 			// 
 			this.BtnSetBootPage.Location = new System.Drawing.Point(2, 9);
@@ -148,14 +140,59 @@
 			this.LbShowStatus.Size = new System.Drawing.Size(0, 12);
 			this.LbShowStatus.TabIndex = 6;
 			// 
+			// GPctlInfo
+			// 
+			this.GPctlInfo.Anchor = System.Windows.Forms.AnchorStyles.None;
+			this.GPctlInfo.Controls.Add(this.ISPrice);
+			this.GPctlInfo.Controls.Add(this.BtnMinimun);
+			this.GPctlInfo.Controls.Add(this.BtnShowBuyList);
+			this.GPctlInfo.Location = new System.Drawing.Point(12, 313);
+			this.GPctlInfo.Name = "GPctlInfo";
+			this.GPctlInfo.Size = new System.Drawing.Size(248, 84);
+			this.GPctlInfo.TabIndex = 7;
+			this.GPctlInfo.TabStop = false;
+			// 
+			// ISPrice
+			// 
+			this.ISPrice.Font = new System.Drawing.Font("宋体", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+			this.ISPrice.Location = new System.Drawing.Point(8, 17);
+			this.ISPrice.Name = "ISPrice";
+			this.ISPrice.Size = new System.Drawing.Size(234, 21);
+			this.ISPrice.TabIndex = 7;
+			this.ISPrice.Text = "12500/10000";
+			this.ISPrice.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+			// 
+			// BtnMinimun
+			// 
+			this.BtnMinimun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.BtnMinimun.Location = new System.Drawing.Point(12, 40);
+			this.BtnMinimun.Margin = new System.Windows.Forms.Padding(2);
+			this.BtnMinimun.Name = "BtnMinimun";
+			this.BtnMinimun.Size = new System.Drawing.Size(113, 36);
+			this.BtnMinimun.TabIndex = 6;
+			this.BtnMinimun.Text = "最小化";
+			this.BtnMinimun.UseVisualStyleBackColor = true;
+			this.BtnMinimun.Click += new System.EventHandler(this.BtnMinimun_Click);
+			// 
+			// BtnShowBuyList
+			// 
+			this.BtnShowBuyList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.BtnShowBuyList.Location = new System.Drawing.Point(127, 40);
+			this.BtnShowBuyList.Margin = new System.Windows.Forms.Padding(2);
+			this.BtnShowBuyList.Name = "BtnShowBuyList";
+			this.BtnShowBuyList.Size = new System.Drawing.Size(116, 36);
+			this.BtnShowBuyList.TabIndex = 5;
+			this.BtnShowBuyList.Text = "立即下单";
+			this.BtnShowBuyList.UseVisualStyleBackColor = true;
+			// 
 			// FrmMain
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(900, 627);
+			this.Controls.Add(this.GPctlInfo);
 			this.Controls.Add(this.LbShowStatus);
 			this.Controls.Add(this.BtnSetBootPage);
-			this.Controls.Add(this.BtnShowBuyList);
 			this.Controls.Add(this.btnRefresh);
 			this.Controls.Add(this.ipWebShowUrl);
 			this.Controls.Add(this.WebShow);
@@ -165,7 +202,9 @@
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMain_FormClosing);
 			this.Load += new System.EventHandler(this.BtnRefresh_Click);
 			this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.FrmMain_MouseClick);
+			this.Resize += new System.EventHandler(this.FrmMain_Resize);
 			this.menuMain.ResumeLayout(false);
+			this.GPctlInfo.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -183,9 +222,12 @@
 		private System.Windows.Forms.ToolStripMenuItem 设置IE版本ToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem iE9ToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem 当前版本ToolStripMenuItem;
-		private System.Windows.Forms.Button BtnShowBuyList;
 		private System.Windows.Forms.Button BtnSetBootPage;
 		private System.Windows.Forms.Label LbShowStatus;
+		private System.Windows.Forms.GroupBox GPctlInfo;
+		private System.Windows.Forms.Label ISPrice;
+		private System.Windows.Forms.Button BtnMinimun;
+		private System.Windows.Forms.Button BtnShowBuyList;
 	}
 }
 

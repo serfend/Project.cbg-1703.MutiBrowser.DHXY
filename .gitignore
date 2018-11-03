@@ -3,3 +3,7 @@
 多开浏览器子线程/bin/Release/多开浏览器子线程.exe.config
 多开浏览器子线程/bin/Debug/多开浏览器子线程.exe.config
 *.pdb
+*.txt
+*.log
+*.log
+*.cache

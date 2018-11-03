@@ -12,7 +12,7 @@ namespace 多开浏览器子线程.Inner
 		public bool notFirstTimeRun;
 		public long GetCmd( out string targetUrl)
 		{
-			Program.reg.In("Main").In("Setting").In("cmd").SetInfo(Program.thisExeThreadId + ".lastRunTime", DateTime.Now);
+			Program.reg.In("Main").In("Setting").In("cmd").SetInfo(Program.thisExeThreadId + ".lastRunTime", DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"));
 			return NeedRefresh(out targetUrl);
 		}
 		public void Refresh()
@@ -60,6 +60,12 @@ namespace 多开浏览器子线程.Inner
 					{
 						targetUrl = GetNextUrl();
 						return 233;
+					}
+				case "newBill":
+					{
+
+						targetUrl = GetNextUrl();
+						return 101;
 					}
 				default:
 					{

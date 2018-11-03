@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -52,6 +53,10 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Interop.MSScriptControl">
+      <HintPath>..\Miner\Interop.MSScriptControl.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -67,19 +72,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\util\codeUtil.cs">
-      <Link>util\codeUtil.cs</Link>
+    <Compile Include="..\..\..\..\..\util\coder\codeUtil.cs">
+      <Link>util\Coder\codeUtil.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\util\HttpClient.cs">
-      <Link>util\HttpClient.cs</Link>
+    <Compile Include="..\..\..\..\..\util\coder\Image2Binary.cs">
+      <Link>util\Coder\Image2Binary.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\util\jsonUtil.cs">
-      <Link>util\jsonUtil.cs</Link>
+    <Compile Include="..\..\..\..\..\util\coder\JShelp.cs">
+      <Link>util\Coder\JShelp.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\util\reg.cs">
+    <Compile Include="..\..\..\..\..\util\httpclient\HttpClient.cs">
+      <Link>util\Coder\HttpClient.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\..\..\util\Logger\SysLog.cs">
+      <Link>util\Coder\SysLog.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\..\..\util\reg.cs">
       <Link>util\reg.cs</Link>
     </Compile>
+    <Compile Include="..\订单信息服务器\TcpClient.cs">
+      <Link>TcpClient.cs</Link>
+    </Compile>
     <Compile Include="browserVersionEdit.cs" />
+    <Compile Include="TcpBrowserClient.cs" />
+    <Compile Include="util\BillPoster.cs" />
+    <Compile Include="util\CookieReader.cs" />
     <Compile Include="FrmMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -115,6 +132,17 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="WinHttp">
+      <Guid>{662901FC-6951-4854-9EB2-D9A2570F2B2E}</Guid>
+      <VersionMajor>5</VersionMajor>
+      <VersionMinor>1</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

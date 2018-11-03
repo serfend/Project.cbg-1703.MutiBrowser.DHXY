@@ -19,6 +19,19 @@ namespace 多开浏览器子线程
 			Application.SetCompatibleTextRenderingDefault(false);
 			Init(args);
 			Application.Run(new FrmMain());
+			var frm = new FrmMain();
+			try
+			{
+
+				frm.Show();
+
+			}
+			catch (Exception ex)
+			{
+				
+				MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
+				
+			}
 		}
 		public static DotNet4.Utilities.UtilReg.Reg reg ;
 		public static string thisExeThreadId;
@@ -33,8 +46,7 @@ namespace 多开浏览器子线程
 				thisExeThreadId = args[0];
 			}
 
-			reg = new DotNet4.Utilities.UtilReg.Reg();
-			reg = reg.In("sfMinerDigger");
+			reg = new DotNet4.Utilities.UtilReg.Reg("sfMinerDigger");
 			//MessageBox.Show(string.Format("子线程已创建到{0}号线程",thisExeThreadId));
 		}
 	}

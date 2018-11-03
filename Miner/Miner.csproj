@@ -10,6 +10,23 @@
     <AssemblyName>Miner</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationVersion>1.0.1.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -20,6 +37,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -30,17 +48,29 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>3AC59E170B1412201132E855BA585BAE3C8F670F</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>Miner_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Interop.MSScriptControl">
       <HintPath>.\Interop.MSScriptControl.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http">
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1\System.Net.Http.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
@@ -62,9 +92,6 @@
     <Compile Include="..\..\..\..\..\util\coder\jsonUtil.cs">
       <Link>Util\Coder\jsonUtil.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\util\HttpClient\HttpClient.cs">
-      <Link>Util\Coder\HttpClient.cs</Link>
-    </Compile>
     <Compile Include="..\..\..\..\..\util\Input\InputBox.cs">
       <Link>Util\Input\InputBox.cs</Link>
       <SubType>Form</SubType>
@@ -75,13 +102,30 @@
     <Compile Include="..\..\..\..\..\util\reg.cs">
       <Link>Util\reg.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\..\..\util\RuoKuaiHttp.cs">
-      <Link>Util\RuoKuaiHttp.cs</Link>
+    <Compile Include="..\订单信息服务器\TcpClient.cs">
+      <Link>TcpClient.cs</Link>
     </Compile>
+    <Compile Include="Goods\Equiment\EquimentPrice.cs" />
+    <Compile Include="Goods\Equiment\Equipment.cs" />
+    <Compile Include="Goods\Goods.cs" />
+    <Compile Include="Goods\Noods.cs" />
+    <Compile Include="IpClient.cs" />
+    <Compile Include="IpConfig.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServerList.cs" />
+    <Compile Include="ServerHandle\Server.cs" />
+    <Compile Include="ServerHandle\ServerList.cs" />
     <Compile Include="Setting.cs" />
+    <Compile Include="Goods\Summon\Summon.cs" />
+    <Compile Include="Goods\Summon\SummonPrice.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\..\..\..\util\Input\InputBox.resx">
+      <Link>Util\Input\InputBox.resx</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="WinHttp">
@@ -95,12 +139,11 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\..\..\..\..\util\Input\InputBox.resx">
-      <Link>Util\Input\InputBox.resx</Link>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
