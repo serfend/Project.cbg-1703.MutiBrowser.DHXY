@@ -14,7 +14,7 @@ namespace Miner
 		{
 			private string name;
 			private string id;
-			private Node goodInfo;
+			private readonly Node goodInfo;
 			private string bookStatus;//可预订:2,已预订:4
 			private string price;
 			private double assumePrice = -1;//本地估价

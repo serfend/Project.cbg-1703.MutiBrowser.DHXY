@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace SfTcp
 {
-	public class SfTcpClient
+	public class SfTcpClient:IDisposable
 	{
 		public TcpClient client;
 		private NetworkStream stream;
@@ -30,7 +30,7 @@ namespace SfTcp
 			bw = new BinaryWriter(stream);
 			br = new BinaryReader(stream);
 			var th = new Thread(Reciving) { IsBackground=true};
-			Console.WriteLine("已成功连接到服务器.");
+			Console.WriteLine("尝试与服务器建立连接.");
 			reporter = new Thread(() => {
 				while (true)
 				{
@@ -126,5 +126,37 @@ namespace SfTcp
 				}
 			}
 		}
+
+		#region IDisposable Support
+		private bool disposedValue = false; // 要检测冗余调用
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposedValue)
+			{
+				if (disposing)
+				{
+					if (client != null) client.Close();
+					if (stream != null) stream.Dispose();
+					if (bw != null) bw.Dispose();
+					if (br != null) br.Dispose();
+					
+				}
+				client = null;
+				stream = null;
+				bw = null;
+				br = null;
+
+				disposedValue = true;
+			}
+		}
+
+		public void Dispose()
+		{
+			// 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+			Dispose(true);
+
+		}
+		#endregion
 	}
 }

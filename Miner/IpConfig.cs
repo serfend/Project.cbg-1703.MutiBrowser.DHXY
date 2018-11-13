@@ -21,16 +21,18 @@ namespace Miner
 			else
 			{
 				//var ipListRaw = HttpUtil.GetAllElements(resRaw, "ip\":\"", "}");
-				list = new List<string>();
-				//foreach(var ipRaw in ipListRaw)
-				//{
-				//	var ip = HttpUtil.GetElementLeft(ipRaw, "\"");
-				//	var port = HttpUtil.GetElementRight(ipRaw, "\":");
-				//	list.Add(string.Format("{0}:{1}", ip, port));
-				//}
-				//Status = resRaw;// HttpUtil.GetElement(resRaw, "error_message\":\"","}");
-				list.Add(resRaw);
-				
+				list = new List<string>
+				{
+					//foreach(var ipRaw in ipListRaw)
+					//{
+					//	var ip = HttpUtil.GetElementLeft(ipRaw, "\"");
+					//	var port = HttpUtil.GetElementRight(ipRaw, "\":");
+					//	list.Add(string.Format("{0}:{1}", ip, port));
+					//}
+					//Status = resRaw;// HttpUtil.GetElement(resRaw, "error_message\":\"","}");
+					resRaw
+				};
+
 			}
 			
 		}

@@ -18,14 +18,6 @@ namespace SfTcp
 		}
 		public TcpServerManager()
 		{
-			//int nowPortIndex = 8010;
-			//var mainTcp = new TcpServer((x, xx) => { }) {
-			//	Connected=(s)=> {
-			//		s.Send((nowPortIndex++).ToString());
-			//		list.Add(NewTcp(nowPortIndex));
-			//		s.Disconnect();
-			//		s.Connect();
-			//	} };
 			NewTcp();
 		}
 		private Action<TcpServer> Connected() {

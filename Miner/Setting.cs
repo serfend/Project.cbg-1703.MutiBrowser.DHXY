@@ -34,7 +34,7 @@ namespace Miner
 		public Reg DataListServerReg;
 		public Reg DataListCoreReg;
 		private string lastInfo;
-		public void LogInfo(string info,string CataPath, bool ignoreDuplicate=false)
+		public void LogInfo(string info,string CataPath="主记录", bool ignoreDuplicate=false)
 		{
 			if (lastInfo == info && !ignoreDuplicate) return;
 			lastInfo = info;
@@ -101,11 +101,10 @@ namespace Miner
 			}
 			get => ThreadReg.GetInfo("Ip");
 		}
-		[DllImport("kernel32")]
-		static  extern uint GetTickCount();
+
 		public void RefreshRunTime()
 		{
-			ThreadReg.SetInfo("Runtime", GetTickCount());
+			ThreadReg.SetInfo("Runtime", Environment.TickCount);
 		}
 	}
 }

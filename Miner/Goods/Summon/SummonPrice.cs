@@ -15,15 +15,7 @@ namespace Goods.Summon
 
 			public static SortedList<double, double> 成长值list;
 
-			private string ruleId;
-
-			public string RuleId
-			{
-				get
-				{
-					return ruleId;
-				}
-			}
+			public readonly string RuleId;
 
 			public static double 成长值范围(double value)
 			{
@@ -56,7 +48,7 @@ namespace Goods.Summon
 				}
 				var 成长值 = Convert.ToDouble(rules[2]);
 				if (!成长值list.ContainsKey(成长值)) 成长值list.Add(成长值, 成长值);
-				ruleId = GetSummonKindId(name, rules[1] == "神", 成长值范围(成长值), rules[3] == "是");
+				RuleId = GetSummonKindId(name, rules[1] == "神", 成长值范围(成长值), rules[3] == "是");
 				if (SummomPriceRuleList.ContainsKey(RuleId))
 				{
 					Program.setting.LogInfo("添加召唤兽规则失败,已存在:" + RuleId, "设置选项");

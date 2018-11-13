@@ -19,7 +19,7 @@ namespace Miner
 {
 	namespace Server
 	{
-		class ServerList
+		class ServerList:IDisposable
 		{
 			private HttpClient http;
 			private Dictionary<string, Server> serverList;
@@ -120,7 +120,6 @@ namespace Miner
 			{
 				try
 				{
-					//HttpClient.UsedProxy = "proxy.baibianip.com:8000";
 					Main();
 					ServerRun(0);
 				}
@@ -199,6 +198,30 @@ namespace Miner
 					ServerRun(nowIndex + 1);
 				}).Start();
 			}
+
+			#region IDisposable Support
+			private bool disposedValue = false; // 要检测冗余调用
+
+			protected virtual void Dispose(bool disposing)
+			{
+				if (!disposedValue)
+				{
+					if (disposing)
+					{
+						if (http != null) http.Dispose();
+					}
+					http = null;
+					disposedValue = true;
+				}
+			}
+
+			// 添加此代码以正确实现可处置模式。
+			public void Dispose()
+			{
+				// 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+				Dispose(true);
+			}
+			#endregion
 
 		}
 		

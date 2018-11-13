@@ -47,6 +47,9 @@
     <Compile Include="..\..\..\..\..\util\coder\codeUtil.cs">
       <Link>Util\Coder\codeUtil.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\..\..\util\reg.cs">
+      <Link>Util\Coder\reg.cs</Link>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

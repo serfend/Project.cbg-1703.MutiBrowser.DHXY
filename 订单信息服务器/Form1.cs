@@ -1,10 +1,12 @@
 ﻿using DotNet4.Utilities.UtilCode;
+using DotNet4.Utilities.UtilReg;
 using SfTcp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -21,15 +23,17 @@ namespace 订单信息服务器
 			foreach(var item in LstConnection.Items) {
 				if (item is ListViewItem it)
 				{
-					if (it.SubItems[1].Text== ip) return it;
+					if (it.SubItems[2].Text== ip) return it;
 				}
 			}
 			return null;
 		}
+		private Reg regSetting;
 		public Form1()
 		{
 			InitializeComponent();
-			t=new TcpServerManager() { NormalMessage=(s,x)=> {
+			regSetting = new Reg("sfMinerDigger").In("Setting").In("vps");
+			t =new TcpServerManager() { NormalMessage=(s,x)=> {
 				this.Invoke((EventHandler)delegate
 				{
 					var targetItem = GetItem(s.Ip);
@@ -41,7 +45,27 @@ namespace 订单信息服务器
 						{
 							targetItem.SubItems[3].Text = "初始化";
 							targetItem.SubItems[0].Text =HttpUtil.GetElementInItem(x, "connectCmdRequire");
-							//s.Send("<connectCmd>test</connectCmd>");
+							s.ID= HttpUtil.GetElementInItem(x, "clientDeviceId");
+							var clientName = regSetting.In(s.ID).GetInfo("clientName", targetItem.SubItems[0].Text);
+							s.Send(string.Format("<setClientName>{0}</setClientName>", clientName));//用于确认当前名称并初始化
+						}
+						else if (x.Contains("<InitComplete>"))
+						{
+							//终端已初始化完成
+							//synSetting,synFile
+							//遍历 【同步文件】 下所有文件
+							var dic =new  DirectoryInfo(Application.StartupPath+"\\同步设置");
+							var tmp = new StringBuilder();
+							foreach (var f in dic.EnumerateFiles())
+							{
+								tmp.Append("<file><name>").Append(f.Name).Append("</name>").Append("<version>").Append(HttpUtil.GetMD5ByMD5CryptoService(f.FullName)).Append("</version>");
+							}
+							if (tmp.Length > 0)
+							{
+								tmp.Append("<versionCheck>");
+								s.Send(tmp.ToString());
+							}
+							
 						}
 						else
 						{

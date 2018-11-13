@@ -21,8 +21,7 @@ namespace 远程连接测试
 			}
 			catch (Exception ex)
 			{
-
-				throw;
+				MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
 			}
 			
 		}

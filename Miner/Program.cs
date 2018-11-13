@@ -9,7 +9,9 @@ using Miner.Goods.Summon;
 using System.Threading;
 using System.Windows.Forms;
 using DotNet4.Utilities.UtilCode;
+
 using System.IO;
+using File_Transfer;
 
 namespace Miner
 {
@@ -25,6 +27,14 @@ namespace Miner
 			Environment.Exit(-1); //有此句则不弹异常对话框
 		}
 		private static Reg rootReg;
+		public  enum VpsStatus
+		{
+			WaitConnect,
+			Connecting,
+			Running,
+			Exception
+		}
+		public static VpsStatus vpsStatus =0;
 		//public static IpConfig IpConfig;
 		[STAThreadAttribute]
 		static void Main(string[] args)
@@ -36,21 +46,22 @@ namespace Miner
 				int systemBegin = Environment.TickCount;
 				Logger.OnLog += (x, xx) => { Console.WriteLine(xx.LogInfo); };
 				
-				InitTcp();
+				
 				var mainThreadCounter =  rootReg.In("Main").In("Thread").In("Main");
 				while (true)
 				{
 					Thread.Sleep(1000);
-					var nowCount = Environment.TickCount;
-					try
+					switch (vpsStatus)
 					{
-						var mainThreadCount = Convert.ToInt32(mainThreadCounter.GetInfo("LastRunTime", "0"));
-						//if (Math.Abs(nowCount - mainThreadCount) > 10000) Environment.Exit(0);
+						case VpsStatus.WaitConnect:
+							{
+								InitTcp();
+								vpsStatus = VpsStatus.Connecting;
+								break;
+							}
+
 					}
-					catch (Exception ex)
-					{
-						MessageBox.Show(ex.Message + "  LastRunTime:" + mainThreadCounter.GetInfo("LastRunTime", "0"));
-					}
+
 				}
 			}
 			catch (Exception ex)
@@ -61,19 +72,22 @@ namespace Miner
 				Thread.Sleep(5000);
 			}
 		}
-		private static Thread MainThread;
 		private static void InitTcp()
 		{
 			var clientId = rootReg.In("Main").In("Setting");
 			var vpsName = clientId.GetInfo("VpsClientId", "null");
-
+			var clientDeviceId = clientId.GetInfo("clientDeviceId",HttpUtil.UUID);
 			Tcp = new SfTcp.SfTcpClient();
 			Tcp.RecieveMessage = (x, xx) =>
 			{
+				Logger.SysLog(xx, "通讯记录");
 				if (xx.Contains("<setClientName>"))
 				{
-					setting = new Setting(HttpUtil.GetElementInItem(xx, "setClientName"));
-					clientId.SetInfo("VpsClientId", HttpUtil.GetElementInItem(xx, "clientId"));
+					var ClientName = HttpUtil.GetElementInItem(xx, "setClientName");
+					setting = new Setting(ClientName);
+					clientId.SetInfo("VpsClientId",ClientName);
+					Program.vpsStatus = VpsStatus.Running;
+					Tcp.Send("<InitComplete>");
 				}
 				if (xx.Contains("<serverRun>"))
 				{
@@ -86,45 +100,57 @@ namespace Miner
 
 				if (xx.Contains("<versionCheck>"))
 				{
-					var cstr = new StringBuilder();
-					var verFiles = HttpUtil.GetAllElements(xx, "<file>", "</file>");
-					foreach (var f in verFiles)
-					{
-						var fver = HttpUtil.GetElement(f, "<version>", "</version>");
-						var fname = HttpUtil.GetElement(f, "<name>", "</name>");
-						if (Convert.ToInt32(fver) > Convert.ToInt32(rootReg.In("setting").In("fileVersion").GetInfo(fname, "0")))
-						{
-							//检测到版本低则更新
-							cstr.Append("<fileRequest>").Append(fname).Append("</fileRequest>");
-						};
-					}
-					if (cstr.Length > 0)
-					{
-						Tcp.Send(cstr.ToString());
-					}
+					SynFile(xx);
 				}
-				if (xx.Contains("<fileContent>"))
-				{
-					var transFile = HttpUtil.GetAllElements(xx, "<fileContent>", "</fileContent>");
-					foreach (var transFileRaw in transFile)
-					{
-						using (var transf = File.Create(HttpUtil.GetElementInItem(transFileRaw, "filePath")))
-						{
-							var data = System.Text.Encoding.Default.GetBytes(HttpUtil.GetElementInItem(transFileRaw, "content"));
-							transf.Write(data, 0, data.Length);
-						}
-					}
-
-				}
-			};
-			Tcp.Disconnected = (x) => {
-				Thread.Sleep(5000);
-				Logger.SysLog("与服务器丢失连接.", "主记录");
-				MainThread = new Thread(() => { InitTcp(); });
-				MainThread.Start();
 				
 			};
-			Tcp.Send("<connectCmdRequire>" + vpsName + "</connectCmdRequire>");
+			Tcp.Disconnected = (x) => {
+				Program.vpsStatus = VpsStatus.WaitConnect;
+				Logger.SysLog("与服务器丢失连接.", "主记录");
+			};
+			
+			Tcp.Send("<connectCmdRequire>" + vpsName + "</connectCmdRequire><clientDeviceId>"+ clientDeviceId+"</clientDeviceId>");
+		}
+		private static void SynFile(string xx)
+		{
+			var cstr = new StringBuilder();
+			var verFiles = HttpUtil.GetAllElements(xx, "<file>", "</file>");
+			foreach (var f in verFiles)
+			{
+				var fver = HttpUtil.GetElement(f, "<version>", "</version>");
+				var fname = HttpUtil.GetElement(f, "<name>", "</name>");
+				var localFile = HttpUtil.GetMD5ByMD5CryptoService(fname);
+				if (fver!= localFile)
+				{
+					//检测到版本低则更新
+					cstr.AppendLine("<fileRequest>").Append(fname).Append("</fileRequest>");
+				};
+			}
+			if (cstr.Length > 0)
+			{
+				Logger.SysLog(cstr.ToString(),"主记录");
+				Tcp.Send(cstr.ToString());
+				var fileEngine = new TransferFileEngine(TcpFiletransfer.TcpTransferEngine.Connections.Connection.EngineModel.AsClient, "1s68948k74.imwork.net",30712);
+				fileEngine.Connection.ConnectedToServer += (x,xxx) => {
+					if (xxx.Success)
+					{
+						setting.LogInfo("连接到文件服务器", "主记录");
+						fileEngine.ReceiveFile(Environment.CurrentDirectory+"/setting");
+					}
+					else
+					{
+						setting.LogInfo("请求文件失败:" + xxx.Info,"主记录");
+					}
+				};
+				fileEngine.Receiver.ReceivingCompletedEvent += (x, xxx) => {
+					if (xxx.Result == File_Transfer.Model.ReceiverFiles.ReceiveResult.Completed)
+					{
+						fileEngine.ReceiveFile(Environment.CurrentDirectory + "/setting");
+					}
+				};
+				fileEngine.Connect();
+				
+			}
 		}
 		private  static void ServerRun()
 		{

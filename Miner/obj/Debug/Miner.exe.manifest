@@ -54,14 +54,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Miner.exe" size="73656">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Miner.exe" size="75192">
       <assemblyIdentity name="Miner" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>CoDC8nvj1S+G28TyzMwUg+47bEQ=</dsig:DigestValue>
+        <dsig:DigestValue>HfmRcue78E5S+HQ5qlVfFj8zOLU=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -74,6 +74,18 @@
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
         <dsig:DigestValue>yLrJ7Uwh6mAkQ3Fu0kSlTd9utrM=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="TcpFiletransfer.dll" size="22528">
+      <assemblyIdentity name="TcpFiletransfer" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+        <dsig:DigestValue>QLDNQh4jt7cckjBmrH00PJVY29c=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

@@ -78,6 +78,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="TcpFiletransfer">
+      <HintPath>..\..\..\..\Project.Util.TcpFiletransferClient.1811\TcpFiletransfer\bin\Debug\TcpFiletransfer.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\..\..\util\coder\codeUtil.cs">

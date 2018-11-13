@@ -48,7 +48,7 @@ namespace SfTcp
 			server.client.Close();
 		}
 	}
-	public class TcpServer
+	public class TcpServer:IDisposable
 	{
 		TcpListener listener;
 		private Thread thread ;
@@ -62,6 +62,7 @@ namespace SfTcp
 		public Action<TcpHttpMessage, TcpHttpResponse> OnHttpRequest;//当来源为http方式时
 		public bool IsLocal=false;
 		public string Ip;
+		public string ID="null";
 		public string clientName = "...";
 		public TcpServer( Action<string,TcpServer> ReceiveInfo = null,Action<TcpHttpMessage, TcpHttpResponse> ReceiveHttp=null,int port=8009)
 		{
@@ -214,5 +215,35 @@ namespace SfTcp
 				}
 			}
 		}
+
+		#region IDisposable Support
+		private bool disposedValue = false; // 要检测冗余调用
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposedValue)
+			{
+				if (disposing)
+				{
+					if (client != null) client.Close();
+					if (writter != null) writter.Dispose();
+					if (reader != null) reader.Dispose();
+				}
+				client = null;
+				writter = null;
+				reader = null;
+				disposedValue = true;
+			}
+		}
+
+
+		// 添加此代码以正确实现可处置模式。
+		public void Dispose()
+		{
+			// 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+			Dispose(true);
+
+		}
+		#endregion
 	}
 }
