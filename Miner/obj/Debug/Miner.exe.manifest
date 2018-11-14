@@ -54,14 +54,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Miner.exe" size="75192">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Miner.exe" size="74680">
       <assemblyIdentity name="Miner" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>HfmRcue78E5S+HQ5qlVfFj8zOLU=</dsig:DigestValue>
+        <dsig:DigestValue>dWGJBJ+VC0CedVR8U32G8cvvrgE=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

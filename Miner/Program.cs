@@ -39,8 +39,7 @@ namespace Miner
 		[STAThreadAttribute]
 		static void Main(string[] args)
 		{
-			try
-			{
+			
 				rootReg = new Reg("sfMinerDigger");
 				AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 				int systemBegin = Environment.TickCount;
@@ -55,7 +54,9 @@ namespace Miner
 					{
 						case VpsStatus.WaitConnect:
 							{
+								
 								InitTcp();
+
 								vpsStatus = VpsStatus.Connecting;
 								break;
 							}
@@ -63,7 +64,9 @@ namespace Miner
 					}
 
 				}
-			}
+				try
+				{
+				}
 			catch (Exception ex)
 			{
 				var info = ex.Message +"\n" + ex.Source + "\n" + ex.StackTrace;
@@ -78,8 +81,7 @@ namespace Miner
 			var vpsName = clientId.GetInfo("VpsClientId", "null");
 			var clientDeviceId = clientId.GetInfo("clientDeviceId",HttpUtil.UUID);
 			Tcp = new SfTcp.SfTcpClient();
-			Tcp.RecieveMessage = (x, xx) =>
-			{
+			Tcp.RecieveMessage = (x, xx) =>{
 				Logger.SysLog(xx, "通讯记录");
 				if (xx.Contains("<setClientName>"))
 				{
@@ -89,26 +91,21 @@ namespace Miner
 					Program.vpsStatus = VpsStatus.Running;
 					Tcp.Send("<InitComplete>");
 				}
-				if (xx.Contains("<serverRun>"))
-				{
+				if (xx.Contains("<serverRun>")){
 					ServerRun();
 				}
 				if (xx.Contains("<setting>"))
 				{
 					SynSetting(xx);
 				}
-
-				if (xx.Contains("<versionCheck>"))
-				{
+				if (xx.Contains("<versionCheck>")){
 					SynFile(xx);
 				}
-				
 			};
 			Tcp.Disconnected = (x) => {
 				Program.vpsStatus = VpsStatus.WaitConnect;
 				Logger.SysLog("与服务器丢失连接.", "主记录");
 			};
-			
 			Tcp.Send("<connectCmdRequire>" + vpsName + "</connectCmdRequire><clientDeviceId>"+ clientDeviceId+"</clientDeviceId>");
 		}
 		private static void SynFile(string xx)
