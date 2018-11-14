@@ -39,69 +39,16 @@ namespace Miner
 					var info = thisServer.Split(',');
 					serverList[info[0]] = new Server(info[0], info[1], info[2], info[3]);
 				} while (true);
-				var ip =Program.setting.threadSetting.Ip;
 				var globalIpRecorder = Program.setting.MainReg.In("Data").In("RecordIp");
 				//此版本仅适用本机vps
-				if (false||Program.setting.ProcessCmdId != "Test" && globalIpRecorder.GetInfo("checkIpValue")=="1")
-				{
-					if (ip != "")
-					{
-						Program.setting.threadSetting.Status = "已加载ip" + ip;
-						
-						if (globalIpRecorder.GetInfo("checkIpRecord") == "1")//TODO 是否开启检查ip使用情况
-						{
-							var ipRecord = globalIpRecorder.In(ip);
-							var lastUsedTime = ipRecord.GetInfo("lastUsedTime");
-							if (lastUsedTime.Length == 0)
-							{
-								ipRecord.SetInfo("lastUsedTime", DateTime.Now.ToString());
-								ipRecord.SetInfo("usedTimes", 1);
-							}
-							else
-							{
-								var usedTimes = Convert.ToInt32(ipRecord.GetInfo("usedTimes", "0"));
-								MessageBox.Show(string.Format("发现使用过的代理:{0}\n上次使用{1}\n目前为止已使用过{2}次", ip, lastUsedTime, usedTimes + 1));
-								ipRecord.SetInfo("usedTimes", usedTimes + 1);
-							}
-						}
-						
-					}
-					else
-					{
-						Program.setting.LogInfo(string.Format("加载代理ip失败"), "主记录");
-						MessageBox.Show(string.Format("加载代理ip失败"));
-						Thread.Sleep(5000);
-						Environment.Exit(0);
-					}
-					
-					var hdl = new HttpClientHandler() { UseProxy = true, Proxy = new WebProxy(ip) };
-					http = new HttpClient(hdl);
-					isUseSelfIp = false;
-					//TODO 本来是要检查是不是本机ip的
-					//CheckSelfIp();
-					//if (isUseSelfIp)
-					//{
-					//	Program.setting.threadSetting.Status = "失败:发现使用本地ip";
-					//	Environment.Exit(0);
-					//}
-				}
-				else
-				{
-					Program.setting.threadSetting.Status = "不使用代理";
-					http = new HttpClient();
-				}
-
-
-
-				
-				//SummomPriceRule.SummomPriceRuleList = new Dictionary<string, SummomPriceRule>();
+				http = new HttpClient();
 			}
 			public void ResetTask(string taskCmd)
 			{
 				if (taskCmd == "#subClose#")
 				{
-					Program.setting.threadSetting.Status = ("进程通过命令被终止");
-					Environment.Exit(0);
+					Program.setting.threadSetting.Status = "进程被关闭";
+					Program.vpsStatus = Program.VpsStatus.WaitConnect;
 				}
 				var tasks = taskCmd.Split('#');
 				hdlServer = new List<Server>(tasks.Length);

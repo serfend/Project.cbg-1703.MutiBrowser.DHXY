@@ -86,21 +86,6 @@ namespace Miner
 			}
 			get => ThreadReg.GetInfo("Status");
 		}
-		public bool NeedNewIp
-		{
-			set {
-				ThreadReg.SetInfo("needNewIp", "1");
-			}
-			get => ThreadReg.GetInfo("needNewIp")=="1";
-		}
-		public string Ip
-		{
-			set
-			{
-				ThreadReg.SetInfo("Ip", value);
-			}
-			get => ThreadReg.GetInfo("Ip");
-		}
 
 		public void RefreshRunTime()
 		{

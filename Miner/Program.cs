@@ -44,8 +44,9 @@ namespace Miner
 				AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 				int systemBegin = Environment.TickCount;
 				Logger.OnLog += (x, xx) => { Console.WriteLine(xx.LogInfo); };
-				
-				
+
+			try
+			{
 				var mainThreadCounter =  rootReg.In("Main").In("Thread").In("Main");
 				while (true)
 				{
@@ -64,8 +65,7 @@ namespace Miner
 					}
 
 				}
-				try
-				{
+
 				}
 			catch (Exception ex)
 			{
