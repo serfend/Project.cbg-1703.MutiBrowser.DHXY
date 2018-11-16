@@ -107,9 +107,8 @@ namespace Miner
 				}
 				if (hdlServer.Count == 0)
 				{
-					Program.setting.threadSetting.Status = ("无需要处理的服务器");
-					Thread.Sleep(5000);
-					Environment.Exit(0);
+					Program.setting.threadSetting.Status = ("无需处理的服务器");
+					Program.vpsStatus = Program.VpsStatus.WaitConnect;
 				}
 				//else
 				//	Program.setting.threadSetting.Status = hdlServer.Count + "个服务器运行开始";

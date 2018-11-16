@@ -19,7 +19,7 @@ namespace Miner
 			private string price;
 			private double assumePrice = -1;//本地估价
 
-			static Goods()
+			public static void StaticInit()
 			{
 				ITalentPriceHandle = new SortedDictionary<double, double>();
 				IAchievementPriceHandle = new SortedDictionary<double, double>();

@@ -205,6 +205,7 @@ namespace Goods.Summon
 				成长值list = new SortedList<double, double>();
 				var info = File.ReadAllLines(@"setting\默认价值.txt", Encoding.Default);
 				var nowLine = 0;
+				Goods.StaticInit();
 				for (int i = 0; i < info.Length; i++)
 				{
 					if (info[i].StartsWith("//")) continue;

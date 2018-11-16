@@ -37,7 +37,7 @@ namespace Miner
 			Exception
 		}
 		public static VpsStatus vpsStatus =0;
-		
+		private static int disconnectTime=0;
 		[STAThreadAttribute]
 		static void Main(string[] args)
 		{
@@ -58,8 +58,13 @@ namespace Miner
 					{
 						case VpsStatus.WaitConnect:
 							{
-								InitTcp();
-								vpsStatus = VpsStatus.Connecting;
+								if (disconnectTime++ > 10)
+								{
+									vpsStatus = VpsStatus.Connecting;
+									InitTcp();
+									disconnectTime = 0;
+								}
+								
 								break;
 							}
 					}
@@ -78,6 +83,13 @@ namespace Miner
 			var clientId = rootReg.In("Main").In("Setting");
 			var vpsName = clientId.GetInfo("VpsClientId", "null");
 			var clientDeviceId = clientId.GetInfo("clientDeviceId",HttpUtil.UUID);
+			if (Tcp != null)
+			{
+				Tcp.Dispose();
+				Tcp = null;
+				Thread.Sleep(1000);//等待资源释放
+				return;
+			}
 			Tcp = new SfTcp.SfTcpClient();
 			Tcp.RecieveMessage = (x, xx) =>{
 				Logger.SysLog(xx, "通讯记录");
@@ -135,13 +147,8 @@ namespace Miner
 				}
 			};
 			Tcp.Disconnected = (x) => {
-				int reconnectInterval = 10;
-				Logger.SysLog(string.Format("与服务器丢失连接.将在{0}秒后",reconnectInterval), "主记录");
-				var reconnect = new Task(()=> {
-					Thread.Sleep(reconnectInterval*1000);
-					Program.vpsStatus = VpsStatus.WaitConnect;
-				});
-				reconnect.Start();
+				Logger.SysLog("与服务器丢失连接", "主记录");
+				Program.vpsStatus = VpsStatus.WaitConnect;
 			};
 			Tcp.Send("clientConnect","<connectCmdRequire>" + vpsName + "</connectCmdRequire><clientDeviceId>"+ clientDeviceId+"</clientDeviceId>");
 		}
@@ -187,7 +194,6 @@ namespace Miner
 			//	Thread.Sleep(50);
 			//}
 			servers.Run();
-			Tcp.Send("clientExit","");
 			setting.LogInfo("进程退出", "主记录");
 		}
 		private static void SynSetting(string raw) {
