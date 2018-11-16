@@ -1,5 +1,6 @@
 ﻿using DotNet4.Utilities.UtilCode;
 using DotNet4.Utilities.UtilReg;
+using File_Transfer;
 using SfTcp;
 using System;
 using System.Collections.Generic;
@@ -12,12 +13,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 namespace 订单信息服务器
 {
 	public partial class Form1 : Form
 	{
 		private TcpServerManager t;
+		private TransferFileEngine transferFileEngine=new TransferFileEngine(TcpFiletransfer.TcpTransferEngine.Connections.Connection.EngineModel.AsServer,"",8010);
+		private string waittingFileInfo;
 		private ListViewItem GetItem(string ip)
 		{
 			foreach(var item in LstConnection.Items) {
@@ -32,6 +34,25 @@ namespace 订单信息服务器
 		public Form1()
 		{
 			InitializeComponent();
+			transferFileEngine.Connection.ConnectToClient += (x, xx) => {
+				if (xx.Result == File_Transfer.Model.ReceiverFiles.ReceiveResult.RequestAccepted)
+				{
+					var fileRequire = HttpUtil.GetAllElements(waittingFileInfo, "<fileRequest>", "</fileRequest>");
+					this.Invoke((EventHandler)delegate { AppendLog("文件已提交至发送队列:" + fileRequire.Count); });
+					foreach (var f in fileRequire)
+					{
+						transferFileEngine.SendingFile("同步设置/"+f);
+					}
+
+				}
+				else { this.Invoke((EventHandler)delegate { AppendLog("文件服务器连接终端失败:"+xx.Info); }); }
+			};
+			transferFileEngine.Sender.SendingFileStartedEvent += (x, xx) => {
+				this.Invoke((EventHandler)delegate { AppendLog("开始传输文件:" + xx.FileName); });
+			};
+			transferFileEngine.Sender.SendingCompletedEvent += (x, xx) => {
+				this.Invoke((EventHandler)delegate { AppendLog("文件传输结束:" + xx.Title+":"+xx.Message); });
+			};
 			regSetting = new Reg("sfMinerDigger").In("Setting").In("vps");
 			t =new TcpServerManager() { NormalMessage=(s,x)=> {
 				this.Invoke((EventHandler)delegate
@@ -58,14 +79,36 @@ namespace 订单信息服务器
 							var tmp = new StringBuilder();
 							foreach (var f in dic.EnumerateFiles())
 							{
-								tmp.Append("<file><name>").Append(f.Name).Append("</name>").Append("<version>").Append(HttpUtil.GetMD5ByMD5CryptoService(f.FullName)).Append("</version>");
+								tmp.Append("<file><name>").Append(f.Name).Append("</name>").Append("<version>").Append(HttpUtil.GetMD5ByMD5CryptoService(f.FullName)).Append("</version></file>");
 							}
 							if (tmp.Length > 0)
 							{
 								tmp.Append("<versionCheck>");
 								s.Send(tmp.ToString());
 							}
+							else
+							{
+								s.Send("<serverRun>");//无需同步
+							}
 							
+						}else if (x.Contains("<RequireFile>"))//服务器接收到来自客户端请求文件的命令
+						{
+							this.Invoke((EventHandler)delegate { AppendLog("vps请求获取文件"); });
+							if (transferFileEngine.Sender.IsSending)
+							{
+								return;
+							}
+							
+							var t = new Task(() => {
+								
+								waittingFileInfo = x;//记录命令的详细信息
+
+								this.Invoke((EventHandler)delegate { AppendLog("准备向终端传输文件"); });
+								s.Send("<ensureFileTransfer>"+new Random().Next(0,1000));
+								transferFileEngine.Connect();//文件发送引擎
+								
+							});
+							t.Start();
 						}
 						else
 						{

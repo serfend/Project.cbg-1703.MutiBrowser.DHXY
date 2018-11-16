@@ -78,7 +78,8 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="TcpFiletransfer">
+    <Reference Include="TcpFiletransfer, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Project.Util.TcpFiletransferClient.1811\TcpFiletransfer\bin\Debug\TcpFiletransfer.dll</HintPath>
     </Reference>
   </ItemGroup>

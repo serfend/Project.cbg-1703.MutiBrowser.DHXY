@@ -24,13 +24,14 @@ namespace SfTcp
 		public SfTcpClient(bool isLocal=false)
 		{
 			//client = new TcpClient(isLocal? "127.0.0.1": "2y155s0805.51mypc.cn", isLocal?8009: 12895);
+			Console.WriteLine("尝试与服务器建立连接.");
 			client = new TcpClient(isLocal ? "127.0.0.1" : "1s68948k74.imwork.net", isLocal ? 8009 : 16397);
 			
 			stream = client.GetStream();
 			bw = new BinaryWriter(stream);
 			br = new BinaryReader(stream);
 			var th = new Thread(Reciving) { IsBackground=true};
-			Console.WriteLine("尝试与服务器建立连接.");
+			
 			reporter = new Thread(() => {
 				while (true)
 				{
@@ -53,12 +54,13 @@ namespace SfTcp
 		private void RecieveComplete(bool getEndPoint = false)
 		{
 			if (getEndPoint) cstr.Replace(this.TcpComplete, "");
-			RecieveMessage?.Invoke(this, cstr.ToString());
+			RecieveMessage?.BeginInvoke(this, cstr.ToString(), (x) => { }, null);
 			//Receive.Invoke(cstr.ToString(), this);
 			cstr.Clear();
 			lastLength = 0;
 			reporterCounter = 0;
 			nowCheckIndex = 0;
+			br.BaseStream.Flush();
 		}
 		public virtual bool Send(string info)
 		{
@@ -76,7 +78,7 @@ namespace SfTcp
 				catch (Exception ex)
 				{
 					Console.WriteLine("Tcp.Send()" + ex.Message);
-					Disconnected.Invoke(this);
+					Disconnected.BeginInvoke(this, (x) => { }, null);
 					return false;
 				}
 				return true;
@@ -112,7 +114,7 @@ namespace SfTcp
 					}
 					catch (Exception ex)
 					{
-						Disconnected?.Invoke(this);
+						Disconnected.BeginInvoke(this, (x) => { }, null);
 						Console.WriteLine("Tcp.Reciving()" + ex.Message);
 						break;
 					}
@@ -121,7 +123,7 @@ namespace SfTcp
 				else
 				{
 					Console.WriteLine("已断开");
-					Disconnected?.Invoke(this);
+					Disconnected.BeginInvoke(this, (x) => { }, null);
 					break;
 				}
 			}

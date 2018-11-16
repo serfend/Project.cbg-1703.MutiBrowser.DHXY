@@ -88,21 +88,21 @@ namespace EquipSettingLoader
 			private string key, value;
 			private int keyBegin, keyEnd;
 			private int valueBegin;
-			public string Key { get => key; }
-			public string Value { get => value; }
+			public string Key { get => Key1; }
+			public string Value { get => Value1; }
 			private int endIndex, beginIndex;
 			private bool keyBeenRead = false;
 			private bool OnStringList = false;
 			public bool haveNext = false;
 			public Node(ref string info,int beginIndex,char beginWith)
 			{
-				this.beginIndex = beginIndex;
-				keyEnd=keyBegin = beginIndex;
+				this.BeginIndex = beginIndex;
+				KeyEnd=KeyBegin = beginIndex;
 				for(int i = beginIndex; i < info.Length; i++)
 				{
 					var chr = info[i];
 					//Console.WriteLine(string.Format("{0}:{1}",i,chr));
-					if (OnStringList)
+					if (OnStringList1)
 					{
 						if (chr == '\'' || chr == '\"')
 						{
@@ -110,12 +110,12 @@ namespace EquipSettingLoader
 						}
 						else
 						{
-							if (keyBeenRead)
+							if (KeyBeenRead)
 							{
 							}
 							else
 							{
-								keyEnd++;
+								KeyEnd++;
 							}
 							continue;
 						}
@@ -140,9 +140,9 @@ namespace EquipSettingLoader
 							{
 								if ((beginWith == '{' && info[i] == '}') || (beginWith=='['&& info[i]==']'))
 								{
-									endIndex = i;
-									if (keyEnd>0)key = info.Substring(keyBegin, keyEnd - keyBegin);
-									if(valueBegin>0)value = info.Substring(valueBegin, endIndex - valueBegin);
+									EndIndex1 = i;
+									if (KeyEnd>0)Key1 = info.Substring(KeyBegin, KeyEnd - KeyBegin);
+									if(ValueBegin>0)Value1 = info.Substring(ValueBegin, EndIndex1 - ValueBegin);
 									return;
 								}
 								else
@@ -152,39 +152,39 @@ namespace EquipSettingLoader
 							}
 						case ',':
 							{
-								endIndex = i-1;
-								if (keyBegin > 0) key = info.Substring(keyBegin, keyEnd - keyBegin );
-								if (valueBegin > 0) value = info.Substring(valueBegin, endIndex - valueBegin+1);
+								EndIndex1 = i-1;
+								if (KeyBegin > 0) Key1 = info.Substring(KeyBegin, KeyEnd - KeyBegin );
+								if (ValueBegin > 0) Value1 = info.Substring(ValueBegin, EndIndex1 - ValueBegin+1);
 								haveNext = true;
 								return;
 							}
 						case ':':
 							{
-								keyBeenRead = true;
-								valueBegin = i+1;
+								KeyBeenRead = true;
+								ValueBegin = i+1;
 								break;
 							}
 						case '\"':
 						case '\'':
 							{
-								OnStringList = !OnStringList;
-								if (keyBeenRead)
+								OnStringList1 = !OnStringList1;
+								if (KeyBeenRead)
 								{
 								}
 								else
 								{
-									keyEnd++;
+									KeyEnd++;
 								}
 								break;
 							}
 						default:
 							{
-								if (keyBeenRead)
+								if (KeyBeenRead)
 								{
 								}
 								else
 								{
-									keyEnd++;
+									KeyEnd++;
 								}
 								break;
 							}
@@ -192,9 +192,18 @@ namespace EquipSettingLoader
 				}
 			}
 
-			public int EndIndex { get => endIndex; set => endIndex = value; }
+			public int EndIndex { get => EndIndex1; set => EndIndex1 = value; }
 			public Node Next { get => next; set => next = value; }
 			public Node FirstChild { get => firstChild; set => firstChild = value; }
+			public string Key1 { get => key; set => key = value; }
+			public string Value1 { get => value; set => this.value = value; }
+			public int KeyBegin { get => keyBegin; set => keyBegin = value; }
+			public int KeyEnd { get => keyEnd; set => keyEnd = value; }
+			public int ValueBegin { get => valueBegin; set => valueBegin = value; }
+			public int EndIndex1 { get => endIndex; set => endIndex = value; }
+			public int BeginIndex { get => beginIndex; set => beginIndex = value; }
+			public bool KeyBeenRead { get => keyBeenRead; set => keyBeenRead = value; }
+			public bool OnStringList1 { get => OnStringList; set => OnStringList = value; }
 		}
 		private Reg IpChecker = new Reg("sfMinerDigger").In("Main").In("Data").In("RecordIp");
 		private void SynButton() {

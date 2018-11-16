@@ -16,6 +16,8 @@
 			if (disposing && (components != null))
 			{
 				components.Dispose();
+				if(transferFileEngine!=null)transferFileEngine.Dispose();
+				transferFileEngine = null;
 			}
 			base.Dispose(disposing);
 		}

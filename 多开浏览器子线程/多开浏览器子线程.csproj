@@ -94,6 +94,7 @@
       <Link>TcpClient.cs</Link>
     </Compile>
     <Compile Include="browserVersionEdit.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="TcpBrowserClient.cs" />
     <Compile Include="util\BillPoster.cs" />
     <Compile Include="util\CookieReader.cs" />

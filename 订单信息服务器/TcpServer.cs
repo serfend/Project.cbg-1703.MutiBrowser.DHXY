@@ -12,21 +12,19 @@ namespace SfTcp
 {
 	public class TcpHttpMessage
 	{
-		private string Method;
+		private string method;
 		private string param;
 		private string httpVersion;
-
 		public TcpHttpMessage(string method, string param, string httpVersion)
 		{
-			Method1 = method;
+			Method = method;
 			this.Param = param;
 			this.HttpVersion = httpVersion;
 			Console.WriteLine(param);
 		}
-
-		public string Method1 { get => Method; set => Method = value; }
 		public string Param { get => param; set => param = value; }
 		public string HttpVersion { get => httpVersion; set => httpVersion = value; }
+		public string Method { get => method; set => method = value; }
 	}
 	public class TcpHttpResponse
 	{
@@ -50,8 +48,9 @@ namespace SfTcp
 	}
 	public class TcpServer:IDisposable
 	{
+		#region 属性
 		TcpListener listener;
-		private Thread thread ;
+		private Thread thread;
 		private Thread reporter;
 		public TcpClient client;
 		private BinaryWriter writter;
@@ -60,10 +59,11 @@ namespace SfTcp
 		public Action<TcpServer> Connected;//连接成功回调
 		public Action<TcpServer> Disconnected;//连接成功回调
 		public Action<TcpHttpMessage, TcpHttpResponse> OnHttpRequest;//当来源为http方式时
-		public bool IsLocal=false;
+		public bool IsLocal = false;
 		public string Ip;
-		public string ID="null";
+		public string ID = "null";
 		public string clientName = "...";
+		#endregion
 		public TcpServer( Action<string,TcpServer> ReceiveInfo = null,Action<TcpHttpMessage, TcpHttpResponse> ReceiveHttp=null,int port=8009)
 		{
 			listener = new TcpListener(IPAddress.Any, port);
@@ -84,7 +84,7 @@ namespace SfTcp
 					var ip = this.client.Client.RemoteEndPoint.ToString();
 					if (ip.Contains("127.0.0.1")) IsLocal = true;
 					this.Ip = this.client.Client.RemoteEndPoint.ToString();
-					Connected?.Invoke(this);
+					Connected?.BeginInvoke(this, (x) => { }, null);
 					var stream = client.GetStream();
 					writter = new BinaryWriter(stream);
 					reader = new BinaryReader(stream);
@@ -126,6 +126,7 @@ namespace SfTcp
 			lastLength = 0;
 			reporterCounter = 0;
 			nowCheckIndex = 0;
+			reader.BaseStream.Flush();
 		}
 		private int reporterCounter = 0;
 		private int lastLength;
@@ -138,11 +139,11 @@ namespace SfTcp
 				var lineInfo = firstLine.Split(' ');
 				if (lineInfo.Length == 3)
 				{
-					OnHttpRequest.Invoke(new TcpHttpMessage(lineInfo[0], lineInfo[1].Substring(1), lineInfo[2]), new TcpHttpResponse(this));
+					OnHttpRequest?.BeginInvoke(new TcpHttpMessage(lineInfo[0], lineInfo[1].Substring(1), lineInfo[2]), new TcpHttpResponse(this),(x)=> { },null);
 					return;
 				}
 			}
-			Receive.Invoke(info,this);
+			Receive?.BeginInvoke(info,this,(x)=> { },null);
 		}
 		public void Disconnect()
 		{
@@ -169,7 +170,7 @@ namespace SfTcp
 				catch (Exception ex)
 				{
 					Console.WriteLine("Tcp.Send()"+ex.Message);
-					Disconnected.Invoke(this);
+					Disconnected?.BeginInvoke(this,(x)=> { },null);
 					return false;
 				}
 				return true;
@@ -201,7 +202,7 @@ namespace SfTcp
 					}
 					catch  (Exception ex)
 					{
-						Disconnected?.Invoke(this);
+						Disconnected?.BeginInvoke(this, (x) => { }, null);
 						Console.WriteLine("Tcp.Reciving()"+ex.Message);
 						break;
 					}
@@ -210,7 +211,7 @@ namespace SfTcp
 				else
 				{
 					Console.WriteLine("已断开");
-					Disconnected?.Invoke(this);
+					Disconnected?.BeginInvoke(this, (x) => { }, null);
 					break;
 				}
 			}

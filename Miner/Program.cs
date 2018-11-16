@@ -12,6 +12,7 @@ using DotNet4.Utilities.UtilCode;
 
 using System.IO;
 using File_Transfer;
+using System.Threading.Tasks;
 
 namespace Miner
 {
@@ -40,11 +41,12 @@ namespace Miner
 		static void Main(string[] args)
 		{
 			
-				rootReg = new Reg("sfMinerDigger");
-				AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-				int systemBegin = Environment.TickCount;
-				Logger.OnLog += (x, xx) => { Console.WriteLine(xx.LogInfo); };
-
+			rootReg = new Reg("sfMinerDigger");
+			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+			int systemBegin = Environment.TickCount;
+			Logger.OnLog += (x, xx) => { Console.WriteLine(xx.LogInfo); };
+			if(rootReg.In("Setting").GetInfo("developeModel")=="1")
+				Logger.IsOnDevelopeModel = true;
 			try
 			{
 				var mainThreadCounter =  rootReg.In("Main").In("Thread").In("Main");
@@ -55,9 +57,7 @@ namespace Miner
 					{
 						case VpsStatus.WaitConnect:
 							{
-								
 								InitTcp();
-
 								vpsStatus = VpsStatus.Connecting;
 								break;
 							}
@@ -70,7 +70,7 @@ namespace Miner
 			catch (Exception ex)
 			{
 				var info = ex.Message +"\n" + ex.Source + "\n" + ex.StackTrace;
-				Program.setting.LogInfo(info,"ExceptionLog");
+				Logger.SysLog(info,"ExceptionLog");
 				Clipboard.SetText(info);
 				Thread.Sleep(5000);
 			}
@@ -99,17 +99,51 @@ namespace Miner
 					SynSetting(xx);
 				}
 				if (xx.Contains("<versionCheck>")){
+					Logger.SysLog("尝试同步设置","主记录");
 					SynFile(xx);
+				}
+				if (xx.Contains("<ensureFileTransfer>")) {//客户端接收到来自服务器【可以开始传输】的指令
+					Logger.SysLog("准备接收文件", "主记录");
+					var fileEngine = new TransferFileEngine(TcpFiletransfer.TcpTransferEngine.Connections.Connection.EngineModel.AsClient, "1s68948k74.imwork.net", 30712);
+					fileEngine.Connection.ConnectedToServer += (xs, xxx) => {
+						if (xxx.Success)
+						{
+							setting.LogInfo("连接到文件服务器,准备开始接收文件", "主记录");
+							fileEngine.ReceiveFile(Environment.CurrentDirectory + "/setting");
+						}
+						else
+						{
+							setting.LogInfo("请求文件失败/结束:" + xxx.Info, "主记录");
+						}
+					};
+					fileEngine.Receiver.ReceivingCompletedEvent += (xs, xxx) => {
+						if (xxx.Result == File_Transfer.Model.ReceiverFiles.ReceiveResult.Completed)
+						{
+							setting.LogInfo("成功接收文件:" + xxx.Message);
+							fileEngine.ReceiveFile(Environment.CurrentDirectory + "/setting");
+						}
+						else
+						{
+							setting.LogInfo(xxx.Title+":"+xxx.Message);
+						}
+					};
+					fileEngine.Connect();
 				}
 			};
 			Tcp.Disconnected = (x) => {
-				Program.vpsStatus = VpsStatus.WaitConnect;
-				Logger.SysLog("与服务器丢失连接.", "主记录");
+				int reconnectInterval = 10;
+				Logger.SysLog(string.Format("与服务器丢失连接.将在{0}秒后",reconnectInterval), "主记录");
+				var reconnect = new Task(()=> {
+					Thread.Sleep(reconnectInterval*1000);
+					Program.vpsStatus = VpsStatus.WaitConnect;
+				});
+				reconnect.Start();
 			};
 			Tcp.Send("<connectCmdRequire>" + vpsName + "</connectCmdRequire><clientDeviceId>"+ clientDeviceId+"</clientDeviceId>");
 		}
 		private static void SynFile(string xx)
 		{
+			
 			var cstr = new StringBuilder();
 			var verFiles = HttpUtil.GetAllElements(xx, "<file>", "</file>");
 			foreach (var f in verFiles)
@@ -119,34 +153,15 @@ namespace Miner
 				var localFile = HttpUtil.GetMD5ByMD5CryptoService(fname);
 				if (fver!= localFile)
 				{
-					//检测到版本低则更新
-					cstr.AppendLine("<fileRequest>").Append(fname).Append("</fileRequest>");
+					//检测到hash不相同则更新
+					cstr.Append("<fileRequest>").Append(fname).AppendLine("</fileRequest>");
 				};
 			}
 			if (cstr.Length > 0)
 			{
-				Logger.SysLog(cstr.ToString(),"主记录");
+				Logger.SysLog(cstr.ToString(), "主记录");
+				cstr.AppendLine("<RequireFile>");
 				Tcp.Send(cstr.ToString());
-				var fileEngine = new TransferFileEngine(TcpFiletransfer.TcpTransferEngine.Connections.Connection.EngineModel.AsClient, "1s68948k74.imwork.net",30712);
-				fileEngine.Connection.ConnectedToServer += (x,xxx) => {
-					if (xxx.Success)
-					{
-						setting.LogInfo("连接到文件服务器", "主记录");
-						fileEngine.ReceiveFile(Environment.CurrentDirectory+"/setting");
-					}
-					else
-					{
-						setting.LogInfo("请求文件失败:" + xxx.Info,"主记录");
-					}
-				};
-				fileEngine.Receiver.ReceivingCompletedEvent += (x, xxx) => {
-					if (xxx.Result == File_Transfer.Model.ReceiverFiles.ReceiveResult.Completed)
-					{
-						fileEngine.ReceiveFile(Environment.CurrentDirectory + "/setting");
-					}
-				};
-				fileEngine.Connect();
-				
 			}
 		}
 		private  static void ServerRun()
