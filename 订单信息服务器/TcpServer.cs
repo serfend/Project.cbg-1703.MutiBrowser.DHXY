@@ -81,7 +81,6 @@ namespace SfTcp
 			{
 				try
 				{
-
 					listener.Start();
 					client = listener.AcceptTcpClient();
 					listener.Stop();

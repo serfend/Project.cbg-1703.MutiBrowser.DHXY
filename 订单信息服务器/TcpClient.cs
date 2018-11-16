@@ -20,7 +20,7 @@ namespace SfTcp
 		public Action<SfTcpClient> Disconnected;
 		
 		
-		private Thread reporter;
+		private Thread reporterThread, receiverThread;
 		private int lastLength, reporterCounter;
 		public SfTcpClient(bool isLocal=false)
 		{
@@ -31,9 +31,9 @@ namespace SfTcp
 			stream = client.GetStream();
 			bw = new BinaryWriter(stream);
 			br = new BinaryReader(stream);
-			var th = new Thread(Reciving) { IsBackground=true};
+			receiverThread = new Thread(Reciving) { IsBackground=true};
 			
-			reporter = new Thread(() => {
+			reporterThread = new Thread(() => {
 				while (true)
 				{
 					var thisLen = cstr.Length;
@@ -49,8 +49,8 @@ namespace SfTcp
 				}
 			})
 			{ IsBackground = true };
-			reporter.Start();
-			th.Start();
+			reporterThread.Start();
+			receiverThread.Start();
 		}
 		private void RecieveComplete(bool getEndPoint = false)
 		{
@@ -140,11 +140,12 @@ namespace SfTcp
 			{
 				if (disposing)
 				{
-					if (client != null) client.Close();
-					if (stream != null) stream.Dispose();
+					receiverThread.Abort();
+					reporterThread.Abort();
 					if (bw != null) bw.Dispose();
 					if (br != null) br.Dispose();
-					
+					if (stream != null) stream.Dispose();
+					if (client != null) client.Close();
 				}
 				client = null;
 				stream = null;
