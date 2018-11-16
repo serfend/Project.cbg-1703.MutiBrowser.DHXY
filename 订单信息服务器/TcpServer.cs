@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DotNet4.Utilities.UtilCode;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -55,7 +56,10 @@ namespace SfTcp
 		public TcpClient client;
 		private BinaryWriter writter;
 		private BinaryReader reader;
-		private Action<string, TcpServer> Receive;//收到信息回调
+		/// <summary>
+		/// title,content,tcpServer
+		/// </summary>
+		private Action<string,string, TcpServer> Receive;//收到信息回调
 		public Action<TcpServer> Connected;//连接成功回调
 		public Action<TcpServer> Disconnected;//连接成功回调
 		public Action<TcpHttpMessage, TcpHttpResponse> OnHttpRequest;//当来源为http方式时
@@ -64,7 +68,7 @@ namespace SfTcp
 		public string ID = "null";
 		public string clientName = "...";
 		#endregion
-		public TcpServer( Action<string,TcpServer> ReceiveInfo = null,Action<TcpHttpMessage, TcpHttpResponse> ReceiveHttp=null,int port=8009)
+		public TcpServer( Action<string,string,TcpServer> ReceiveInfo = null,Action<TcpHttpMessage, TcpHttpResponse> ReceiveHttp=null,int port=8009)
 		{
 			listener = new TcpListener(IPAddress.Any, port);
 			this.Receive = ReceiveInfo;
@@ -143,7 +147,12 @@ namespace SfTcp
 					return;
 				}
 			}
-			Receive?.BeginInvoke(info,this,(x)=> { },null);
+			if (!info.StartsWith("<")) return;
+			var title = HttpUtil.GetElement(info, "<", ">");
+			if (info.IndexOf("</" + title + ">", 0) < 0) return;
+			var content = HttpUtil.GetElement(info, ">", "<");
+			content = EncryptHelper.AESDecrypt(content);
+			Receive?.BeginInvoke(title, content, this,(x)=> { },null);
 		}
 		public void Disconnect()
 		{

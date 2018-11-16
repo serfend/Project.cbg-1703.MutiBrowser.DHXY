@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DotNet4.Utilities.UtilCode;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -62,9 +63,10 @@ namespace SfTcp
 			nowCheckIndex = 0;
 			br.BaseStream.Flush();
 		}
-		public virtual bool Send(string info)
+		public virtual bool Send(string key,string info)
 		{
-			return Send(Encoding.UTF8.GetBytes(info + TcpComplete));
+			var safeMessage = string.Format("<{0}>{1}</{0}>{2}",key, EncryptHelper.AESEncrypt(info), TcpComplete);
+			return Send(Encoding.UTF8.GetBytes(safeMessage ));
 		}
 		public virtual bool Send(byte[] info)
 		{
