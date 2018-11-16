@@ -17,7 +17,7 @@ namespace 远程连接测试
 		private long lastHeartBeatTimeStamp;
 		public Form1()
 		{
-			client = new SfTcpClient() {
+			client = new SfTcpClient("1s68948k74.imwork.net",16397) { 
 				RecieveMessage = (tcp, msg) => {
 					this.Invoke((EventHandler)delegate {
 						if (msg.Contains("<ping>"))

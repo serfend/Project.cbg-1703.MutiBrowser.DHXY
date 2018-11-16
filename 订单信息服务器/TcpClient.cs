@@ -22,11 +22,10 @@ namespace SfTcp
 		
 		private Thread reporterThread, receiverThread;
 		private int lastLength, reporterCounter;
-		public SfTcpClient(bool isLocal=false)
+		public SfTcpClient(string ip,int port)
 		{
-			//client = new TcpClient(isLocal? "127.0.0.1": "2y155s0805.51mypc.cn", isLocal?8009: 12895);
 			Console.WriteLine("尝试与服务器建立连接.");
-			client = new TcpClient(isLocal ? "127.0.0.1" : "1s68948k74.imwork.net", isLocal ? 8009 : 16397);
+			client = new TcpClient(ip, port);
 			
 			stream = client.GetStream();
 			bw = new BinaryWriter(stream);

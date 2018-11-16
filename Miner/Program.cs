@@ -13,6 +13,7 @@ using DotNet4.Utilities.UtilCode;
 using System.IO;
 using File_Transfer;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Miner
 {
@@ -37,11 +38,25 @@ namespace Miner
 			Exception
 		}
 		public static VpsStatus vpsStatus =0;
-		private static int disconnectTime=0;
+		private static int disconnectTime=10;
+
+		public static string TcpMainTubeIp= "1s68948k74.imwork.net";
+		public static int TcpMainTubePort= 16397;
+		public static string TcpFileTubeIp= "1s68948k74.imwork.net";
+		public static int TcpFileTubePort=30712;
 		[STAThreadAttribute]
 		static void Main(string[] args)
 		{
-			
+			var fileName = Process.GetCurrentProcess().MainModule.FileName;
+			var targetIp = HttpUtil.GetElement(fileName,"(", ")");
+			var tmpInfo = targetIp.Split('!');
+			if (tmpInfo.Length == 4)
+			{
+				TcpMainTubeIp = tmpInfo[0];
+				TcpMainTubePort = Convert.ToInt32(tmpInfo[1]);
+				TcpFileTubeIp = tmpInfo[2];
+				TcpFileTubePort = Convert.ToInt32(tmpInfo[3]);
+			}
 			rootReg = new Reg("sfMinerDigger");
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 			int systemBegin = Environment.TickCount;
@@ -83,14 +98,14 @@ namespace Miner
 			var clientId = rootReg.In("Main").In("Setting");
 			var vpsName = clientId.GetInfo("VpsClientId", "null");
 			var clientDeviceId = clientId.GetInfo("clientDeviceId",HttpUtil.UUID);
+			clientId.SetInfo("clientDeviceId", clientDeviceId);
 			if (Tcp != null)
 			{
 				Tcp.Dispose();
 				Tcp = null;
 				Thread.Sleep(1000);//等待资源释放
-				return;
 			}
-			Tcp = new SfTcp.SfTcpClient();
+			Tcp = new SfTcp.SfTcpClient(TcpMainTubeIp,TcpMainTubePort);
 			Tcp.RecieveMessage = (x, xx) =>{
 				Logger.SysLog(xx, "通讯记录");
 				if (xx.Contains("<setClientName>"))
@@ -98,8 +113,12 @@ namespace Miner
 					var ClientName = HttpUtil.GetElementInItem(xx, "setClientName");
 					setting = new Setting(ClientName);
 					clientId.SetInfo("VpsClientId",ClientName);
+					Tcp.Send("nameModefied", ClientName);
+				}
+				if (xx.Contains("SynInit"))
+				{
 					Program.vpsStatus = VpsStatus.Syning;
-					Tcp.Send("InitComplete","");
+					Tcp.Send("InitComplete", "");
 				}
 				if (xx.Contains("<serverRun>")){
 					ServerRun();
@@ -109,41 +128,10 @@ namespace Miner
 					SynSetting(xx);
 				}
 				if (xx.Contains("<versionCheck>")){
-					Logger.SysLog("尝试同步设置","主记录");
 					SynFile(xx);
 				}
 				if (xx.Contains("<ensureFileTransfer>")) {//客户端接收到来自服务器【可以开始传输】的指令
-					Logger.SysLog("准备接收文件", "主记录");
-					var fileEngine = new TransferFileEngine(TcpFiletransfer.TcpTransferEngine.Connections.Connection.EngineModel.AsClient, "1s68948k74.imwork.net", 30712);
-					fileEngine.Connection.ConnectedToServer += (xs, xxx) => {
-						if (xxx.Success)
-						{
-							setting.LogInfo("连接到文件服务器,准备开始接收文件", "主记录");
-							fileEngine.ReceiveFile(Environment.CurrentDirectory + "/setting");
-						}
-						else
-						{
-							setting.LogInfo("请求文件失败/结束:" + xxx.Info, "主记录");
-						}
-					};
-					fileEngine.Receiver.ReceivingCompletedEvent += (xs, xxx) => {
-						if (xxx.Result == File_Transfer.Model.ReceiverFiles.ReceiveResult.Completed)
-						{
-							setting.LogInfo("成功接收文件:" + xxx.Message + "("+ fileNowReceive++ + "/"+ fileWaitToUpdate +")");
-							if (fileNowReceive >= fileWaitToUpdate)
-							{
-								setting.LogInfo("文件已同步完成");
-								ServerRun();
-								return;
-							}
-							fileEngine.ReceiveFile(Environment.CurrentDirectory + "/setting");
-						}
-						else
-						{
-							setting.LogInfo(xxx.Title+":"+xxx.Message);
-						}
-					};
-					fileEngine.Connect();
+					TranslateFileStart();
 				}
 			};
 			Tcp.Disconnected = (x) => {
@@ -152,10 +140,44 @@ namespace Miner
 			};
 			Tcp.Send("clientConnect","<connectCmdRequire>" + vpsName + "</connectCmdRequire><clientDeviceId>"+ clientDeviceId+"</clientDeviceId>");
 		}
+		private static void TranslateFileStart()
+		{
+			Logger.SysLog("准备接收文件", "主记录");
+			var fileEngine = new TransferFileEngine(TcpFiletransfer.TcpTransferEngine.Connections.Connection.EngineModel.AsClient, "1s68948k74.imwork.net", 30712);
+			fileEngine.Connection.ConnectedToServer += (xs, xxx) => {
+				if (xxx.Success)
+				{
+					setting.LogInfo("连接到文件服务器,准备开始接收文件", "主记录");
+					fileEngine.ReceiveFile(Environment.CurrentDirectory + "/setting");
+				}
+				else
+				{
+					setting.LogInfo("请求文件失败/结束:" + xxx.Info, "主记录");
+				}
+			};
+			fileEngine.Receiver.ReceivingCompletedEvent += (xs, xxx) => {
+				if (xxx.Result == File_Transfer.Model.ReceiverFiles.ReceiveResult.Completed)
+				{
+					setting.LogInfo("成功接收文件:" + xxx.Message + "(" + fileNowReceive++ + "/" + fileWaitToUpdate + ")");
+					if (fileNowReceive >= fileWaitToUpdate)
+					{
+						setting.LogInfo("文件已同步完成");
+						ServerRun();
+						return;
+					}
+					fileEngine.ReceiveFile(Environment.CurrentDirectory + "/setting");
+				}
+				else
+				{
+					setting.LogInfo(xxx.Title + ":" + xxx.Message);
+				}
+			};
+			fileEngine.Connect();
+		}
 		private static int fileWaitToUpdate = 0,fileNowReceive=0;
 		private static void SynFile(string xx)
 		{
-			
+			Logger.SysLog("尝试同步设置", "主记录");
 			var cstr = new StringBuilder();
 			var verFiles = HttpUtil.GetAllElements(xx, "<file>", "</file>");
 			fileWaitToUpdate = fileNowReceive = 0;

@@ -17,7 +17,7 @@ namespace 订单信息服务器
 {
 	public partial class Form1 : Form
 	{
-		private TcpServerManager t;
+		private TcpServerManager serverManager;
 		private TransferFileEngine transferFileEngine;
 		private struct FileWaitingClient
 		{
@@ -102,7 +102,7 @@ namespace 订单信息服务器
 			InitializeComponent();
 			InitTransferEngine();
 			regSetting = new Reg("sfMinerDigger").In("Setting").In("vps");
-			t =new TcpServerManager() { NormalMessage=(s,x, InnerInfo) => {
+			serverManager =new TcpServerManager() { NormalMessage=(s,x, InnerInfo) => {
 				this.Invoke((EventHandler)delegate
 				{
 					var targetItem = GetItem(s.Ip);
@@ -118,8 +118,21 @@ namespace 订单信息服务器
 							var clientName = regSetting.In(s.ID).GetInfo("clientName", targetItem.SubItems[0].Text);
 							s.Send(string.Format("<setClientName>{0}</setClientName>", clientName));//用于确认当前名称并初始化
 						}
+						else if (x.Contains("nameModefied"))
+						{
+							targetItem.SubItems[0].Text = InnerInfo;
+							if (s.clientName == "...")
+							{
+								s.Send("<SynInit>");
+							}
+							s.clientName = InnerInfo;
+						}
 						else if (x.Contains("InitComplete"))
 						{
+							//识别vps终端
+							s.IsLocal = true;
+							targetItem.SubItems[1].Text = "vps";
+
 							//终端已初始化完成
 							//synSetting,synFile
 							//遍历 【同步文件】 下所有文件
@@ -143,6 +156,10 @@ namespace 订单信息服务器
 						{
 							this.Invoke((EventHandler)delegate { AppendLog("vps" + s.clientName + "请求获取文件"); });
 							HdlVpsFileSynRequest(InnerInfo, s);
+						}
+						else if (x.Contains("Status"))
+						{
+							targetItem.SubItems[3].Text = InnerInfo;
 						}
 						else
 						{
@@ -186,14 +203,29 @@ namespace 订单信息服务器
 
 		private void CheckIfUserEditName(object sender, LabelEditEventArgs e)
 		{
-			MessageBox.Show(e.Item.ToString());
+			try
+			{
+				var ip = LstConnection.Items[e.Item].SubItems[2].Text;
+				TcpServer target = serverManager[ip];
+				var clientName = e.Label;
+				regSetting.In(target.ID).SetInfo("clientName", clientName);
+				target.Send(string.Format("<setClientName>{0}</setClientName>", clientName));
+			}
+			catch (Exception ex)
+			{
+				AppendLog("修改终端名称失败:" + ex.Message);
+			}
+		
 		}
 
 		public void AppendLog(string info)
 		{
 			OpLog.AppendText("\n");
 			OpLog.AppendText(string.Format("{0}>>{1}",DateTime.Now,info));
-			
+			if (OpLog.Text.Length > 1000)
+			{
+				OpLog.Clear();
+			}
 		}
 
 		private void CmdServerOn_Click(object sender, EventArgs e)
@@ -201,7 +233,7 @@ namespace 订单信息服务器
 			try
 			{
 				var nowSelect = LstConnection.SelectedItems[0].SubItems[2].Text;
-				var tcp = t[nowSelect];
+				var tcp = serverManager[nowSelect];
 				tcp.Send(IpSender.Text);
 			}
 			catch (Exception ex)
@@ -210,9 +242,5 @@ namespace 订单信息服务器
 			}
 		}
 
-		private void LstConnection_SelectedIndexChanged(object sender, EventArgs e)
-		{
-
-		}
 	}
 }

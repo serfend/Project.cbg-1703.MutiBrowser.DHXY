@@ -126,7 +126,7 @@ namespace 多开浏览器子线程
 			}
 			return null;
 		}
-		private SfTcp.SfTcpClient Tcp=new SfTcp.SfTcpClient(true);
+		private SfTcp.SfTcpClient Tcp=new TcpBrowserClient();
 		private void TrySubmitBill(string url)
 		{
 			
