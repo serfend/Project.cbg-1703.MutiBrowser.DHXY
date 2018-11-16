@@ -82,7 +82,9 @@ namespace Miner
 		{
 			set {
 				Program.setting.LogInfo("Status:"+value,"主记录");
-				ThreadReg.SetInfo("Status", value.Length>10?value.Substring(0,10): value);
+				var contentValue = value.Length > 10 ? value.Substring(0, 10) : value;
+				ThreadReg.SetInfo("Status", contentValue);
+				Program.Tcp.Send("Status", contentValue );
 			}
 			get => ThreadReg.GetInfo("Status");
 		}

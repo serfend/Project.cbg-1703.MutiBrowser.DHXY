@@ -32,11 +32,12 @@ namespace Miner
 		{
 			WaitConnect,
 			Connecting,
+			Syning,
 			Running,
 			Exception
 		}
 		public static VpsStatus vpsStatus =0;
-		//public static IpConfig IpConfig;
+		
 		[STAThreadAttribute]
 		static void Main(string[] args)
 		{
@@ -61,12 +62,9 @@ namespace Miner
 								vpsStatus = VpsStatus.Connecting;
 								break;
 							}
-
 					}
-
 				}
-
-				}
+			}
 			catch (Exception ex)
 			{
 				var info = ex.Message +"\n" + ex.Source + "\n" + ex.StackTrace;
@@ -88,8 +86,8 @@ namespace Miner
 					var ClientName = HttpUtil.GetElementInItem(xx, "setClientName");
 					setting = new Setting(ClientName);
 					clientId.SetInfo("VpsClientId",ClientName);
-					Program.vpsStatus = VpsStatus.Running;
-					Tcp.Send("<InitComplete>");
+					Program.vpsStatus = VpsStatus.Syning;
+					Tcp.Send("InitComplete","");
 				}
 				if (xx.Contains("<serverRun>")){
 					ServerRun();
@@ -119,7 +117,13 @@ namespace Miner
 					fileEngine.Receiver.ReceivingCompletedEvent += (xs, xxx) => {
 						if (xxx.Result == File_Transfer.Model.ReceiverFiles.ReceiveResult.Completed)
 						{
-							setting.LogInfo("成功接收文件:" + xxx.Message);
+							setting.LogInfo("成功接收文件:" + xxx.Message + "("+ fileNowReceive++ + "/"+ fileWaitToUpdate +")");
+							if (fileNowReceive >= fileWaitToUpdate)
+							{
+								setting.LogInfo("文件已同步完成");
+								ServerRun();
+								return;
+							}
 							fileEngine.ReceiveFile(Environment.CurrentDirectory + "/setting");
 						}
 						else
@@ -139,20 +143,23 @@ namespace Miner
 				});
 				reconnect.Start();
 			};
-			Tcp.Send("<connectCmdRequire>" + vpsName + "</connectCmdRequire><clientDeviceId>"+ clientDeviceId+"</clientDeviceId>");
+			Tcp.Send("clientConnect","<connectCmdRequire>" + vpsName + "</connectCmdRequire><clientDeviceId>"+ clientDeviceId+"</clientDeviceId>");
 		}
+		private static int fileWaitToUpdate = 0,fileNowReceive=0;
 		private static void SynFile(string xx)
 		{
 			
 			var cstr = new StringBuilder();
 			var verFiles = HttpUtil.GetAllElements(xx, "<file>", "</file>");
+			fileWaitToUpdate = fileNowReceive = 0;
 			foreach (var f in verFiles)
 			{
 				var fver = HttpUtil.GetElement(f, "<version>", "</version>");
 				var fname = HttpUtil.GetElement(f, "<name>", "</name>");
-				var localFile = HttpUtil.GetMD5ByMD5CryptoService(fname);
+				var localFile = HttpUtil.GetMD5ByMD5CryptoService("setting/"+fname);
 				if (fver!= localFile)
 				{
+					fileWaitToUpdate++;
 					//检测到hash不相同则更新
 					cstr.Append("<fileRequest>").Append(fname).AppendLine("</fileRequest>");
 				};
@@ -160,12 +167,16 @@ namespace Miner
 			if (cstr.Length > 0)
 			{
 				Logger.SysLog(cstr.ToString(), "主记录");
-				cstr.AppendLine("<RequireFile>");
-				Tcp.Send(cstr.ToString());
+				Tcp.Send("RequireFile",cstr.ToString());
+			}
+			else
+			{
+				ServerRun();
 			}
 		}
 		private  static void ServerRun()
 		{
+			vpsStatus = VpsStatus.Running;
 			servers = new ServerList();
 			SummomPriceRule.Init();
 			Goods.Equiment.EquimentPrice.Init();
@@ -176,7 +187,7 @@ namespace Miner
 			//	Thread.Sleep(50);
 			//}
 			servers.Run();
-			Tcp.Send("<clientExit>");
+			Tcp.Send("clientExit","");
 			setting.LogInfo("进程退出", "主记录");
 		}
 		private static void SynSetting(string raw) {

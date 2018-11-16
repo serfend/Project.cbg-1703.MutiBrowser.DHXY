@@ -10,7 +10,10 @@ namespace SfTcp
 		private List<TcpServer> list = new List<TcpServer>();
 		public Action<TcpServer> ServerConnected;
 		public Action<TcpServer> ServerDisconnected;
-		public Action<TcpServer, string> NormalMessage;
+		/// <summary>
+		/// tcpServer,title,content
+		/// </summary>
+		public Action<TcpServer, string,string> NormalMessage;
 		public Action<TcpHttpMessage, TcpHttpResponse> HttpRequest;
 		public TcpServer this[string ip]
 		{
@@ -31,11 +34,11 @@ namespace SfTcp
 		}
 		private TcpServer NewTcp(int port=8009)
 		{
-			return new TcpServer((x, s) => {
-				NormalMessage?.Invoke(s,x);
-				if (x.Contains("<mobile>"))
+			return new TcpServer((x,InnerInfo, s) => {
+				NormalMessage?.Invoke(s,x,InnerInfo);
+				if (x.Contains("shouldSendToMobile"))
 				{
-					if (x.Contains("heartBeat"))
+					if (InnerInfo.Contains("heartBeat"))
 					{
 						s.Send("<server.response>heartBeat</server.response>");
 						return;
@@ -44,11 +47,11 @@ namespace SfTcp
 					{
 						foreach (var p in list)
 						{
-							if (!p.IsLocal) p.Send("<server.command>" + x + "</server.command>");
+							if (!p.IsLocal) p.Send("<server.command>" + InnerInfo + "</server.command>");
 						}
 					}
 					else
-						s.Send("<server.response>" + x + "</server.response>");
+						s.Send("<server.response>" + InnerInfo + "</server.response>");
 				}
 			}, (x,s) => {
 				HttpRequest.Invoke(x,s);

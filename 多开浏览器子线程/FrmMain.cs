@@ -135,7 +135,7 @@ namespace 多开浏览器子线程
 			//未登录=》登录超时，请重新登录！
 			//返回订单信息
 			var cookiesLogin = "sid=" + GetNowLoginCookies();
-			Tcp.Send("<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><buildBill></buildBill></client.command>");
+			Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><buildBill></buildBill></client.command>");
 			http.Item.Request.Cookies +=  cookiesLogin;
 			http.GetHtml(url,callBack:(x)=> {
 				var info =x.response.DataString(Encoding.Default);
@@ -151,7 +151,7 @@ namespace 多开浏览器子线程
 								ReNavigateWeb(url);
 							});
 							var t = new Task(() => {
-								Tcp.Send("<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
+								Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
 								this.Invoke((EventHandler)delegate {
 									Text = ("下单成功\n" + url);
 									this.WebShow.Visible = true;
@@ -164,7 +164,7 @@ namespace 多开浏览器子线程
 						{
 							var t = new Task(() => {
 								this.Invoke((EventHandler)delegate {
-									Tcp.Send("<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>"+ result+"</client.command>");
+									Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>"+ result+"</client.command>");
 									Text = (result + "\n" + url);
 									this.WebShow.Visible = true;
 								});
@@ -251,7 +251,7 @@ namespace 多开浏览器子线程
 					{
 						LbShowStatus.Text += ",用户主动提交";
 						WebShow.Document.GetElementById("equip_info").InvokeMember("submit");
-						Tcp.Send("<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
+						Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
 					}
 					else if (canSubmit)
 					{

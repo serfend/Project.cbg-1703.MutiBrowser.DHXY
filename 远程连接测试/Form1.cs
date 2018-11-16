@@ -45,7 +45,7 @@ namespace 远程连接测试
 				{
 					Thread.Sleep(1000);
 					lastHeartBeatTimeStamp = HttpUtil.TimeStamp;
-					client.Send("<ping></ping>");
+					client.Send("ping","");
 				}
 			})
 			{ IsBackground=true};
