@@ -16,7 +16,7 @@
 			if (disposing && (components != null))
 			{
 				components.Dispose();
-				Tcp.Dispose();
+				Program.Tcp.Dispose();
 			}
 			base.Dispose(disposing);
 		}

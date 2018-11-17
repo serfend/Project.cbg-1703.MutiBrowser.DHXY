@@ -18,7 +18,7 @@ namespace 多开浏览器子线程
 {
 	partial class FrmMain : Form
 	{
-		private Inner.Ccmd CCmd=new Inner.Ccmd();
+		private Inner.Ccmd CCmd = new Inner.Ccmd();
 		public FrmMain()
 		{
 			//RegUtil.SetIEBrowserTempPath();
@@ -26,45 +26,63 @@ namespace 多开浏览器子线程
 			//HttpClient.UsedFidder = true;
 			//RegUtil.SetIEBrowserTempPathEnd();
 			WebShow.ScriptErrorsSuppressed = true;
-			
+
 			WebShow.DocumentCompleted += WebShow_DocumentCompleted;
 			WebShow.NewWindow += WebShow_NewWindow;
 			BtnShowBuyList.Click += (x, xx) => {
 				TryLoadBill(true);
 			};
 			ipWebShowUrl.KeyPress += IpWebShowUrl_KeyPress;
-			var t = new Thread(()=> {
+			var t = new Thread(() => {
 				while (true)
 				{
 					Thread.Sleep(200);
-					CheckNewCmd();
+					var cmd = CCmd.GetCmd(out string targetUrl);
+					CheckNewCmd(cmd,targetUrl);
 				}
-			}) { IsBackground=true};
-			
+			}) { IsBackground = true };
+
 			this.Show();
-			int[] tmpBounds=RegUtil.GetFormPos(this);
+			int[] tmpBounds = RegUtil.GetFormPos(this);
 			this.Left = tmpBounds[0];
 			this.Top = tmpBounds[1];
 			this.Width = tmpBounds[2];
 			this.Height = tmpBounds[3];
-			if (Tcp==null||Tcp.client==null||!Tcp.client.Connected)
+			if (Program.Tcp == null || Program.Tcp.client == null || !Program.Tcp.client.Connected)
 			{
 				this.Close();
 			}
+			Program.Tcp.RecieveMessage += ReceiveMessage;
 			t.Start();
 		}
 
 		#region 逻辑
-		public void CheckNewCmd()
+		private void ReceiveMessage(SfTcp.SfTcpClient s,string info){
+			if (info.Contains("<newCheckBill>"))
+			{
+				var targetUrl = HttpUtil.GetElementInItem(info,"targetUrl");
+				CheckNewCmd(CmdInfo.SubmitBill, targetUrl);
+			}
+		}
+		public enum CmdInfo
 		{
-				switch (CCmd.GetCmd(out string targetUrl))
+			None,
+			SubClose,
+			ShowWeb,
+			InitWeb,
+			SubmitBill,
+			OnlyRefresh
+		}
+		public void CheckNewCmd(CmdInfo cmdInfo,string targetUrl)
+		{
+				switch (cmdInfo)
 				{
-					case -1:
+					case CmdInfo.None:
 						break;
-					case 404:
+					case CmdInfo.SubClose:
 						this.Invoke((EventHandler)delegate { this.Close(); });
 						return;
-					case 233:
+					case CmdInfo.ShowWeb:
 						{
 							this.Invoke((EventHandler)delegate {
 								this.Focus();
@@ -75,7 +93,7 @@ namespace 多开浏览器子线程
 
 						}
 						break;
-					case 2333:
+					case CmdInfo.InitWeb:
 						{
 							this.Invoke((EventHandler)delegate {
 								this.Text = Program.thisExeThreadId + ":" + CCmd.GetWebInfo("name");
@@ -88,7 +106,7 @@ namespace 多开浏览器子线程
 
 							break;
 						}
-					case 101:
+					case CmdInfo.SubmitBill:
 					{
 						this.Invoke((EventHandler)delegate {
 							this.Focus();
@@ -100,7 +118,7 @@ namespace 多开浏览器子线程
 						});
 						break;
 					}
-					case 1:
+					case CmdInfo.OnlyRefresh:
 						this.Invoke((EventHandler)delegate {
 							this.Text = Program.thisExeThreadId + ":" + CCmd.GetWebInfo("name") + "--刷新";
 							WebShow.Refresh();
@@ -126,7 +144,7 @@ namespace 多开浏览器子线程
 			}
 			return null;
 		}
-		private SfTcp.SfTcpClient Tcp=new TcpBrowserClient();
+		
 		private void TrySubmitBill(string url)
 		{
 			
@@ -135,7 +153,7 @@ namespace 多开浏览器子线程
 			//未登录=》登录超时，请重新登录！
 			//返回订单信息
 			var cookiesLogin = "sid=" + GetNowLoginCookies();
-			Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><buildBill></buildBill></client.command>");
+			Program.Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><buildBill></buildBill></client.command>");
 			http.Item.Request.Cookies +=  cookiesLogin;
 			http.GetHtml(url,callBack:(x)=> {
 				var info =x.response.DataString(Encoding.Default);
@@ -151,7 +169,7 @@ namespace 多开浏览器子线程
 								ReNavigateWeb(url);
 							});
 							var t = new Task(() => {
-								Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
+								Program.Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
 								this.Invoke((EventHandler)delegate {
 									Text = ("下单成功\n" + url);
 									this.WebShow.Visible = true;
@@ -164,7 +182,7 @@ namespace 多开浏览器子线程
 						{
 							var t = new Task(() => {
 								this.Invoke((EventHandler)delegate {
-									Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>"+ result+"</client.command>");
+									Program.Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>"+ result+"</client.command>");
 									Text = (result + "\n" + url);
 									this.WebShow.Visible = true;
 								});
@@ -251,7 +269,7 @@ namespace 多开浏览器子线程
 					{
 						LbShowStatus.Text += ",用户主动提交";
 						WebShow.Document.GetElementById("equip_info").InvokeMember("submit");
-						Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
+						Program.Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
 					}
 					else if (canSubmit)
 					{
