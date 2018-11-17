@@ -109,6 +109,7 @@
     <Compile Include="..\订单信息服务器\TcpClient.cs">
       <Link>TcpClient.cs</Link>
     </Compile>
+    <Compile Include="Util\CmdRasdial.cs" />
     <Compile Include="Goods\Equiment\EquimentPrice.cs" />
     <Compile Include="Goods\Equiment\Equipment.cs" />
     <Compile Include="Goods\Goods.cs" />

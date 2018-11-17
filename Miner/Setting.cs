@@ -23,10 +23,7 @@ namespace Miner
 		private bool init;
 		private string processCmdId;
 
-		public Reg MainReg;
-		public Reg BrowserServerSeeting;
-		public Reg DataListServerReg;
-		public Reg DataListCoreReg;
+
 		private string lastInfo;
 		public void LogInfo(string info,string CataPath="主记录", bool ignoreDuplicate=false)
 		{

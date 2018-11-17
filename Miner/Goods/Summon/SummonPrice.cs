@@ -253,7 +253,7 @@ namespace Goods.Summon
 
 					}
 				}
-				return;//TODO 用于激活static
+				return;//用于激活static
 			}
 		}
 	}

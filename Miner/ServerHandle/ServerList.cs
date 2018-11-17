@@ -61,21 +61,21 @@ namespace Miner
 					MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
 				}
 			}
-			private bool isUseSelfIp=true;
-			private void CheckSelfIp()
-			{
-				string selfIp = Program.setting.MainReg.In("Setting").GetInfo("SelfIp");
-				var result=http.GetAsync("http://pv.sohu.com/cityjson").Result;
-				var netIp = result.Content.ReadAsStringAsync().Result;
-				if(netIp.Contains("cip"))
-				netIp = HttpUtil.GetElement(netIp, "cip\": \"", "\"");
-				else
-				{
-					Program.setting.threadSetting.Status = "检查本地ip失败"+netIp;
-					Environment.Exit(0);
-				}
-				isUseSelfIp = netIp.Contains(selfIp);
-			}
+			//private bool isUseSelfIp=true;
+			//private void CheckSelfIp()
+			//{
+				//string selfIp = Program.setting.MainReg.In("Setting").GetInfo("SelfIp");
+				//var result=http.GetAsync("http://pv.sohu.com/cityjson").Result;
+				//var netIp = result.Content.ReadAsStringAsync().Result;
+				//if(netIp.Contains("cip"))
+				//netIp = HttpUtil.GetElement(netIp, "cip\": \"", "\"");
+				//else
+				//{
+				//	Program.setting.threadSetting.Status = "检查本地ip失败"+netIp;
+				//	Environment.Exit(0);
+				//}
+				//isUseSelfIp = netIp.Contains(selfIp);
+			//}
 			private void ResetConfig(string taskInfo, int delayTime)
 			{
 				ResetTask(taskInfo);
@@ -95,14 +95,13 @@ namespace Miner
 				runTimeRecord++;
 				if (hdlServer.Count == 0) {
 					Thread.Sleep(500);
+					Program.anyTaskWorking = false;
 					return;
 				}
-				if (nowIndex == hdlServer.Count) {
-					nowIndex = 0;
-				};
-				if (Program.vpsStatus == Program.VpsStatus.Idle)
+				if (nowIndex == hdlServer.Count) {nowIndex = 0;};
+				if (Program.vpsStatus == Program.VpsStatus.Idle || Program.vpsStatus==Program.VpsStatus.WaitConnect)
 				{
-					Program.Tcp.Send("Idle", "");
+					Program.anyTaskWorking = false;
 					return;
 				}
 				hdlServer[nowIndex].Run(http);

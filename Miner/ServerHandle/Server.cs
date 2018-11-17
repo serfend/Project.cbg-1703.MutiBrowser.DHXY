@@ -21,10 +21,6 @@ namespace Miner
 			private string serverName;
 			private string aeroId;
 			private string aeroName;
-			static string GetServerBrowserId(string serverId)
-			{
-				return Program.setting.BrowserServerSeeting.GetInfo("Server" + serverId);
-			}
 			public Server(string id, string serverName, string aeroId, string aeroName)
 			{
 				this.Id = id;
@@ -62,20 +58,23 @@ namespace Miner
 				{
 					if (info.Contains("为了您的帐号安全，请登录之后继续访问"))
 					{
-						ExitAftert("失败:需登录", 1000);
+						ExitAftert("需登录 失败", 1000);
 					}
 					else if (info.Contains("请输入验证码"))
 					{
-						ExitAftert("失败:需验证码.", 1000);
+						ExitAftert("需验证码 失败", 1000);
 					}
 					else if (info.Contains("系统繁忙"))
 					{
-						ExitAftert("失败:系统繁忙.", 1000);
+						ExitAftert("系统繁忙 失败", 1000);
 					}
 					else if (info.Contains("该服务器已被合服"))
 					{
-						ExitAftert("失败:该服务器已合服",5000);
-						Program.vpsStatus = Program.VpsStatus.Idle;
+						ExitAftert("已合服 失败", 5000);
+					}
+					else if (info.Contains("请输入正确的服务器名称"))
+					{
+						ExitAftert("服务器名称无效 失败", 5000);
 					}
 					else
 					{

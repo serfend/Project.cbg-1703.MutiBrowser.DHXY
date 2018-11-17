@@ -78,7 +78,7 @@ namespace Miner
 					{
 						case VpsStatus.WaitConnect:
 							{
-								if (disconnectTime++ > 10)
+								if (disconnectTime++ > 10 && anyTaskWorking==false)
 								{
 									vpsStatus = VpsStatus.Connecting;
 									InitTcp();
@@ -110,7 +110,17 @@ namespace Miner
 				Tcp = null;
 				Thread.Sleep(1000);//等待资源释放
 			}
-			Tcp = new SfTcp.SfTcpClient(TcpMainTubeIp,TcpMainTubePort);
+			try
+			{
+
+				Tcp = new SfTcp.SfTcpClient(TcpMainTubeIp, TcpMainTubePort);
+			}
+			catch (Exception ex)
+			{
+				Logger.SysLog("建立连接失败 " + ex.Message,"ExceptionLog");
+				vpsStatus = VpsStatus.WaitConnect;
+				return;
+			}
 			Tcp.RecieveMessage = (x, xx) =>{
 				Logger.SysLog(xx, "通讯记录");
 				if (xx.Contains("<setClientName>"))
@@ -142,6 +152,14 @@ namespace Miner
 				if (xx.Contains("<InnerTargetUrl>"))
 				{
 					InnerTargetUrl = HttpUtil.GetElementInItem(xx, "InnerTargetUrl");
+				}
+				if (xx.Contains("<reRasdial>"))
+				{
+					Tcp.Send("reRasdial", "");
+					var p = new CmdRasdial();
+					p.DisRasdial();
+					p.Rasdial();
+					Program.vpsStatus = VpsStatus.WaitConnect;
 				}
 			};
 			Tcp.Disconnected = (x) => {
@@ -222,15 +240,16 @@ namespace Miner
 				ServerRun();
 			}
 		}
+		public static bool anyTaskWorking = false;
 		private  static void ServerRun()
 		{
 			vpsStatus = VpsStatus.Running;
+			anyTaskWorking = true;
 			servers = new ServerList();
 			SummomPriceRule.Init();
 			Goods.Equiment.EquimentPrice.Init();
 			Program.setting.threadSetting.Status = "初始化完成";
 			servers.Run(settingTaskInfo,settingDelayTime);
-			setting.LogInfo("进程退出", "主记录");
 		}
 		private static void SynSetting(string raw) {
 			var settings = HttpUtil.GetAllElements(raw, "<setting>", "</setting>");

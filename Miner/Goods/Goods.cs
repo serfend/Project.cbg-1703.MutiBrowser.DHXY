@@ -83,30 +83,8 @@ namespace Miner
 					}
 					Program.setting.LogInfo(cstr.ToString(), server.ServerName);
 				}
-				var submitInfo = new StringBuilder();
+				Program.Tcp.Send("newCheckBill",MainInfo);
 
-				//server.ServerReg.SetInfo("info", MainInfo);
-				//server.ServerReg.SetInfo("ordersn", HttpUtil.GetElement(BuyUrl, "ordersn=", "&"));
-				//server.ServerReg.SetInfo("serverName", server.ServerName);
-				//server.ServerReg.SetInfo("updateDate", DateTime.Now);
-				//server.ServerReg.SetInfo("hasNew", "new");
-				//Program.setting.DataListCoreReg.SetInfo("hasNew", server.Id);
-				//server.ServerCmdBrowserReg.SetInfo("Price", Price + "," + AssumePrice);
-				//server.ServerCmdBrowserReg.SetInfo("url", BuyUrl);
-				//Program.setting.threadSetting.Status = "提交价格" + Price + "/" + AssumePrice + "," + server.ServerCmdBrowserReg.SubKey;
-
-				 if (Convert.ToDouble(Price) > AssumePrice)
-				{
-					Program.setting.threadSetting.Status = string.Format("{0}{1}/{2}",Name,AssumePrice,Price);
-					//server.ServerCmdBrowserReg.SetInfo("cmd", "newWeb");
-					//return;//不论是否合适都提交
-				}
-				else
-				{
-					//server.ServerCmdBrowserReg.SetInfo("cmd", "newBill");
-					Program.setting.threadSetting.Status = (Name + "合适商品,已提交");
-				}
-				//
 				
 				
 			}
@@ -116,7 +94,15 @@ namespace Miner
 				{
 					StringBuilder cstr = new StringBuilder();
 					string split = "##";
-					cstr.Append(Name).Append(split).Append(Price).Append("/").Append(AssumePrice).Append(split).Append(Rank).Append(split).Append(ITalent).Append(split).Append(IAchievement).Append(split).Append(IChengjiu).Append(split).Append(ISingleEnergyRate).Append(split);
+					cstr.Append(server.ServerName).Append(split).
+						Append(Name).Append(split).
+						Append(Price).Append("/").Append(AssumePrice).Append(split).
+						Append(Rank).Append(split).
+						Append(ITalent).Append(split).
+						Append(IAchievement).Append(split).
+						Append(IChengjiu).Append(split).
+						Append(ISingleEnergyRate).Append(split).
+						Append(BuyUrl);
 					return cstr.ToString();
 				}
 			}
@@ -146,7 +132,7 @@ namespace Miner
 					var thisSummon = new Summon.Summon(summon,server);
 					if (thisSummon.Valid) summons.Add(thisSummon);
 				}
-				var equipments = goodInfo["mpEquip"];//TODO 利用itype获取装备名称
+				var equipments = goodInfo["mpEquip"];//利用itype获取装备名称
 				this.equipments = new List<Equipment>();
 				foreach (var equipment in equipments.child)
 				{
@@ -184,7 +170,8 @@ namespace Miner
 				var equimentPrice = GetEquimentPrice();
 
 				var sumPrice = goodsPrice + summonPrice + equimentPrice;
-				var priceRate = Convert.ToDouble(Program.setting.MainReg.In("Setting").In("Price").GetInfo("rate", "100"));
+				//var priceRate = Convert.ToDouble(Program.setting.MainReg.In("Setting").In("Price").GetInfo("rate", "100"));
+				var priceRate = 100;
 				Program.setting.LogInfo(string.Format("总估价:({0}+{1}+{2}={3}*{4}%={5}),TimeStamp={6}", goodsPrice,summonPrice,equimentPrice, sumPrice,priceRate, sumPrice*priceRate/100, HttpUtil.TimeStamp), server.ServerName);
 
 				return sumPrice*priceRate/100;
