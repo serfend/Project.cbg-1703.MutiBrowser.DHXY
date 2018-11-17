@@ -42,14 +42,22 @@
 			this.CmdSendNotifications = new System.Windows.Forms.Button();
 			this.IpSender = new System.Windows.Forms.TextBox();
 			this.OpLog = new System.Windows.Forms.TextBox();
-			this.listView1 = new System.Windows.Forms.ListView();
+			this.LstServerQueue = new System.Windows.Forms.ListView();
 			this.serverIndex = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.serverName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.serverHandled = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.serverTaskNum = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.button1 = new System.Windows.Forms.Button();
-			this.button2 = new System.Windows.Forms.Button();
-			this.button3 = new System.Windows.Forms.Button();
+			this.IpTaskInterval = new System.Windows.Forms.TextBox();
+			this.label1 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.IpTaskTimeOut = new System.Windows.Forms.TextBox();
+			this.label3 = new System.Windows.Forms.Label();
+			this.label4 = new System.Windows.Forms.Label();
+			this.label6 = new System.Windows.Forms.Label();
+			this.IpPerVPShdl = new System.Windows.Forms.TextBox();
+			this.label5 = new System.Windows.Forms.Label();
+			this.Server = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.SuspendLayout();
 			// 
 			// LstConnection
@@ -59,7 +67,8 @@
             this.Type,
             this.Ip,
             this.status,
-            this.delay});
+            this.delay,
+            this.Server});
 			this.LstConnection.FullRowSelect = true;
 			this.LstConnection.LabelEdit = true;
 			this.LstConnection.Location = new System.Drawing.Point(12, 33);
@@ -72,7 +81,7 @@
 			// clientName
 			// 
 			this.clientName.Text = "ID";
-			this.clientName.Width = 130;
+			this.clientName.Width = 50;
 			// 
 			// Type
 			// 
@@ -92,7 +101,7 @@
 			// delay
 			// 
 			this.delay.Text = "延迟";
-			this.delay.Width = 98;
+			this.delay.Width = 53;
 			// 
 			// OpConnectionCount
 			// 
@@ -124,7 +133,7 @@
 			// 
 			// CmdSendNotifications
 			// 
-			this.CmdSendNotifications.Location = new System.Drawing.Point(131, 697);
+			this.CmdSendNotifications.Location = new System.Drawing.Point(117, 697);
 			this.CmdSendNotifications.Name = "CmdSendNotifications";
 			this.CmdSendNotifications.Size = new System.Drawing.Size(106, 34);
 			this.CmdSendNotifications.TabIndex = 5;
@@ -135,7 +144,7 @@
 			// 
 			this.IpSender.Location = new System.Drawing.Point(12, 670);
 			this.IpSender.Name = "IpSender";
-			this.IpSender.Size = new System.Drawing.Size(225, 21);
+			this.IpSender.Size = new System.Drawing.Size(211, 21);
 			this.IpSender.TabIndex = 6;
 			// 
 			// OpLog
@@ -146,21 +155,21 @@
 			this.OpLog.Size = new System.Drawing.Size(366, 106);
 			this.OpLog.TabIndex = 1;
 			// 
-			// listView1
+			// LstServerQueue
 			// 
-			this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+			this.LstServerQueue.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.serverIndex,
             this.serverName,
             this.serverHandled,
             this.serverTaskNum});
-			this.listView1.FullRowSelect = true;
-			this.listView1.LabelEdit = true;
-			this.listView1.Location = new System.Drawing.Point(547, 145);
-			this.listView1.Name = "listView1";
-			this.listView1.Size = new System.Drawing.Size(366, 519);
-			this.listView1.TabIndex = 7;
-			this.listView1.UseCompatibleStateImageBehavior = false;
-			this.listView1.View = System.Windows.Forms.View.Details;
+			this.LstServerQueue.FullRowSelect = true;
+			this.LstServerQueue.LabelEdit = true;
+			this.LstServerQueue.Location = new System.Drawing.Point(547, 145);
+			this.LstServerQueue.Name = "LstServerQueue";
+			this.LstServerQueue.Size = new System.Drawing.Size(366, 519);
+			this.LstServerQueue.TabIndex = 7;
+			this.LstServerQueue.UseCompatibleStateImageBehavior = false;
+			this.LstServerQueue.View = System.Windows.Forms.View.Details;
 			// 
 			// serverIndex
 			// 
@@ -181,40 +190,112 @@
 			// 
 			// button1
 			// 
-			this.button1.Location = new System.Drawing.Point(243, 670);
+			this.button1.Location = new System.Drawing.Point(229, 697);
 			this.button1.Name = "button1";
 			this.button1.Size = new System.Drawing.Size(106, 34);
 			this.button1.TabIndex = 8;
 			this.button1.Text = "暂停终端";
 			this.button1.UseVisualStyleBackColor = true;
 			// 
-			// button2
+			// IpTaskInterval
 			// 
-			this.button2.Location = new System.Drawing.Point(355, 670);
-			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(106, 21);
-			this.button2.TabIndex = 9;
-			this.button2.Text = "设置采集间隔";
-			this.button2.UseVisualStyleBackColor = true;
+			this.IpTaskInterval.Location = new System.Drawing.Point(416, 670);
+			this.IpTaskInterval.Name = "IpTaskInterval";
+			this.IpTaskInterval.Size = new System.Drawing.Size(108, 21);
+			this.IpTaskInterval.TabIndex = 9;
+			this.IpTaskInterval.Tag = "RecordReg";
 			// 
-			// button3
+			// label1
 			// 
-			this.button3.Location = new System.Drawing.Point(355, 697);
-			this.button3.Name = "button3";
-			this.button3.Size = new System.Drawing.Size(106, 21);
-			this.button3.TabIndex = 11;
-			this.button3.Text = "设置...";
-			this.button3.UseVisualStyleBackColor = true;
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(357, 679);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(53, 12);
+			this.label1.TabIndex = 10;
+			this.label1.Text = "采集间隔";
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(357, 706);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(53, 12);
+			this.label2.TabIndex = 12;
+			this.label2.Text = "采集超时";
+			// 
+			// IpTaskTimeOut
+			// 
+			this.IpTaskTimeOut.Location = new System.Drawing.Point(416, 697);
+			this.IpTaskTimeOut.Name = "IpTaskTimeOut";
+			this.IpTaskTimeOut.Size = new System.Drawing.Size(108, 21);
+			this.IpTaskTimeOut.TabIndex = 11;
+			this.IpTaskTimeOut.Tag = "RecordReg";
+			// 
+			// label3
+			// 
+			this.label3.AutoSize = true;
+			this.label3.Location = new System.Drawing.Point(530, 679);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(17, 12);
+			this.label3.TabIndex = 13;
+			this.label3.Text = "ms";
+			// 
+			// label4
+			// 
+			this.label4.AutoSize = true;
+			this.label4.Location = new System.Drawing.Point(530, 705);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(17, 12);
+			this.label4.TabIndex = 14;
+			this.label4.Text = "ms";
+			// 
+			// label6
+			// 
+			this.label6.AutoSize = true;
+			this.label6.Location = new System.Drawing.Point(357, 733);
+			this.label6.Name = "label6";
+			this.label6.Size = new System.Drawing.Size(53, 12);
+			this.label6.TabIndex = 16;
+			this.label6.Text = "终端处理";
+			// 
+			// IpPerVPShdl
+			// 
+			this.IpPerVPShdl.Location = new System.Drawing.Point(416, 724);
+			this.IpPerVPShdl.Name = "IpPerVPShdl";
+			this.IpPerVPShdl.Size = new System.Drawing.Size(108, 21);
+			this.IpPerVPShdl.TabIndex = 15;
+			this.IpPerVPShdl.Tag = "RecordReg";
+			// 
+			// label5
+			// 
+			this.label5.AutoSize = true;
+			this.label5.Location = new System.Drawing.Point(530, 733);
+			this.label5.Name = "label5";
+			this.label5.Size = new System.Drawing.Size(53, 12);
+			this.label5.TabIndex = 17;
+			this.label5.Text = "个服务器";
+			// 
+			// Server
+			// 
+			this.Server.Text = "任务";
+			this.Server.Width = 134;
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(920, 747);
-			this.Controls.Add(this.button3);
-			this.Controls.Add(this.button2);
+			this.Controls.Add(this.label5);
+			this.Controls.Add(this.label6);
+			this.Controls.Add(this.IpPerVPShdl);
+			this.Controls.Add(this.label4);
+			this.Controls.Add(this.label3);
+			this.Controls.Add(this.label2);
+			this.Controls.Add(this.IpTaskTimeOut);
+			this.Controls.Add(this.label1);
+			this.Controls.Add(this.IpTaskInterval);
 			this.Controls.Add(this.button1);
-			this.Controls.Add(this.listView1);
+			this.Controls.Add(this.LstServerQueue);
 			this.Controls.Add(this.IpSender);
 			this.Controls.Add(this.CmdSendNotifications);
 			this.Controls.Add(this.CmdServerOn);
@@ -243,14 +324,22 @@
 		private System.Windows.Forms.ColumnHeader clientName;
 		private System.Windows.Forms.TextBox OpLog;
 		private System.Windows.Forms.ColumnHeader delay;
-		private System.Windows.Forms.ListView listView1;
+		private System.Windows.Forms.ListView LstServerQueue;
 		private System.Windows.Forms.ColumnHeader serverIndex;
 		private System.Windows.Forms.ColumnHeader serverName;
 		private System.Windows.Forms.ColumnHeader serverHandled;
 		private System.Windows.Forms.ColumnHeader serverTaskNum;
 		private System.Windows.Forms.Button button1;
-		private System.Windows.Forms.Button button2;
-		private System.Windows.Forms.Button button3;
+		private System.Windows.Forms.ColumnHeader Server;
+		private System.Windows.Forms.TextBox IpTaskInterval;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.TextBox IpTaskTimeOut;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.TextBox IpPerVPShdl;
+		private System.Windows.Forms.Label label5;
 	}
 }
 

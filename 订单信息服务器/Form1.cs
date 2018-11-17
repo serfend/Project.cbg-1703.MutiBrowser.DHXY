@@ -53,7 +53,8 @@ namespace 订单信息服务器
 				transferFileEngine = null;
 			}
 			transferFileEngine = new TransferFileEngine(TcpFiletransfer.TcpTransferEngine.Connections.Connection.EngineModel.AsServer, "", 8010);
-			transferFileEngine.Connection.ConnectToClient += (x, xx) => {
+			transferFileEngine.Connection.ConnectToClient += (x, xx) =>
+			{
 				if (xx.Result == File_Transfer.Model.ReceiverFiles.ReceiveResult.RequestAccepted)
 				{
 					var fileRequire = HttpUtil.GetAllElements(waittingFileInfo, "<fileRequest>", "</fileRequest>");
@@ -66,16 +67,18 @@ namespace 订单信息服务器
 				}
 				else { this.Invoke((EventHandler)delegate { AppendLog("文件服务器连接终端失败:" + xx.Info); }); }
 			};
-			transferFileEngine.Sender.SendingFileStartedEvent += (x, xx) => {
+			transferFileEngine.Sender.SendingFileStartedEvent += (x, xx) =>
+			{
 				this.Invoke((EventHandler)delegate { AppendLog("开始传输文件:" + xx.FileName); });
 			};
 			transferFileEngine.Sender.SendingCompletedEvent += (x, xx) =>
 			{
-				this.Invoke((EventHandler)delegate {
+				this.Invoke((EventHandler)delegate
+				{
 					//AppendLog("文件传输结束:" + xx.Title + ":" + xx.Message);
-					if (x.SendingFileQueue.Count==0)
+					if (x.SendingFileQueue.Count == 0)
 					{
-						AppendLog("终端文件传输结束" );
+						AppendLog("终端文件传输结束");
 						if (fileSynQueue.Count > 0)
 						{
 							var fsq = fileSynQueue.Dequeue();
@@ -84,6 +87,232 @@ namespace 订单信息服务器
 					}
 				});
 			};
+		}
+		private void InitServerManager()
+		{
+			serverManager = new TcpServerManager()
+			{
+				NormalMessage = (s, x, InnerInfo) => {
+					this.Invoke((EventHandler)delegate
+					{
+						var targetItem = GetItem(s.Ip);
+						if (targetItem != null)
+						{
+							if (x.Contains("heartBeat"))
+							{
+							} else if (x.Contains("RefreshHeartbeat"))
+							{
+								targetItem.SubItems[4].Text = InnerInfo;
+							}
+							else if (x.Contains("clientConnect"))
+							{
+								targetItem.SubItems[3].Text = "初始化";
+								targetItem.SubItems[0].Text = HttpUtil.GetElementInItem(InnerInfo, "connectCmdRequire");
+								s.ID = HttpUtil.GetElementInItem(InnerInfo, "clientDeviceId");
+								var clientName = regSetting.In(s.ID).GetInfo("clientName", targetItem.SubItems[0].Text);
+								s.Send(string.Format("<setClientName>{0}</setClientName>", clientName));//用于确认当前名称并初始化
+							}
+							else if (x.Contains("nameModefied"))
+							{
+								targetItem.SubItems[0].Text = HttpUtil.GetElementInItem(InnerInfo,"clientName");
+								if (s.clientName == "..." && InnerInfo.Contains("<AskForSynInit>"))//首次初始化时尝试发送vps终端初始化
+								{
+									BuildNewTaskToVps(s);
+								}
+								s.clientName = InnerInfo;
+							}
+							else if (x.Contains("InitComplete"))
+							{
+								//识别vps终端
+								s.IsLocal = true;
+								targetItem.SubItems[1].Text = "vps";
+
+								//终端已初始化完成
+								//synSetting,synFile
+								//遍历 【同步文件】 下所有文件
+								var dic = new DirectoryInfo(Application.StartupPath + "\\同步设置");
+								var tmp = new StringBuilder();
+								foreach (var f in dic.EnumerateFiles())
+								{
+									tmp.Append("<file><name>").Append(f.Name).Append("</name>").Append("<version>").Append(HttpUtil.GetMD5ByMD5CryptoService(f.FullName)).Append("</version></file>");
+								}
+								if (tmp.Length > 0)
+								{
+									tmp.Append("<versionCheck>");
+									s.Send(tmp.ToString());
+								}
+								else
+								{
+									s.Send("<serverRun>");//无需同步
+								}
+
+							}
+							else if (x.Contains("RequireFile"))//服务器接收到来自客户端请求文件的命令
+							{
+								this.Invoke((EventHandler)delegate { AppendLog("vps" + s.clientName + "请求获取文件"); });
+								HdlVpsFileSynRequest(InnerInfo, s);
+							}
+							else if (x.Contains("Status"))
+							{
+								targetItem.SubItems[3].Text = InnerInfo;
+							}
+							else
+							{
+								AppendLog("新消息[" + s.clientName + "] " + x + ":" + InnerInfo);
+								targetItem.SubItems[3].Text = InnerInfo;
+							}
+						}
+
+					});
+				},
+				ServerConnected = (x) => {
+					this.Invoke((EventHandler)delegate {
+						AppendLog("已连接:" + x.Ip);
+						var info = new string[5];
+						info[1] = x.IsLocal ? "主机" : "终端";
+						info[2] = x.Ip;
+						info[0] = x.clientName;
+						LstConnection.Items.Add(new ListViewItem(info));
+
+						var welcome = new Task(() => {
+							Thread.Sleep(3000);
+							x.Send("<welcome>" + DateTime.Now + "</welcome>");
+						});
+						welcome.Start();
+					});
+				},
+				ServerDisconnected = (x) => {
+					this.Invoke((EventHandler)delegate {
+						AppendLog("已断开:" + x.Ip);
+						for (int i = 0; i < LstConnection.Items.Count; i++)
+							if (LstConnection.Items[i].SubItems[2].Text == x.Ip)
+								LstConnection.Items.RemoveAt(i);
+						if (allocServer.ContainsKey(x.Ip))
+						{
+							var vps = allocServer[x.Ip];
+							foreach(var server in vps.hdlServer)
+							{
+								var s = serverInfoList[server];
+								s.NowNum--;
+							}
+							allocServer.Remove(x.Ip);
+						}
+					});
+				},
+				HttpRequest = (x, s) => {
+					s.Response(string.Format("<h1>Hey,测试服务器已开启</h1><br><p>当前连接数:{0}</p>", LstConnection.Items.Count));
+				}
+			};
+		}
+		/// <summary>
+		/// 将从任务列表中提取可用任务分配给VPS，VPS断开时撤回
+		/// </summary>
+		/// <param name="s"></param>
+		private void BuildNewTaskToVps(TcpServer s)
+		{
+			int singleHdl = 1;
+			try
+			{
+				singleHdl = Convert.ToInt32(IpPerVPShdl.Text);
+				if (singleHdl == 0)
+				{
+					IpPerVPShdl.Text = "1";
+					singleHdl = 1;
+				}
+			}
+			catch (Exception)
+			{
+				IpPerVPShdl.Text = singleHdl.ToString();
+			}
+			string hdlServer = GetFreeServer(singleHdl, s.Ip);
+			int interval = 1500, timeout = 100000;
+			
+			try
+			{
+				timeout = Convert.ToInt32(IpTaskTimeOut.Text);
+			}
+			catch (Exception)
+			{
+				IpTaskTimeOut.Text = timeout.ToString();
+			}
+			try
+			{
+				interval = Convert.ToInt32(IpTaskInterval.Text);
+			}
+			catch (Exception)
+			{
+				IpTaskInterval.Text = interval.ToString();
+			}
+			s.Send(string.Format("<SynInit><interval>{0}</interval><task>{1}</task><timeout>{2}</timeout></SynInit>", interval, hdlServer, timeout));
+		}
+		private struct HdlServerInfo
+		{
+			string id;
+			string name;
+			string aeroId;
+			string aeroName;
+			int hdlNum;
+			int nowNum;
+
+			public HdlServerInfo(string id, string name, string aeroId, string aeroName, int hdlNum) : this()
+			{
+				this.Id = id;
+				this.Name = name;
+				this.AeroId = aeroId;
+				this.AeroName = aeroName;
+				this.HdlNum = hdlNum;
+			}
+
+			public string Id { get => id; set => id = value; }
+			public string Name { get => name; set => name = value; }
+			public string AeroId { get => aeroId; set => aeroId = value; }
+			public string AeroName { get => aeroName; set => aeroName = value; }
+			public int HdlNum { get => hdlNum; set => hdlNum = value; }
+			public int NowNum { get => nowNum; set => nowNum = value; }
+		}
+		private struct VPS
+		{
+			string name;
+			string ip;
+			public List<string> hdlServer;
+
+			public VPS(string name, string ip) : this()
+			{
+				this.Name = name;
+				this.Ip = ip;
+				hdlServer = new List<string>();
+			}
+
+			public string Name { get => name; set => name = value; }
+			public string Ip { get => ip; set => ip = value; }
+		}
+		private Dictionary<string, HdlServerInfo> serverInfoList=new Dictionary<string, HdlServerInfo>();
+		private Dictionary<string, VPS> allocServer=new Dictionary<string, VPS>();//以ip对应终端
+		private void InitServerTaskList()
+		{
+			var serverInfo = File.ReadAllLines("ServerInfo.txt",Encoding.Default);
+			foreach(var server in serverInfo)
+			{
+				var info = server.Split(',');
+				var data = new string[4];
+				if (info.Length < 4) {
+					AppendLog("【警告】无效的区信息:" + server);
+					continue;
+				}
+				var hdlNum = info.Length == 5 ? Convert.ToInt32(info[4]) : 1;
+				var s = new HdlServerInfo(info[0],info[1],info[2],info[3],hdlNum);
+				if (serverInfoList.ContainsKey(s.Id))
+				{
+					AppendLog("【警告】重复的区:" + server);
+					continue;
+				}
+				serverInfoList.Add(s.Id, s);
+				data[0] = s.Id;//区号
+				data[1] = s.Name;//名称
+				data[2] = s.NowNum.ToString();//已分配
+				data[3] = s.HdlNum.ToString();//需分配
+				LstServerQueue.Items.Add(new ListViewItem(data));
+			}
 		}
 		private string waittingFileInfo;
 		private ListViewItem GetItem(string ip)
@@ -96,109 +325,67 @@ namespace 订单信息服务器
 			}
 			return null;
 		}
+		
 		private Reg regSetting;
 		public Form1()
 		{
-			InitializeComponent();
-			InitTransferEngine();
 			regSetting = new Reg("sfMinerDigger").In("Setting").In("vps");
-			serverManager =new TcpServerManager() { NormalMessage=(s,x, InnerInfo) => {
-				this.Invoke((EventHandler)delegate
-				{
-					var targetItem = GetItem(s.Ip);
-					if (targetItem != null)
-					{
-						if (x.Contains("heartBeat"))
-						{ }
-						else if (x.Contains("clientConnect"))
-						{
-							targetItem.SubItems[3].Text = "初始化";
-							targetItem.SubItems[0].Text =HttpUtil.GetElementInItem(InnerInfo, "connectCmdRequire");
-							s.ID= HttpUtil.GetElementInItem(InnerInfo, "clientDeviceId");
-							var clientName = regSetting.In(s.ID).GetInfo("clientName", targetItem.SubItems[0].Text);
-							s.Send(string.Format("<setClientName>{0}</setClientName>", clientName));//用于确认当前名称并初始化
-						}
-						else if (x.Contains("nameModefied"))
-						{
-							targetItem.SubItems[0].Text = InnerInfo;
-							if (s.clientName == "...")
-							{
-								s.Send("<SynInit>");
-							}
-							s.clientName = InnerInfo;
-						}
-						else if (x.Contains("InitComplete"))
-						{
-							//识别vps终端
-							s.IsLocal = true;
-							targetItem.SubItems[1].Text = "vps";
-
-							//终端已初始化完成
-							//synSetting,synFile
-							//遍历 【同步文件】 下所有文件
-							var dic =new  DirectoryInfo(Application.StartupPath+"\\同步设置");
-							var tmp = new StringBuilder();
-							foreach (var f in dic.EnumerateFiles())
-							{
-								tmp.Append("<file><name>").Append(f.Name).Append("</name>").Append("<version>").Append(HttpUtil.GetMD5ByMD5CryptoService(f.FullName)).Append("</version></file>");
-							}
-							if (tmp.Length > 0)
-							{
-								tmp.Append("<versionCheck>");
-								s.Send(tmp.ToString());
-							}
-							else
-							{
-								s.Send("<serverRun>");//无需同步
-							}
-							
-						}else if (x.Contains("RequireFile"))//服务器接收到来自客户端请求文件的命令
-						{
-							this.Invoke((EventHandler)delegate { AppendLog("vps" + s.clientName + "请求获取文件"); });
-							HdlVpsFileSynRequest(InnerInfo, s);
-						}
-						else if (x.Contains("Status"))
-						{
-							targetItem.SubItems[3].Text = InnerInfo;
-						}
-						else
-						{
-							AppendLog("新消息[" + s.clientName + "] "+ x+":" + InnerInfo);
-							targetItem.SubItems[3].Text = InnerInfo;
-						}
-					}
-					
-				});
-			} ,
-			ServerConnected=(x)=> {
-				this.Invoke((EventHandler)delegate {
-					AppendLog("已连接:" + x.Ip);
-					var info = new string[4];
-					info[1] = x.IsLocal?"主机":"终端";
-					info[2] = x.Ip;
-					info[0] = x.clientName;
-					LstConnection.Items.Add(new ListViewItem(info));
-
-					var welcome = new Task(()=> {
-						Thread.Sleep(3000);
-						x.Send("<welcome>" + DateTime.Now + "</welcome>");
-					});
-					welcome.Start();
-				});
-			},
-			ServerDisconnected = (x) => {
-					this.Invoke((EventHandler)delegate {
-						AppendLog("已断开:" + x.Ip);
-						for(int i = 0; i < LstConnection.Items.Count; i++)
-							if (LstConnection.Items[i].SubItems[2].Text == x.Ip)
-								LstConnection.Items.RemoveAt(i);
-					});
-			},
-				HttpRequest = (x, s) => {
-					s.Response(string.Format("<h1>Hey,测试服务器已开启</h1><br><p>当前连接数:{0}</p>",LstConnection.Items.Count));
-				}
-			};
+			InitializeComponent();
+			InitHistorySettingOnFormctl();
+			InitTransferEngine();
+			InitServerTaskList();
+			InitServerManager();
 			LstConnection.AfterLabelEdit += CheckIfUserEditName;
+		}
+
+		private bool ctlSaveLoaded = false;
+		private void InitHistorySettingOnFormctl()
+		{
+			var frmSetting = new Reg("sfMinerDigger").In("Setting").In("Form").In("ServerFormMain");
+			foreach (var ctl in this.Controls)
+			{
+				if(ctl is TextBox t)
+				{
+					if (t.Tag==null || t.Tag.ToString() != "RecordReg") continue;
+					t.Text = frmSetting.GetInfo(t.Name);
+					if (!ctlSaveLoaded)
+					{
+						t.TextChanged += (x, xx) => {
+							frmSetting.SetInfo(t.Name, t.Text);
+						};
+					}
+				}
+			}
+			ctlSaveLoaded = true;
+
+		}
+
+		/// <summary>
+		/// 无需要的任务时则返回"Idle"，终端进入休眠模式，30秒后再次询问
+		/// </summary>
+		/// <param name="singleHdl"></param>
+		/// <param name="ip"></param>
+		/// <returns></returns>
+		private string GetFreeServer(int singleHdl,string ip)
+		{
+			var vps = new VPS("", ip);
+			var taskInfo = new StringBuilder();
+			foreach(var s in serverInfoList)
+			{
+				if (singleHdl <= 0) break;
+				if (s.Value.NowNum < s.Value.HdlNum)
+				{
+					var t = s.Value;
+					t.NowNum--;
+					singleHdl--;
+					vps.hdlServer.Add(t.Id);
+					if (taskInfo.Length > 0) taskInfo.Append("#");
+					taskInfo.Append(string.Format("<id>{0}</id><serverName>{1}</serverName><aeroId>{2}</aeroId><aeroName>{3}</aeroName>",t.Id,t.Name,t.AeroId,t.AeroName));
+				}
+			}
+			if (taskInfo.Length == 0) return "Idle";
+			allocServer.Add(vps.Ip,vps);
+			return taskInfo.ToString();
 		}
 
 		private void CheckIfUserEditName(object sender, LabelEditEventArgs e)

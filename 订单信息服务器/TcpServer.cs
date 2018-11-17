@@ -59,7 +59,7 @@ namespace SfTcp
 		/// <summary>
 		/// title,content,tcpServer
 		/// </summary>
-		private Action<string,string, TcpServer> Receive;//收到信息回调
+		private readonly Action<string,string, TcpServer> Receive;//收到信息回调
 		public Action<TcpServer> Connected;//连接成功回调
 		public Action<TcpServer> Disconnected;//连接成功回调
 		public Action<TcpHttpMessage, TcpHttpResponse> OnHttpRequest;//当来源为http方式时

@@ -15,8 +15,7 @@ namespace Miner
 	{
 		public class Server
 		{
-			public Reg ServerReg;
-			public Reg ServerCmdBrowserReg;
+			public Reg ServerReg = new Reg("sfMinerDigger").In("Main").In("Setting").In("goodhistory");
 			public static int DelayTime = 1500;
 			private string id;
 			private string serverName;
@@ -29,8 +28,6 @@ namespace Miner
 			public Server(string id, string serverName, string aeroId, string aeroName)
 			{
 				this.Id = id;
-				ServerReg = Program.setting.DataListServerReg.In("@" + id);
-				ServerCmdBrowserReg = Program.setting.MainReg.In("ThreadCmd").In(GetServerBrowserId(id));
 				this.ServerName = serverName;
 				this.AeroId = aeroId;
 				this.AeroName = aeroName;
@@ -55,7 +52,7 @@ namespace Miner
 				Program.setting.LogInfo(info + "即将结束:" + delay,"主记录");
 				Console.WriteLine("进程已结束,{0}ms后将退出此界面", delay);
 				Thread.Sleep(delay);
-				Environment.Exit(0);
+				Program.vpsStatus = Program.VpsStatus.WaitConnect;
 			}
 			private void HdlResult(string info)
 			{
@@ -74,6 +71,11 @@ namespace Miner
 					else if (info.Contains("系统繁忙"))
 					{
 						ExitAftert("失败:系统繁忙.", 1000);
+					}
+					else if (info.Contains("该服务器已被合服"))
+					{
+						ExitAftert("失败:该服务器已合服",5000);
+						Program.vpsStatus = Program.VpsStatus.Idle;
 					}
 					else
 					{

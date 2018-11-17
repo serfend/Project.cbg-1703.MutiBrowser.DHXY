@@ -19,6 +19,4 @@ D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\obj\Debug\Miner.application
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\TcpFiletransfer.dll
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\TcpFiletransfer.pdb
-D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Miner.exe.CodeAnalysisLog.xml
-D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Miner.exe.lastcodeanalysissucceeded
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\obj\Debug\Miner.csprojAssemblyReference.cache

@@ -35,6 +35,7 @@ namespace Miner
 			Connecting,
 			Syning,
 			Running,
+			Idle,
 			Exception
 		}
 		public static VpsStatus vpsStatus =0;
@@ -49,14 +50,18 @@ namespace Miner
 		{
 			var fileName = Process.GetCurrentProcess().MainModule.FileName;
 			var targetIp = HttpUtil.GetElement(fileName,"(", ")");
-			var tmpInfo = targetIp.Split('!');
-			if (tmpInfo.Length == 4)
+			if (targetIp !=null)
 			{
-				TcpMainTubeIp = tmpInfo[0];
-				TcpMainTubePort = Convert.ToInt32(tmpInfo[1]);
-				TcpFileTubeIp = tmpInfo[2];
-				TcpFileTubePort = Convert.ToInt32(tmpInfo[3]);
+				var tmpInfo = targetIp.Split('!');
+				if (tmpInfo.Length == 4)
+				{
+					TcpMainTubeIp = tmpInfo[0];
+					TcpMainTubePort = Convert.ToInt32(tmpInfo[1]);
+					TcpFileTubeIp = tmpInfo[2];
+					TcpFileTubePort = Convert.ToInt32(tmpInfo[3]);
+				}
 			}
+				
 			rootReg = new Reg("sfMinerDigger");
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 			int systemBegin = Environment.TickCount;
@@ -113,10 +118,11 @@ namespace Miner
 					var ClientName = HttpUtil.GetElementInItem(xx, "setClientName");
 					setting = new Setting(ClientName);
 					clientId.SetInfo("VpsClientId",ClientName);
-					Tcp.Send("nameModefied", ClientName);
+					Tcp.Send("nameModefied", string.Format("<clientName>{0}</clientName><AskForSynInit>", ClientName));
 				}
 				if (xx.Contains("SynInit"))
 				{
+					InitSetting(xx);
 					Program.vpsStatus = VpsStatus.Syning;
 					Tcp.Send("InitComplete", "");
 				}
@@ -132,6 +138,10 @@ namespace Miner
 				}
 				if (xx.Contains("<ensureFileTransfer>")) {//客户端接收到来自服务器【可以开始传输】的指令
 					TranslateFileStart();
+				}
+				if (xx.Contains("<InnerTargetUrl>"))
+				{
+					InnerTargetUrl = HttpUtil.GetElementInItem(xx, "InnerTargetUrl");
 				}
 			};
 			Tcp.Disconnected = (x) => {
@@ -175,6 +185,15 @@ namespace Miner
 			fileEngine.Connect();
 		}
 		private static int fileWaitToUpdate = 0,fileNowReceive=0;
+
+		public static string InnerTargetUrl { get; internal set; }
+		private static string settingTaskInfo;
+		private static int settingDelayTime;
+		private static void InitSetting(string settingInfo)
+		{
+			settingTaskInfo = HttpUtil.GetElementInItem(settingInfo, "task");
+			settingDelayTime = Convert.ToInt32(HttpUtil.GetElementInItem(settingInfo, "interval"));
+		}
 		private static void SynFile(string xx)
 		{
 			Logger.SysLog("尝试同步设置", "主记录");
@@ -210,12 +229,7 @@ namespace Miner
 			SummomPriceRule.Init();
 			Goods.Equiment.EquimentPrice.Init();
 			Program.setting.threadSetting.Status = "初始化完成";
-			//setting.LogInfo("进程加载完成,等待1000ms", "主记录");
-			//while(Environment.TickCount- systemBegin < 1000)
-			//{
-			//	Thread.Sleep(50);
-			//}
-			servers.Run();
+			servers.Run(settingTaskInfo,settingDelayTime);
 			setting.LogInfo("进程退出", "主记录");
 		}
 		private static void SynSetting(string raw) {

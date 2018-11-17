@@ -83,27 +83,27 @@ namespace Miner
 					}
 					Program.setting.LogInfo(cstr.ToString(), server.ServerName);
 				}
+				var submitInfo = new StringBuilder();
 
-
-				server.ServerReg.SetInfo("info", MainInfo);
-				server.ServerReg.SetInfo("ordersn", HttpUtil.GetElement(BuyUrl, "ordersn=", "&"));
-				server.ServerReg.SetInfo("serverName", server.ServerName);
-				server.ServerReg.SetInfo("updateDate", DateTime.Now);
-				server.ServerReg.SetInfo("hasNew", "new");
-				Program.setting.DataListCoreReg.SetInfo("hasNew", server.Id);
-				server.ServerCmdBrowserReg.SetInfo("Price", Price + "," + AssumePrice);
-				server.ServerCmdBrowserReg.SetInfo("url", BuyUrl);
+				//server.ServerReg.SetInfo("info", MainInfo);
+				//server.ServerReg.SetInfo("ordersn", HttpUtil.GetElement(BuyUrl, "ordersn=", "&"));
+				//server.ServerReg.SetInfo("serverName", server.ServerName);
+				//server.ServerReg.SetInfo("updateDate", DateTime.Now);
+				//server.ServerReg.SetInfo("hasNew", "new");
+				//Program.setting.DataListCoreReg.SetInfo("hasNew", server.Id);
+				//server.ServerCmdBrowserReg.SetInfo("Price", Price + "," + AssumePrice);
+				//server.ServerCmdBrowserReg.SetInfo("url", BuyUrl);
 				//Program.setting.threadSetting.Status = "提交价格" + Price + "/" + AssumePrice + "," + server.ServerCmdBrowserReg.SubKey;
 
 				 if (Convert.ToDouble(Price) > AssumePrice)
 				{
 					Program.setting.threadSetting.Status = string.Format("{0}{1}/{2}",Name,AssumePrice,Price);
-					server.ServerCmdBrowserReg.SetInfo("cmd", "newWeb");
+					//server.ServerCmdBrowserReg.SetInfo("cmd", "newWeb");
 					//return;//不论是否合适都提交
 				}
 				else
 				{
-					server.ServerCmdBrowserReg.SetInfo("cmd", "newBill");
+					//server.ServerCmdBrowserReg.SetInfo("cmd", "newBill");
 					Program.setting.threadSetting.Status = (Name + "合适商品,已提交");
 				}
 				//

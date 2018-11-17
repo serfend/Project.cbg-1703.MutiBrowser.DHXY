@@ -22,24 +22,11 @@ namespace Miner
 		class ServerList:IDisposable
 		{
 			private HttpClient http;
-			private Dictionary<string, Server> serverList;
 			private List<Server> hdlServer;
 			public ServerList()
 			{
 				hdlServer = new List<Server>();
 
-				serverList = new Dictionary<string, Server>();
-				var ServerInfo = Program.setting.MainReg.In("Setting").In("ServerInfo").In("ServerList");
-				var index = 1;
-				do
-				{
-					var thisServer = ServerInfo.GetInfo("Server " + index);
-					if (thisServer == "") break;
-					index++;
-					var info = thisServer.Split(',');
-					serverList[info[0]] = new Server(info[0], info[1], info[2], info[3]);
-				} while (true);
-				var globalIpRecorder = Program.setting.MainReg.In("Data").In("RecordIp");
 				//此版本仅适用本机vps
 				http = new HttpClient();
 			}
@@ -49,25 +36,24 @@ namespace Miner
 				{
 					Program.setting.threadSetting.Status = "进程被关闭";
 					Program.vpsStatus = Program.VpsStatus.WaitConnect;
+					return;
 				}
 				var tasks = taskCmd.Split('#');
 				hdlServer = new List<Server>(tasks.Length);
 				foreach (var task in tasks)
 				{
 					if (task == "") continue;
-					var target = serverList.ContainsKey(task) ? serverList[task] : null;
-
-					if (target == null) Program.setting.threadSetting.Status = ("获取失败,无效的服务器:" + task);
-					else hdlServer.Add(target);
+					var target = new Server(HttpUtil.GetElementInItem(task,"id"), HttpUtil.GetElementInItem(task, "serverName"), HttpUtil.GetElementInItem(task, "aeroId"), HttpUtil.GetElementInItem(task, "aeroName"));
+					hdlServer.Add(target);
 				}
 				Program.setting.threadSetting.Status = string.Format("目标服务器加载完成,共计{0}个", hdlServer.Count);
 			}
 			private int runTimeRecord = 0;
-			public void Run()
+			public void Run(string taskInfo, int delayTime)
 			{
 				try
 				{
-					Main();
+					ResetConfig(taskInfo,delayTime);
 					ServerRun(0);
 				}
 				catch (Exception ex)
@@ -90,55 +76,50 @@ namespace Miner
 				}
 				isUseSelfIp = netIp.Contains(selfIp);
 			}
-			private void Main()
+			private void ResetConfig(string taskInfo, int delayTime)
 			{
-				Program.setting.threadSetting.RefreshRunTime();
-				
-				
-				var config = Program.setting.threadSetting;
-				var haveRefresh = config.ThisThreadIsRefresh;
-
-				if (haveRefresh)
-				{
-					Program.setting.threadSetting.Status = ("更新设置");
-					ResetTask(config.Task);
-					Server.DelayTime = config.DelayTime;
-					Server.DelayTime = Server.DelayTime <= 100 ? 100 : Server.DelayTime;
-				}
+				ResetTask(taskInfo);
+				Server.DelayTime = delayTime;
+				Server.DelayTime = Server.DelayTime <= 100 ? 100 : Server.DelayTime;
 				if (hdlServer.Count == 0)
 				{
 					Program.setting.threadSetting.Status = ("无需处理的服务器");
 					Program.vpsStatus = Program.VpsStatus.WaitConnect;
 				}
-				//else
-				//	Program.setting.threadSetting.Status = hdlServer.Count + "个服务器运行开始";
-				
-				Program.setting.threadSetting.RefreshRunTime();
+				Program.setting.threadSetting.RefreshRunTime(0);
 			}
+			private int lastRunTime = 0;
 			private void ServerRun(int nowIndex)
 			{
+				lastRunTime = Environment.TickCount;
 				runTimeRecord++;
 				if (hdlServer.Count == 0) {
 					Thread.Sleep(500);
 					return;
 				}
 				if (nowIndex == hdlServer.Count) {
-					Main();
 					nowIndex = 0;
 				};
+				if (Program.vpsStatus == Program.VpsStatus.Idle)
+				{
+					Program.Tcp.Send("Idle", "");
+					return;
+				}
 				hdlServer[nowIndex].Run(http);
 				/*if(runTimeRecord%10==0)*/
 				Program.setting.threadSetting.Status = string.Format("{1}次刷新 {0} 结束", hdlServer[nowIndex].ServerName, runTimeRecord);
 				if (new Random().Next(1, 100) > 90)
 				{
 					var t = new Task(() => {
-						var targetUrl = Program.setting.MainReg.GetInfo("TargetUrl");
+						var targetUrl = Program.InnerTargetUrl;
+						if (targetUrl==null||targetUrl.Length == 0) return;
 						var targetResult=http.GetAsync(targetUrl);
 						var myResponseStream = targetResult.Result.Content.ReadAsStreamAsync().Result;
 					});
 					t.Start();
 				}
-				Program.setting.threadSetting.RefreshRunTime();
+				var interval = Environment.TickCount - lastRunTime;
+				Program.setting.threadSetting.RefreshRunTime(interval);
 				Thread.Sleep(Server.DelayTime);
 				new Thread(() => {
 					ServerRun(nowIndex + 1);
