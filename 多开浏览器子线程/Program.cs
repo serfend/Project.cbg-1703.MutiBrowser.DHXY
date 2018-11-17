@@ -8,7 +8,8 @@ namespace 多开浏览器子线程
 {
 	static class Program
 	{
-		
+		public static SfTcp.SfTcpClient Tcp = new TcpBrowserClient();
+
 		/// <summary>
 		/// 应用程序的主入口点。
 		/// </summary>

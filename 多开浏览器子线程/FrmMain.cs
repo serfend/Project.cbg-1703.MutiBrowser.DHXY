@@ -131,7 +131,7 @@ namespace 多开浏览器子线程
 		{
 			
 			var http = new HttpClient();
-			//TODO 使用webbrowser登录cookies进行获取订单？
+			//使用webbrowser登录cookies进行获取订单？
 			//未登录=》登录超时，请重新登录！
 			//返回订单信息
 			var cookiesLogin = "sid=" + GetNowLoginCookies();
