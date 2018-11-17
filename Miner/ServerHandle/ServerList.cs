@@ -105,7 +105,13 @@ namespace Miner
 					return;
 				}
 				hdlServer[nowIndex].Run(http);
-				/*if(runTimeRecord%10==0)*/
+				if (Program.vpsStatus == Program.VpsStatus.Idle || Program.vpsStatus == Program.VpsStatus.WaitConnect)
+				{
+					Program.anyTaskWorking = false;
+					return;
+				}
+
+
 				Program.setting.threadSetting.Status = string.Format("{1}次刷新 {0} 结束", hdlServer[nowIndex].ServerName, runTimeRecord);
 				if (new Random().Next(1, 100) > 90)
 				{

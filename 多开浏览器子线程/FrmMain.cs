@@ -16,8 +16,11 @@ using 多开浏览器子线程.util;
 
 namespace 多开浏览器子线程
 {
+	
 	partial class FrmMain : Form
 	{
+		private bool frmClosing = false;
+		Thread ThreadMonitor;
 		private Inner.Ccmd CCmd = new Inner.Ccmd();
 		public FrmMain()
 		{
@@ -32,9 +35,10 @@ namespace 多开浏览器子线程
 			BtnShowBuyList.Click += (x, xx) => {
 				TryLoadBill(true);
 			};
+			this.FormClosing += (x, xx) => { frmClosing = true; RegUtil.SetFormPos(this); };
 			ipWebShowUrl.KeyPress += IpWebShowUrl_KeyPress;
-			var t = new Thread(() => {
-				while (true)
+			ThreadMonitor = new Thread(() => {
+				while (!frmClosing)
 				{
 					Thread.Sleep(200);
 					var cmd = CCmd.GetCmd(out string targetUrl);
@@ -53,15 +57,25 @@ namespace 多开浏览器子线程
 				this.Close();
 			}
 			Program.Tcp.RecieveMessage += ReceiveMessage;
-			t.Start();
+			Program.Tcp.Send("clientConnect", $"<browserInit>{CCmd.GetWebInfo("server")}</browserInit>");
+
+			ThreadMonitor.Start();
+
 		}
 
 		#region 逻辑
+		private string price, assumePrice;
 		private void ReceiveMessage(SfTcp.SfTcpClient s,string info){
 			if (info.Contains("<newCheckBill>"))
 			{
 				var targetUrl = HttpUtil.GetElementInItem(info,"targetUrl");
-				CheckNewCmd(CmdInfo.SubmitBill, targetUrl);
+				price = HttpUtil.GetElementInItem(info, "price");
+				assumePrice = HttpUtil.GetElementInItem(info, "assumePrice");
+				CheckNewCmd(CmdInfo.SubmitBill,targetUrl);
+			}else if (info.Contains("<showWeb>"))
+			{
+				var targetUrl = HttpUtil.GetElementInItem(info, "targetUrl");
+				CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
 			}
 		}
 		public enum CmdInfo
@@ -171,7 +185,7 @@ namespace 多开浏览器子线程
 							var t = new Task(() => {
 								Program.Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
 								this.Invoke((EventHandler)delegate {
-									Text = ("下单成功\n" + url);
+									Text = ("下单成功 " + url);
 									this.WebShow.Visible = true;
 								});
 							}
@@ -231,7 +245,9 @@ namespace 多开浏览器子线程
 			var submitTarget = WebShow.Document.GetElementById("buy_btn");
 			if (submitTarget != null)
 			{
-				bool canSubmit = IsPriceSuit(out string bidInfo);
+				if (price==null||price == "") price = "0";if (assumePrice==null|| assumePrice == "") assumePrice = "0";
+				bool canSubmit = Convert.ToDouble(price)<=Convert.ToDouble(assumePrice);
+				string bidInfo = $"{price}/{assumePrice}";
 				ISPrice.Text = bidInfo;
 				LbShowStatus.Text = "检测到进入预约界面(" + (canSubmit ? "报价符合" : "报价不符") + " " + bidInfo + ")";
 				WebShow.Document.InvokeScript("tab_onclick", new object[] { 3 });
@@ -284,18 +300,7 @@ namespace 多开浏览器子线程
 				}
 			}
 		}
-		private bool IsPriceSuit(out string bidInfo)
-		{
-			var priceInfo = Program.reg.In("Main").In("ThreadCmd").In(Program.thisExeThreadId);
-			bidInfo = priceInfo.GetInfo("Price");
-			priceInfo.SetInfo("Price","none");
-			string[] temp = bidInfo.Split(new string[] { "," },StringSplitOptions.RemoveEmptyEntries);
-			if (temp.Length < 2 || bidInfo=="none") return false;
-			double.TryParse(temp[0], out double askBid);
-			double.TryParse(temp[1], out double myBid);
-			
-			return (myBid >= askBid);
-		}
+
 		private void BtnRefresh_Click(object sender, EventArgs e)
 		{
 			ReNavigateWeb();
@@ -329,16 +334,6 @@ namespace 多开浏览器子线程
 		private void 当前版本ToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			MessageBox.Show("当前版本:"+WebShow.Version);
-		}
-
-		private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
-		{
-			RegUtil.SetFormPos(this);
-			RegUtil.SetIEBrowserTempPathEnd();
-			if (e.CloseReason == CloseReason.WindowsShutDown)
-			{
-				//此处应处理立即保存快照
-			}
 		}
 
 		private void WebShow_Navigating(object sender, WebBrowserNavigatingEventArgs e)

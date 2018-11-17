@@ -19,19 +19,15 @@ namespace 多开浏览器子线程
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Init(args);
-			Application.Run(new FrmMain());
-			var frm = new FrmMain();
+			
+
 			try
 			{
-
-				frm.Show();
-
+				Application.Run(new FrmMain());
 			}
 			catch (Exception ex)
 			{
-				
 				MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
-				
 			}
 		}
 		public static DotNet4.Utilities.UtilReg.Reg reg ;

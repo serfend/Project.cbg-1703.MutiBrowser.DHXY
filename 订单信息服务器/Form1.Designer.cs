@@ -57,6 +57,16 @@
 			this.label6 = new System.Windows.Forms.Label();
 			this.IpPerVPShdl = new System.Windows.Forms.TextBox();
 			this.label5 = new System.Windows.Forms.Label();
+			this.LstGoodShow = new System.Windows.Forms.ListView();
+			this.GoodShowServer = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.GoodShowName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.GoodShowPriceInfo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.GoodShowRank = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.GoodShowTalent = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.GoodShowAchievement = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.GoodShowSociatyAchievement = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.GoodShowFamilyRank = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.GoodShowBuyUrl = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.SuspendLayout();
 			// 
 			// LstConnection
@@ -127,7 +137,7 @@
 			// 
 			// CmdServerOn
 			// 
-			this.CmdServerOn.Location = new System.Drawing.Point(12, 697);
+			this.CmdServerOn.Location = new System.Drawing.Point(16, 940);
 			this.CmdServerOn.Name = "CmdServerOn";
 			this.CmdServerOn.Size = new System.Drawing.Size(99, 34);
 			this.CmdServerOn.TabIndex = 4;
@@ -137,7 +147,7 @@
 			// 
 			// CmdSendNotifications
 			// 
-			this.CmdSendNotifications.Location = new System.Drawing.Point(117, 697);
+			this.CmdSendNotifications.Location = new System.Drawing.Point(121, 940);
 			this.CmdSendNotifications.Name = "CmdSendNotifications";
 			this.CmdSendNotifications.Size = new System.Drawing.Size(106, 34);
 			this.CmdSendNotifications.TabIndex = 5;
@@ -146,7 +156,7 @@
 			// 
 			// IpSender
 			// 
-			this.IpSender.Location = new System.Drawing.Point(12, 670);
+			this.IpSender.Location = new System.Drawing.Point(16, 913);
 			this.IpSender.Name = "IpSender";
 			this.IpSender.Size = new System.Drawing.Size(211, 21);
 			this.IpSender.TabIndex = 6;
@@ -194,7 +204,7 @@
 			// 
 			// IpTaskInterval
 			// 
-			this.IpTaskInterval.Location = new System.Drawing.Point(288, 670);
+			this.IpTaskInterval.Location = new System.Drawing.Point(292, 913);
 			this.IpTaskInterval.Name = "IpTaskInterval";
 			this.IpTaskInterval.Size = new System.Drawing.Size(108, 21);
 			this.IpTaskInterval.TabIndex = 9;
@@ -203,7 +213,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(229, 679);
+			this.label1.Location = new System.Drawing.Point(233, 922);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(53, 12);
 			this.label1.TabIndex = 10;
@@ -212,7 +222,7 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(229, 706);
+			this.label2.Location = new System.Drawing.Point(233, 949);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(53, 12);
 			this.label2.TabIndex = 12;
@@ -220,7 +230,7 @@
 			// 
 			// IpTaskTimeOut
 			// 
-			this.IpTaskTimeOut.Location = new System.Drawing.Point(288, 697);
+			this.IpTaskTimeOut.Location = new System.Drawing.Point(292, 940);
 			this.IpTaskTimeOut.Name = "IpTaskTimeOut";
 			this.IpTaskTimeOut.Size = new System.Drawing.Size(108, 21);
 			this.IpTaskTimeOut.TabIndex = 11;
@@ -229,7 +239,7 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(402, 679);
+			this.label3.Location = new System.Drawing.Point(406, 922);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(17, 12);
 			this.label3.TabIndex = 13;
@@ -238,7 +248,7 @@
 			// label4
 			// 
 			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(402, 705);
+			this.label4.Location = new System.Drawing.Point(406, 948);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(17, 12);
 			this.label4.TabIndex = 14;
@@ -247,7 +257,7 @@
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(229, 733);
+			this.label6.Location = new System.Drawing.Point(233, 976);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(53, 12);
 			this.label6.TabIndex = 16;
@@ -255,7 +265,7 @@
 			// 
 			// IpPerVPShdl
 			// 
-			this.IpPerVPShdl.Location = new System.Drawing.Point(288, 724);
+			this.IpPerVPShdl.Location = new System.Drawing.Point(292, 967);
 			this.IpPerVPShdl.Name = "IpPerVPShdl";
 			this.IpPerVPShdl.Size = new System.Drawing.Size(108, 21);
 			this.IpPerVPShdl.TabIndex = 15;
@@ -264,17 +274,80 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(402, 733);
+			this.label5.Location = new System.Drawing.Point(406, 976);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(53, 12);
 			this.label5.TabIndex = 17;
 			this.label5.Text = "个服务器";
 			// 
+			// LstGoodShow
+			// 
+			this.LstGoodShow.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.GoodShowServer,
+            this.GoodShowName,
+            this.GoodShowPriceInfo,
+            this.GoodShowRank,
+            this.GoodShowTalent,
+            this.GoodShowAchievement,
+            this.GoodShowSociatyAchievement,
+            this.GoodShowFamilyRank,
+            this.GoodShowBuyUrl});
+			this.LstGoodShow.FullRowSelect = true;
+			this.LstGoodShow.LabelEdit = true;
+			this.LstGoodShow.Location = new System.Drawing.Point(12, 671);
+			this.LstGoodShow.Name = "LstGoodShow";
+			this.LstGoodShow.Size = new System.Drawing.Size(901, 224);
+			this.LstGoodShow.TabIndex = 18;
+			this.LstGoodShow.UseCompatibleStateImageBehavior = false;
+			this.LstGoodShow.View = System.Windows.Forms.View.Details;
+			this.LstGoodShow.DoubleClick += new System.EventHandler(this.LstGoodShow_DoubleClick);
+			// 
+			// GoodShowServer
+			// 
+			this.GoodShowServer.Text = "服务器";
+			this.GoodShowServer.Width = 90;
+			// 
+			// GoodShowName
+			// 
+			this.GoodShowName.Text = "名称";
+			this.GoodShowName.Width = 96;
+			// 
+			// GoodShowPriceInfo
+			// 
+			this.GoodShowPriceInfo.Text = "价格";
+			this.GoodShowPriceInfo.Width = 77;
+			// 
+			// GoodShowRank
+			// 
+			this.GoodShowRank.Text = "等级";
+			// 
+			// GoodShowTalent
+			// 
+			this.GoodShowTalent.Text = "天赋";
+			// 
+			// GoodShowAchievement
+			// 
+			this.GoodShowAchievement.Text = "功绩";
+			// 
+			// GoodShowSociatyAchievement
+			// 
+			this.GoodShowSociatyAchievement.Text = "帮派点数";
+			// 
+			// GoodShowFamilyRank
+			// 
+			this.GoodShowFamilyRank.Text = "家族回灵";
+			// 
+			// GoodShowBuyUrl
+			// 
+			this.GoodShowBuyUrl.Text = "购买链接";
+			this.GoodShowBuyUrl.Width = 333;
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(920, 747);
+			this.ClientSize = new System.Drawing.Size(920, 996);
+			this.Controls.Add(this.LstGoodShow);
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.label6);
 			this.Controls.Add(this.IpPerVPShdl);
@@ -328,6 +401,16 @@
 		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.TextBox IpPerVPShdl;
 		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.ListView LstGoodShow;
+		private System.Windows.Forms.ColumnHeader GoodShowServer;
+		private System.Windows.Forms.ColumnHeader GoodShowName;
+		private System.Windows.Forms.ColumnHeader GoodShowPriceInfo;
+		private System.Windows.Forms.ColumnHeader GoodShowRank;
+		private System.Windows.Forms.ColumnHeader GoodShowTalent;
+		private System.Windows.Forms.ColumnHeader GoodShowAchievement;
+		private System.Windows.Forms.ColumnHeader GoodShowSociatyAchievement;
+		private System.Windows.Forms.ColumnHeader GoodShowFamilyRank;
+		private System.Windows.Forms.ColumnHeader GoodShowBuyUrl;
 	}
 }
 

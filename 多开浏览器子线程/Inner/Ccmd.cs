@@ -10,7 +10,7 @@ namespace 多开浏览器子线程.Inner
 	{
 		public DateTime lastRun;
 		public bool notFirstTimeRun;
-		public long GetCmd( out string targetUrl)
+		public FrmMain.CmdInfo GetCmd( out string targetUrl)
 		{
 			Program.reg.In("Main").In("Setting").In("cmd").SetInfo(Program.thisExeThreadId + ".lastRunTime", DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss"));
 			return NeedRefresh(out targetUrl);
@@ -25,53 +25,53 @@ namespace 多开浏览器子线程.Inner
 			SetRefresh(threadId);
 			return rel;
 		}
-		private int NeedRefresh(out string targetUrl)
+		private FrmMain.CmdInfo NeedRefresh(out string targetUrl)
 		{
 			if (!notFirstTimeRun)
 			{
 				notFirstTimeRun = true;
 				targetUrl = GetDefaultUrl();
 				SetRefresh(Program.thisExeThreadId);
-				return 2333;
+				return FrmMain.CmdInfo.ShowWeb;
 			}
 			if ((DateTime.Now - lastRun).TotalSeconds < 10)
 			{
 				targetUrl = "无需更新";
-				return -1;
+				return FrmMain.CmdInfo.None;
 			}
 			switch (GetNowCmd(Program.thisExeThreadId))
 			{
 				case "":
 					{
 						targetUrl = "无任何操作";
-						return -1;
+						return FrmMain.CmdInfo.None;
 					}
 				case "subClose":
 					{
 						targetUrl = "关闭进程";
-						return 404;
+						return FrmMain.CmdInfo.SubClose;
 					}
 				case "refresh":
 					{
 						targetUrl = "仅刷新";
-						return 1;
+						return FrmMain.CmdInfo.OnlyRefresh;
 					}
 				case "newWeb":
 					{
 						targetUrl = GetNextUrl();
-						return 233;
+						return FrmMain.CmdInfo.ShowWeb;
 					}
 				case "newBill":
 					{
 
 						targetUrl = GetNextUrl();
-						return 101;
+						return FrmMain.CmdInfo.SubmitBill;
 					}
 				default:
 					{
 						targetUrl = "未能识别的指令";
 						//Console.WriteLine("CCmd：有未能识别的指令出现");
-						return 0;
+						return FrmMain.CmdInfo.None;
 					}
 			}
 		}

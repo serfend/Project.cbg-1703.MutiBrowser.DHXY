@@ -200,7 +200,6 @@
 			this.Margin = new System.Windows.Forms.Padding(2);
 			this.Name = "FrmMain";
 			this.Text = "frmMain";
-			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMain_FormClosing);
 			this.Load += new System.EventHandler(this.BtnRefresh_Click);
 			this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.FrmMain_MouseClick);
 			this.Resize += new System.EventHandler(this.FrmMain_Resize);

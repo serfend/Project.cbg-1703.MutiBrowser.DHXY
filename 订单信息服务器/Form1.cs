@@ -106,11 +106,21 @@ namespace 订单信息服务器
 							}
 							else if (x.Contains("clientConnect"))
 							{
-								targetItem.SubItems[3].Text = "初始化";
-								targetItem.SubItems[0].Text = HttpUtil.GetElementInItem(InnerInfo, "connectCmdRequire");
-								s.ID = HttpUtil.GetElementInItem(InnerInfo, "clientDeviceId");
-								var clientName = regSetting.In(s.ID).GetInfo("clientName", targetItem.SubItems[0].Text);
-								s.Send(string.Format("<setClientName>{0}</setClientName>", clientName));//用于确认当前名称并初始化
+								if (InnerInfo.Contains("<browserInit>"))
+								{
+									var hdlServerName = HttpUtil.GetElementInItem(InnerInfo, "browserInit");
+									targetItem.SubItems[3].Text = "等待订单";
+									targetItem.SubItems[0].Text = hdlServerName;
+									BrowserIp[hdlServerName] = s.Ip;
+								}
+								else
+								{
+									targetItem.SubItems[3].Text = "初始化";
+									targetItem.SubItems[0].Text = HttpUtil.GetElementInItem(InnerInfo, "connectCmdRequire");
+									s.ID = HttpUtil.GetElementInItem(InnerInfo, "clientDeviceId");
+									var clientName = regSetting.In(s.ID).GetInfo("clientName", targetItem.SubItems[0].Text);
+									s.Send(string.Format("<setClientName>{0}</setClientName>", clientName));//用于确认当前名称并初始化
+								}
 							}
 							else if (x.Contains("nameModefied"))
 							{
@@ -157,10 +167,18 @@ namespace 订单信息服务器
 							else if (x.Contains("Status"))
 							{
 								targetItem.SubItems[3].Text = InnerInfo;
+								if(InnerInfo.Contains(" 失败"))
+								{
+									s.Send("<reRasdial>");
+								}
 							}
 							else if (x.Contains("newCheckBill"))
 							{
-								AppendLog("订单" + InnerInfo);
+								HdlNewCheckBill(s.clientName, InnerInfo);
+							}
+							else if (x.Contains("reRasdial"))
+							{
+								targetItem.SubItems[3].Text = "VPS重拨号中";
 							}
 							else
 							{
@@ -215,6 +233,44 @@ namespace 订单信息服务器
 			};
 		}
 
+		private void HdlNewCheckBill(string sender,string InnerInfo)
+		{
+			var tmp = InnerInfo.Split(new string[] { "##" }, StringSplitOptions.None);
+			if (tmp.Length < 9)
+			{
+				AppendLog(sender + " 无效的订单信息:" + InnerInfo);
+				return;
+			}
+			var serverName = tmp[0];
+			var goodName = tmp[1];
+			var priceInfo = tmp[2];
+			var Rank = tmp[3];
+			var ITalent = tmp[4];
+			var IAchievement = tmp[5];
+			var IChengjiu = tmp[6];
+			var ISingleEnergyRate = tmp[7];
+			var BuyUrl = tmp[8];
+			var data = new string[8];
+			for (int i = 1; i <= data.Length; i++) data[i-1] = tmp[i];
+			LstGoodShow.Items.Add(new ListViewItem(data));
+			if (LstGoodShow.Items.Count > 10) LstGoodShow.Items[9].Remove();
+			SendCmdToBrowserClient(serverName, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceInfo}</price>");
+		}
+		private void SendCmdToBrowserClient(string serverName, string cmdInfo)
+		{
+			if (!BrowserIp.ContainsKey(serverName))
+			{
+				AppendLog(serverName + " 对应的下单浏览器进程未启动");
+				return;
+			}
+			else
+			{
+				var targetBrowser = BrowserIp[serverName];
+				var client = serverManager[targetBrowser];
+				client.Send(cmdInfo);
+			}
+		}
+		private Dictionary<string, string> BrowserIp=new Dictionary<string, string>();//浏览器进程对应终端ip
 		private void SynLstTask()
 		{
 			for(int i = 0; i < LstServerQueue.Items.Count; i++)
@@ -462,5 +518,12 @@ namespace 订单信息服务器
 			}
 		}
 
+		private void LstGoodShow_DoubleClick(object sender, EventArgs e)
+		{
+			var target = LstGoodShow.SelectedItems[0];
+			var targetUrl = target.SubItems[9].Text;
+			Clipboard.SetText(targetUrl);
+			SendCmdToBrowserClient(target.SubItems[0].Text,$"<showWeb><targetUrl>{targetUrl}</targetUrl></showWeb>");
+		}
 	}
 }

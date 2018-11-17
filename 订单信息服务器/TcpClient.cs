@@ -69,7 +69,7 @@ namespace SfTcp
 		}
 		public virtual bool Send(byte[] info)
 		{
-			if (client.Connected)
+			if (client!=null&&client.Connected)
 			{
 				try
 				{
@@ -79,7 +79,7 @@ namespace SfTcp
 				catch (Exception ex)
 				{
 					Console.WriteLine("Tcp.Send()" + ex.Message);
-					Disconnected.BeginInvoke(this, (x) => { }, null);
+					Disconnected?.BeginInvoke(this, (x) => { }, null);
 					return false;
 				}
 				return true;
@@ -115,7 +115,7 @@ namespace SfTcp
 					}
 					catch (Exception ex)
 					{
-						Disconnected.BeginInvoke(this, (x) => { }, null);
+						Disconnected?.BeginInvoke(this, (x) => { }, null);
 						Console.WriteLine("Tcp.Reciving()" + ex.Message);
 						break;
 					}
@@ -124,7 +124,7 @@ namespace SfTcp
 				else
 				{
 					Console.WriteLine("已断开");
-					Disconnected.BeginInvoke(this, (x) => { }, null);
+					Disconnected?.BeginInvoke(this, (x) => { }, null);
 					break;
 				}
 			}

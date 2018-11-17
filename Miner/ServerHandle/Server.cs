@@ -42,12 +42,10 @@ namespace Miner
 					HdlResult(str);
 				};
 			}
-			public void ExitAftert(string info, int delay = 10000)
+			public void ExitAftert(string info)
 			{
-				Program.setting.threadSetting.Status =info.Length>10? info.Substring(0,10):info;
-				Program.setting.LogInfo(info + "即将结束:" + delay,"主记录");
-				Console.WriteLine("进程已结束,{0}ms后将退出此界面", delay);
-				Thread.Sleep(delay);
+				Program.setting.threadSetting.Status =info;
+				Program.setting.LogInfo(info + "进程关闭","主记录");
 				Program.vpsStatus = Program.VpsStatus.WaitConnect;
 			}
 			private void HdlResult(string info)
@@ -58,27 +56,27 @@ namespace Miner
 				{
 					if (info.Contains("为了您的帐号安全，请登录之后继续访问"))
 					{
-						ExitAftert("需登录 失败", 1000);
+						ExitAftert("需登录 失败");
 					}
 					else if (info.Contains("请输入验证码"))
 					{
-						ExitAftert("需验证码 失败", 1000);
+						ExitAftert("需验证码 失败");
 					}
 					else if (info.Contains("系统繁忙"))
 					{
-						ExitAftert("系统繁忙 失败", 1000);
+						ExitAftert("系统繁忙 失败");
 					}
 					else if (info.Contains("该服务器已被合服"))
 					{
-						ExitAftert("已合服 失败", 5000);
+						ExitAftert("已合服");
 					}
 					else if (info.Contains("请输入正确的服务器名称"))
 					{
-						ExitAftert("服务器名称无效 失败", 5000);
+						ExitAftert("服务器名称无效");
 					}
 					else
 					{
-						ExitAftert("加载页面失败.", 1000);
+						ExitAftert("加载页面失败.");
 						Logger.SysLog(info + "\n\n\n\n\n", "PageRaw");
 					}
 					return;
