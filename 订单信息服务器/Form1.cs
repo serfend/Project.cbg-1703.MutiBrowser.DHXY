@@ -117,7 +117,9 @@ namespace 订单信息服务器
 								targetItem.SubItems[0].Text = HttpUtil.GetElementInItem(InnerInfo,"clientName");
 								if (s.clientName == "..." && InnerInfo.Contains("<AskForSynInit>"))//首次初始化时尝试发送vps终端初始化
 								{
-									BuildNewTaskToVps(s);
+									BuildNewTaskToVps(s,out string taskTitle);
+									targetItem.SubItems[5].Text = taskTitle;
+									SynLstTask();
 								}
 								s.clientName = InnerInfo;
 							}
@@ -156,6 +158,10 @@ namespace 订单信息服务器
 							{
 								targetItem.SubItems[3].Text = InnerInfo;
 							}
+							else if (x.Contains("newCheckBill"))
+							{
+								AppendLog("订单" + InnerInfo);
+							}
 							else
 							{
 								AppendLog("新消息[" + s.clientName + "] " + x + ":" + InnerInfo);
@@ -168,10 +174,13 @@ namespace 订单信息服务器
 				ServerConnected = (x) => {
 					this.Invoke((EventHandler)delegate {
 						AppendLog("已连接:" + x.Ip);
-						var info = new string[5];
+						var info = new string[6];
 						info[1] = x.IsLocal ? "主机" : "终端";
 						info[2] = x.Ip;
 						info[0] = x.clientName;
+						info[3] = "新建状态";
+						info[4] = "等待连接";//延迟
+						info[5] = "暂无";
 						LstConnection.Items.Add(new ListViewItem(info));
 
 						var welcome = new Task(() => {
@@ -196,6 +205,7 @@ namespace 订单信息服务器
 								s.NowNum--;
 							}
 							allocServer.Remove(x.Ip);
+							SynLstTask();
 						}
 					});
 				},
@@ -204,11 +214,25 @@ namespace 订单信息服务器
 				}
 			};
 		}
+
+		private void SynLstTask()
+		{
+			for(int i = 0; i < LstServerQueue.Items.Count; i++)
+			{
+				var item = LstServerQueue.Items[i];
+				var id = item.SubItems[0].Text;
+				if (serverInfoList.ContainsKey(id))
+				{
+					item.SubItems[2].Text = (serverInfoList[id].HdlNum-serverInfoList[id].NowNum).ToString();
+				}
+			}
+		}
+
 		/// <summary>
 		/// 将从任务列表中提取可用任务分配给VPS，VPS断开时撤回
 		/// </summary>
 		/// <param name="s"></param>
-		private void BuildNewTaskToVps(TcpServer s)
+		private void BuildNewTaskToVps(TcpServer s,out string taskTitle)
 		{
 			int singleHdl = 1;
 			try
@@ -224,7 +248,7 @@ namespace 订单信息服务器
 			{
 				IpPerVPShdl.Text = singleHdl.ToString();
 			}
-			string hdlServer = GetFreeServer(singleHdl, s.Ip);
+			string hdlServer = GetFreeServer(singleHdl, s.Ip,out taskTitle);
 			int interval = 1500, timeout = 100000;
 			
 			try
@@ -260,7 +284,7 @@ namespace 订单信息服务器
 				this.Name = name;
 				this.AeroId = aeroId;
 				this.AeroName = aeroName;
-				this.HdlNum = hdlNum;
+				this.HdlNum=this.NowNum = hdlNum;
 			}
 
 			public string Id { get => id; set => id = value; }
@@ -309,7 +333,7 @@ namespace 订单信息服务器
 				serverInfoList.Add(s.Id, s);
 				data[0] = s.Id;//区号
 				data[1] = s.Name;//名称
-				data[2] = s.NowNum.ToString();//已分配
+				data[2] = "0";//已分配
 				data[3] = s.HdlNum.ToString();//需分配
 				LstServerQueue.Items.Add(new ListViewItem(data));
 			}
@@ -365,11 +389,13 @@ namespace 订单信息服务器
 		/// </summary>
 		/// <param name="singleHdl"></param>
 		/// <param name="ip"></param>
+		/// <param name="taskTitle">输出本次所有任务的标题</param>
 		/// <returns></returns>
-		private string GetFreeServer(int singleHdl,string ip)
+		private string GetFreeServer(int singleHdl,string ip,out string taskTitle)
 		{
 			var vps = new VPS("", ip);
 			var taskInfo = new StringBuilder();
+			var tTitle = new StringBuilder();
 			foreach(var s in serverInfoList)
 			{
 				if (singleHdl <= 0) break;
@@ -379,11 +405,18 @@ namespace 订单信息服务器
 					t.NowNum--;
 					singleHdl--;
 					vps.hdlServer.Add(t.Id);
-					if (taskInfo.Length > 0) taskInfo.Append("#");
+					if (taskInfo.Length > 0)
+					{
+						tTitle.Append(",");
+						taskInfo.Append("#");
+					}
 					taskInfo.Append(string.Format("<id>{0}</id><serverName>{1}</serverName><aeroId>{2}</aeroId><aeroName>{3}</aeroName>",t.Id,t.Name,t.AeroId,t.AeroName));
+					tTitle.Append(t.Name);
 				}
 			}
-			if (taskInfo.Length == 0) return "Idle";
+			taskTitle = "Idle";
+			if (taskInfo.Length == 0) return taskTitle;
+			taskTitle = tTitle.ToString();
 			allocServer.Add(vps.Ip,vps);
 			return taskInfo.ToString();
 		}
