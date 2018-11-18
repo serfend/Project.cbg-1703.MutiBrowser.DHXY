@@ -13,3 +13,6 @@
 .vs/多开浏览器子线程/v15/Server/sqlite3/storage.ide-wal
 .vs/多开浏览器子线程/v15/Server/sqlite3/storage.ide-wal
 *.dll
+*.application
+*.dll
+*.manifest

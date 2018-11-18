@@ -33,11 +33,11 @@ namespace Miner
 
 		public void DisRasdial()
 		{
-			CmdRun("Rasdial "+ rasName +" "+ userName +" "+ userPsw);
+			CmdRun("Rasdial " + rasName + " /DISCONNECT");
 		}
 		public void Rasdial()
 		{
-			CmdRun("Rasdial" + rasName + "/ DISCONNECT");
+			CmdRun("Rasdial " + rasName + " " + userName + " " + userPsw);
 		}
 		public void CmdRun(string str)
 		{

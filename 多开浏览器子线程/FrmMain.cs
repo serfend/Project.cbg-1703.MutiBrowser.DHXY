@@ -128,7 +128,7 @@ namespace 多开浏览器子线程
 							this.Focus();
 							this.TopMost = true;
 							this.WindowState = FormWindowState.Normal;
-							this.WebShow.Visible = false;
+							
 							TrySubmitBill(targetUrl);
 							
 						});
@@ -188,7 +188,6 @@ namespace 多开浏览器子线程
 								Program.Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
 								this.Invoke((EventHandler)delegate {
 									Text = ("下单成功 " + url);
-									this.WebShow.Visible = true;
 								});
 							}
 								);
@@ -200,7 +199,6 @@ namespace 多开浏览器子线程
 								this.Invoke((EventHandler)delegate {
 									Program.Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>"+ result+"</client.command>");
 									Text = (result + "\n" + url);
-									this.WebShow.Visible = true;
 								});
 							}
 							);

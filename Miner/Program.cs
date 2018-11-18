@@ -167,8 +167,12 @@ namespace Miner
 					Tcp.Send("reRasdial", "");
 					var p = new CmdRasdial();
 					p.DisRasdial();
-					p.Rasdial();
-					Program.vpsStatus = VpsStatus.WaitConnect;
+					var t = new Task(()=> {
+						Thread.Sleep(1000);
+						p.Rasdial();
+						Program.vpsStatus = VpsStatus.WaitConnect;
+					});
+					t.Start();
 				}
 			};
 			Tcp.Disconnected = (x) => {

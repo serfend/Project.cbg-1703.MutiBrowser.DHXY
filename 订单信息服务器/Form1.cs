@@ -182,6 +182,8 @@ namespace 订单信息服务器
 							else if (x.Contains("reRasdial"))
 							{
 								targetItem.SubItems[3].Text = "VPS重拨号中";
+								var tcp = serverManager[targetItem.SubItems[2].Text];
+								tcp.Disconnect();
 							}
 							else
 							{
@@ -286,6 +288,8 @@ namespace 订单信息服务器
 				}
 			};
 		}
+
+		private Reg regPreviousGood;
 		/// <summary>
 		/// 将新的物品添加到商品列表
 		/// </summary>
@@ -308,6 +312,10 @@ namespace 订单信息服务器
 			var IChengjiu = tmp[6];
 			var ISingleEnergyRate = tmp[7];
 			var BuyUrl = tmp[8];
+
+			var ordersn = HttpUtil.GetElement(BuyUrl, "ordersn=", "&");
+			if (regPreviousGood.GetInfo(ordersn) != "") return;
+			regPreviousGood.SetInfo(ordersn, "exist");
 			LstGoodShow.Items.Add(new ListViewItem(tmp));
 			if (LstGoodShow.Items.Count > 10) LstGoodShow.Items[0].Remove();
 			ManagerHttpBase.FitWebShowTime++;
