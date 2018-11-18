@@ -36,7 +36,7 @@ namespace SfTcp
 		{
 			return new TcpServer((x,InnerInfo, s) => {
 				NormalMessage?.Invoke(s,x,InnerInfo);
-				if (x.Contains("shouldSendToMobile"))
+				if (x.Contains("BrowserClientReport"))
 				{
 					if (InnerInfo.Contains("heartBeat"))
 					{
