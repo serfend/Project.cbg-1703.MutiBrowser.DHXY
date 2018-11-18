@@ -34,11 +34,12 @@ namespace 订单信息服务器
 				return;
 			}
 			var t = new Task(() => {
-
+				
 				waittingFileInfo = x;//记录命令的详细信息
 
 				this.Invoke((EventHandler)delegate { AppendLog("准备向终端" + s.clientName + " 传输文件"); });
 				InitTransferEngine();
+				Thread.Sleep(5000);
 				s.Send("<ensureFileTransfer>" + new Random().Next(0, 1000));
 				transferFileEngine.Connect();//文件发送引擎
 
@@ -125,13 +126,15 @@ namespace 订单信息服务器
 							else if (x.Contains("nameModefied"))
 							{
 								targetItem.SubItems[0].Text = HttpUtil.GetElementInItem(InnerInfo,"clientName");
-								if (s.clientName == "..." && InnerInfo.Contains("<AskForSynInit>"))//首次初始化时尝试发送vps终端初始化
+								bool flag = (s.clientName == "..." && InnerInfo.Contains("<AskForSynInit>"));//首次初始化时尝试发送vps终端初始化
+								
+								s.clientName = targetItem.SubItems[0].Text;
+								if(flag)
 								{
-									BuildNewTaskToVps(s,out string taskTitle);
+									BuildNewTaskToVps(s, out string taskTitle);
 									targetItem.SubItems[5].Text = taskTitle;
 									SynLstTask();
 								}
-								s.clientName = InnerInfo;
 							}
 							else if (x.Contains("InitComplete"))
 							{
@@ -396,6 +399,7 @@ namespace 订单信息服务器
 				data[2] = "0";//已分配
 				data[3] = s.HdlNum.ToString();//需分配
 				data[4] = regServerInfo.GetInfo(s.Id,"启用");
+				s.Enable = (data[4] == "启用");
 				LstServerQueue.Items.Add(new ListViewItem(data));
 			}
 		}
@@ -430,11 +434,10 @@ namespace 订单信息服务器
 		private void InitHistorySettingOnFormctl()
 		{
 			var frmSetting = regSetting.In("Form").In("ServerFormMain");
-			foreach (var ctl in this.Controls)
+			foreach (var ctl in this.TabMain_Setting.Controls)
 			{
 				if(ctl is TextBox t)
 				{
-					if (t.Tag==null || t.Tag.ToString() != "RecordReg") continue;
 					t.Text = frmSetting.GetInfo(t.Name);
 					if (!ctlSaveLoaded)
 					{
@@ -512,27 +515,6 @@ namespace 订单信息服务器
 			}
 		}
 
-		private void CmdServerOn_Click(object sender, EventArgs e)
-		{
-			try
-			{
-				var nowSelect = LstConnection.SelectedItems[0].SubItems[2].Text;
-				var tcp = serverManager[nowSelect];
-				tcp.Send(IpSender.Text);
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(ex.Message);
-			}
-		}
-
-		private void LstGoodShow_DoubleClick(object sender, EventArgs e)
-		{
-			var target = LstGoodShow.SelectedItems[0];
-			var targetUrl = target.SubItems[9].Text;
-			Clipboard.SetText(targetUrl);
-			SendCmdToBrowserClient(target.SubItems[0].Text,$"<showWeb><targetUrl>{targetUrl}</targetUrl></showWeb>");
-		}
 
 		private void CmdDisconnect_Click(object sender, EventArgs e)
 		{
@@ -584,6 +566,28 @@ namespace 订单信息服务器
 				LstServerQueue.SelectedItems[0].SubItems[4].Text = "启用";
 			}
 			regServerInfo.SetInfo(LstServerQueue.SelectedItems[0].SubItems[0].Text, LstServerQueue.SelectedItems[0].SubItems[4].Text);
+		}
+
+		private void LstGoodShow_DoubleClick_1(object sender, EventArgs e)
+		{
+			var target = LstGoodShow.SelectedItems[0];
+			var targetUrl = target.SubItems[8].Text;
+			Clipboard.SetText(targetUrl);
+			SendCmdToBrowserClient(target.SubItems[0].Text, $"<showWeb><targetUrl>{targetUrl}</targetUrl></showWeb>");
+		}
+
+		private void CmdServerOn_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				var nowSelect = LstConnection.SelectedItems[0].SubItems[2].Text;
+				var tcp = serverManager[nowSelect];
+				tcp.Send(IpSender.Text);
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
 		}
 	}
 }

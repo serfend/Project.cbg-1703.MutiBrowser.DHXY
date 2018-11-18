@@ -57,7 +57,7 @@ namespace 多开浏览器子线程
 				this.Close();
 			}
 			Program.Tcp.RecieveMessage += ReceiveMessage;
-			Program.Tcp.Send("clientConnect", $"<browserInit>{CCmd.GetWebInfo("server")}</browserInit>");
+			Program.Tcp.Send("clientConnect", $"<browserInit>{CCmd.GetWebInfo("name")}</browserInit>");
 
 			ThreadMonitor.Start();
 
@@ -75,6 +75,8 @@ namespace 多开浏览器子线程
 			}else if (info.Contains("<showWeb>"))
 			{
 				var targetUrl = HttpUtil.GetElementInItem(info, "targetUrl");
+				price = "999";
+				assumePrice = "0";
 				CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
 			}
 		}
@@ -290,7 +292,7 @@ namespace 多开浏览器子线程
 					else if (canSubmit)
 					{
 						LbShowStatus.Text += ",自动提交";
-						//WebShow.Document.GetElementById("equip_info").InvokeMember("submit");
+						WebShow.Document.GetElementById("equip_info").InvokeMember("submit");
 					}
 					else
 					{

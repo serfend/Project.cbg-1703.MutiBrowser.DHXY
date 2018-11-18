@@ -12,7 +12,7 @@
          <Members>
           <Member Name="#.ctor()" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
            <Messages>
-            <Message TypeName="DoNotCallOverridableMethodsInConstructors" Category="Microsoft.Usage" CheckId="CA2214" Status="ExcludedInSource" Created="2018-11-18 05:18:56Z" FixCategory="NonBreaking">
+            <Message TypeName="DoNotCallOverridableMethodsInConstructors" Category="Microsoft.Usage" CheckId="CA2214" Status="ExcludedInSource" Created="2018-11-18 06:39:12Z" FixCategory="NonBreaking">
              <Issue Certainty="95" Level="CriticalWarning" Path="D:\aserfend\workSpace\repos\util\httpclient" File="HttpClient.cs" Line="28">'HttpApi.HttpApi()' 包含调用链，该调用链导致调用此类所定义的虚方法。请检查以下调用堆栈，看是否有意外结果: &#xD;&#xA;&#xD;&#xA;HttpApi..ctor()&#xD;&#xA;WinHttpRequestClass.add_OnError(IWinHttpRequestEvents_OnErrorEventHandler):Void。</Issue>
              <Issue Certainty="95" Level="CriticalWarning" Path="D:\aserfend\workSpace\repos\util\httpclient" File="HttpClient.cs" Line="28">'HttpApi.HttpApi()' 包含调用链，该调用链导致调用此类所定义的虚方法。请检查以下调用堆栈，看是否有意外结果: &#xD;&#xA;&#xD;&#xA;HttpApi..ctor()&#xD;&#xA;WinHttpRequestClass.add_OnError(IWinHttpRequestEvents_OnErrorEventHandler):Void&#xD;&#xA;WinHttpRequestClass.add_OnResponseFinished(IWinHttpRequestEvents_OnResponseFinishedEventHandler):Void。</Issue>
             </Message>
@@ -20,7 +20,7 @@
           </Member>
           <Member Name="#.ctor(System.Boolean,System.String)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
            <Messages>
-            <Message TypeName="DoNotCallOverridableMethodsInConstructors" Category="Microsoft.Usage" CheckId="CA2214" Status="ExcludedInSource" Created="2018-11-18 05:18:56Z" FixCategory="NonBreaking">
+            <Message TypeName="DoNotCallOverridableMethodsInConstructors" Category="Microsoft.Usage" CheckId="CA2214" Status="ExcludedInSource" Created="2018-11-18 06:39:12Z" FixCategory="NonBreaking">
              <Issue Certainty="95" Level="CriticalWarning" Path="D:\aserfend\workSpace\repos\util\httpclient" File="HttpClient.cs" Line="33">'HttpApi.HttpApi(bool, string)' 包含调用链，该调用链导致调用此类所定义的虚方法。请检查以下调用堆栈，看是否有意外结果: &#xD;&#xA;&#xD;&#xA;HttpApi..ctor(Boolean, String)&#xD;&#xA;WinHttpRequestClass.SetProxy(Int32, Object, Object):Void。</Issue>
             </Message>
            </Messages>
@@ -35,16 +35,16 @@
          <Members>
           <Member Name="#InternetGetCookieEx(System.String,System.String,System.Text.StringBuilder,System.Int32&amp;,System.Int32,System.IntPtr)" Kind="Method" Static="True" Accessibility="Private" ExternallyVisible="False">
            <Messages>
-            <Message TypeName="MovePInvokesToNativeMethodsClass" Category="Microsoft.Design" CheckId="CA1060" Status="ExcludedInSource" Created="2018-11-18 05:18:56Z" FixCategory="Breaking">
+            <Message TypeName="MovePInvokesToNativeMethodsClass" Category="Microsoft.Design" CheckId="CA1060" Status="ExcludedInSource" Created="2018-11-18 06:39:12Z" FixCategory="Breaking">
              <Issue Certainty="95" Level="CriticalWarning">由于是 P/Invoke 方法，因此，应在名为 NativeMethods、SafeNativeMethods 或 UnsafeNativeMethods 的类中定义 'CookieReader.InternetGetCookieEx(string, string, StringBuilder, ref int, int, IntPtr)'。</Issue>
             </Message>
-            <Message Id="0" TypeName="SpecifyMarshalingForPInvokeStringArguments" Category="Microsoft.Globalization" CheckId="CA2101" Status="ExcludedInSource" Created="2018-11-18 05:18:56Z" FixCategory="NonBreaking">
+            <Message Id="0" TypeName="SpecifyMarshalingForPInvokeStringArguments" Category="Microsoft.Globalization" CheckId="CA2101" Status="ExcludedInSource" Created="2018-11-18 06:39:12Z" FixCategory="NonBreaking">
              <Issue Name="ParameterImplicitAnsi" Certainty="75" Level="Error">为了降低安全风险，请将参数 'url' 封送为 Unicode，方法是将 DllImport.CharSet 设置为 CharSet.Unicode，或者将该参数显式封送为 UnmanagedType.LPWStr。如果您需要将该字符串封送为 ANSI 或者与系统相关的编码，请显式指定 MarshalAs，并设置 BestFitMapping=false；为了提高安全性，还应设置 ThrowOnUnmappableChar=true。</Issue>
             </Message>
-            <Message Id="1" TypeName="SpecifyMarshalingForPInvokeStringArguments" Category="Microsoft.Globalization" CheckId="CA2101" Status="ExcludedInSource" Created="2018-11-18 05:18:56Z" FixCategory="NonBreaking">
+            <Message Id="1" TypeName="SpecifyMarshalingForPInvokeStringArguments" Category="Microsoft.Globalization" CheckId="CA2101" Status="ExcludedInSource" Created="2018-11-18 06:39:12Z" FixCategory="NonBreaking">
              <Issue Name="ParameterImplicitAnsi" Certainty="75" Level="Error">为了降低安全风险，请将参数 'cookieName' 封送为 Unicode，方法是将 DllImport.CharSet 设置为 CharSet.Unicode，或者将该参数显式封送为 UnmanagedType.LPWStr。如果您需要将该字符串封送为 ANSI 或者与系统相关的编码，请显式指定 MarshalAs，并设置 BestFitMapping=false；为了提高安全性，还应设置 ThrowOnUnmappableChar=true。</Issue>
             </Message>
-            <Message Id="2" TypeName="SpecifyMarshalingForPInvokeStringArguments" Category="Microsoft.Globalization" CheckId="CA2101" Status="ExcludedInSource" Created="2018-11-18 05:18:56Z" FixCategory="NonBreaking">
+            <Message Id="2" TypeName="SpecifyMarshalingForPInvokeStringArguments" Category="Microsoft.Globalization" CheckId="CA2101" Status="ExcludedInSource" Created="2018-11-18 06:39:12Z" FixCategory="NonBreaking">
              <Issue Name="ParameterImplicitAnsi" Certainty="75" Level="Error">为了降低安全风险，请将参数 'cookieData' 封送为 Unicode，方法是将 DllImport.CharSet 设置为 CharSet.Unicode，或者将该参数显式封送为 UnmanagedType.LPWStr。如果您需要将该字符串封送为 ANSI 或者与系统相关的编码，请显式指定 MarshalAs，并设置 BestFitMapping=false；为了提高安全性，还应设置 ThrowOnUnmappableChar=true。</Issue>
             </Message>
            </Messages>
@@ -59,7 +59,7 @@
          <Members>
           <Member Name="#.ctor()" Kind="Method" Static="False" Accessibility="Assembly" ExternallyVisible="False">
            <Messages>
-            <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="ExcludedInSource" Created="2018-11-18 05:18:56Z" FixCategory="NonBreaking" LastSeen="0001-01-01 00:00:00Z" />
+            <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="ExcludedInSource" Created="2018-11-18 06:39:12Z" FixCategory="NonBreaking" LastSeen="0001-01-01 00:00:00Z" />
            </Messages>
           </Member>
          </Members>

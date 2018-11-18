@@ -32,6 +32,7 @@
 		{
 			this.TabMain = new System.Windows.Forms.TabControl();
 			this.TabMain_VpsManager = new System.Windows.Forms.TabPage();
+			this.CmdRedial = new System.Windows.Forms.Button();
 			this.LstGoodShow = new System.Windows.Forms.ListView();
 			this.GoodShowServer = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.GoodShowName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -48,6 +49,7 @@
 			this.serverTask_Name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.serverTask_Handled = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.serverTask_Num = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.serverTask_Enable = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.IpSender = new System.Windows.Forms.TextBox();
 			this.CmdDisconnect = new System.Windows.Forms.Button();
 			this.CmdServerOn = new System.Windows.Forms.Button();
@@ -70,8 +72,6 @@
 			this.IpTaskTimeOut = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.IpTaskInterval = new System.Windows.Forms.TextBox();
-			this.CmdRedial = new System.Windows.Forms.Button();
-			this.serverTask_Enable = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TabMain.SuspendLayout();
 			this.TabMain_VpsManager.SuspendLayout();
 			this.TabMain_Setting.SuspendLayout();
@@ -107,6 +107,16 @@
 			this.TabMain_VpsManager.Text = "终端管理";
 			this.TabMain_VpsManager.UseVisualStyleBackColor = true;
 			// 
+			// CmdRedial
+			// 
+			this.CmdRedial.Location = new System.Drawing.Point(221, 690);
+			this.CmdRedial.Name = "CmdRedial";
+			this.CmdRedial.Size = new System.Drawing.Size(106, 21);
+			this.CmdRedial.TabIndex = 37;
+			this.CmdRedial.Text = "重新拨号(vps)";
+			this.CmdRedial.UseVisualStyleBackColor = true;
+			this.CmdRedial.Click += new System.EventHandler(this.CmdRedial_Click);
+			// 
 			// LstGoodShow
 			// 
 			this.LstGoodShow.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -127,6 +137,7 @@
 			this.LstGoodShow.TabIndex = 36;
 			this.LstGoodShow.UseCompatibleStateImageBehavior = false;
 			this.LstGoodShow.View = System.Windows.Forms.View.Details;
+			this.LstGoodShow.DoubleClick += new System.EventHandler(this.LstGoodShow_DoubleClick_1);
 			// 
 			// GoodShowServer
 			// 
@@ -211,6 +222,10 @@
 			// 
 			this.serverTask_Num.Text = "需分配量";
 			// 
+			// serverTask_Enable
+			// 
+			this.serverTask_Enable.Text = "状态";
+			// 
 			// IpSender
 			// 
 			this.IpSender.Location = new System.Drawing.Point(4, 663);
@@ -236,6 +251,7 @@
 			this.CmdServerOn.TabIndex = 23;
 			this.CmdServerOn.Text = "发送";
 			this.CmdServerOn.UseVisualStyleBackColor = true;
+			this.CmdServerOn.Click += new System.EventHandler(this.CmdServerOn_Click);
 			// 
 			// OpLog
 			// 
@@ -398,20 +414,6 @@
 			this.IpTaskInterval.Size = new System.Drawing.Size(108, 21);
 			this.IpTaskInterval.TabIndex = 36;
 			this.IpTaskInterval.Tag = "RecordReg";
-			// 
-			// CmdRedial
-			// 
-			this.CmdRedial.Location = new System.Drawing.Point(221, 690);
-			this.CmdRedial.Name = "CmdRedial";
-			this.CmdRedial.Size = new System.Drawing.Size(106, 21);
-			this.CmdRedial.TabIndex = 37;
-			this.CmdRedial.Text = "重新拨号(vps)";
-			this.CmdRedial.UseVisualStyleBackColor = true;
-			this.CmdRedial.Click += new System.EventHandler(this.CmdRedial_Click);
-			// 
-			// serverTask_Enable
-			// 
-			this.serverTask_Enable.Text = "状态";
 			// 
 			// Form1
 			// 
