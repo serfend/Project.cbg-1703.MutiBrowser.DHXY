@@ -130,7 +130,6 @@
             this.GoodShowFamilyRank,
             this.GoodShowBuyUrl});
 			this.LstGoodShow.FullRowSelect = true;
-			this.LstGoodShow.LabelEdit = true;
 			this.LstGoodShow.Location = new System.Drawing.Point(4, 730);
 			this.LstGoodShow.Name = "LstGoodShow";
 			this.LstGoodShow.Size = new System.Drawing.Size(901, 224);

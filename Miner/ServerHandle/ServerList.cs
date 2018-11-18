@@ -119,7 +119,7 @@ namespace Miner
 				{
 					var t = new Task(() => {
 						var targetUrl = Program.InnerTargetUrl;
-						if (targetUrl==null||targetUrl.Length == 0) return;
+						if (targetUrl==null||targetUrl.Length == 0|| targetUrl=="null") return;
 						var targetResult=http.GetAsync(targetUrl);
 						var myResponseStream = targetResult.Result.Content.ReadAsStreamAsync().Result;
 					});

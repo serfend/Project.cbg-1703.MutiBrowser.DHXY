@@ -53,7 +53,7 @@ namespace 订单信息服务器
 				transferFileEngine.Dispose();
 				transferFileEngine = null;
 			}
-			transferFileEngine = new TransferFileEngine(TcpFiletransfer.TcpTransferEngine.Connections.Connection.EngineModel.AsServer, "", 8010);
+			transferFileEngine = new TransferFileEngine(TcpFiletransfer.TcpTransferEngine.Connections.Connection.EngineModel.AsServer, "any", 8010);
 			transferFileEngine.Connection.ConnectToClient += (x, xx) =>
 			{
 				if (xx.Result == File_Transfer.Model.ReceiverFiles.ReceiveResult.RequestAccepted)
@@ -194,7 +194,7 @@ namespace 订单信息服务器
 				},
 				ServerConnected = (x) => {
 					this.Invoke((EventHandler)delegate {
-						AppendLog("已连接:" + x.Ip);
+						//AppendLog("已连接:" + x.Ip);
 						var info = new string[6];
 						info[1] = x.IsLocal ? "主机" : "终端";
 						info[2] = x.Ip;
@@ -213,7 +213,7 @@ namespace 订单信息服务器
 				},
 				ServerDisconnected = (x) => {
 					this.Invoke((EventHandler)delegate {
-						AppendLog("已断开:" + x.Ip);
+						//AppendLog("已断开:" + x.Ip);
 						for (int i = 0; i < LstConnection.Items.Count; i++)
 							if (LstConnection.Items[i].SubItems[2].Text == x.Ip)
 								LstConnection.Items.RemoveAt(i);
@@ -230,12 +230,68 @@ namespace 订单信息服务器
 					});
 				},
 				HttpRequest = (x, s) => {
-					s.Response(string.Format("<h1>Hey,测试服务器已开启</h1><br><p>当前连接数:{0}</p>", LstConnection.Items.Count));
+					var cst = new StringBuilder();
+					cst.AppendLine($"<h1>Hey,测试服务器已开启</h1><br><p>当前连接数:{LstConnection.Items.Count }</p>");
+					cst.AppendLine($"<p>request: {x.Param}</p>");
+					var checkIfHaveValue = x.Param.IndexOf(':') ;
+					string requestPage, requestParam;
+					if (checkIfHaveValue > 0)
+					{
+						requestPage = x.Param.Substring(0, checkIfHaveValue);
+						requestParam = x.Param.Substring(checkIfHaveValue + 1);
+					}
+					else
+					{
+						requestPage=x.Param;
+						requestParam = string.Empty;
+					}
+					switch (requestPage)
+					{
+						case "Status": {
+								this.Invoke((EventHandler)delegate {
+									var clientNum = this.LstConnection.Items.Count;
+									var columnsNum = LstConnection.Columns.Count;
+									cst.AppendLine($"<p>当前状态共有{clientNum}个连接</p><br>");
+									cst.AppendLine($"打开网页次数: 手动:{ManagerHttpBase.UserWebShowTime}  自动:{ManagerHttpBase.FitWebShowTime}<br>");
+									cst.AppendLine($"profit:{ManagerHttpBase.RecordMoneyGet}  times:{ManagerHttpBase.RecordMoneyGetTime}");
+									cst.AppendLine("<table border=\"1\">");
+									cst.AppendLine("<tr>");
+									for (int i = 0; i < columnsNum; i++)
+										cst.Append($"<th>{LstConnection.Columns[i].Text}</th>");
+
+									cst.AppendLine("</tr>");
+									for (int i = 0; i < clientNum; i++)
+									{
+										cst.AppendLine("<tr>");
+										for (int j = 0; j < columnsNum; j++) cst.Append($"<td>{LstConnection.Items[i].SubItems[j].Text}</td>");
+										cst.AppendLine("</tr>");
+									}
+									cst.Append("</table>");
+									
+								});
+								break;
+							}
+						case "targetUrl":{
+								var nowTargetUrl = ManagerHttpBase.TargetUrl;
+								if (checkIfHaveValue > 0)
+								{
+									ManagerHttpBase.TargetUrl = requestParam;
+								}
+								cst.AppendLine($"targetPrevious: {nowTargetUrl}");
+								cst.AppendLine($"targetNew: {ManagerHttpBase.TargetUrl}");
+								break;
+							}
+					}
+					s.Response(cst.ToString() );
 				}
 			};
 		}
-
-		private void HdlNewCheckBill(string sender,string InnerInfo)
+		/// <summary>
+		/// 将新的物品添加到商品列表
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="InnerInfo"></param>
+		private void HdlNewCheckBill(string sender, string InnerInfo)
 		{
 			var tmp = InnerInfo.Split(new string[] { "##" }, StringSplitOptions.None);
 			if (tmp.Length < 9)
@@ -253,7 +309,20 @@ namespace 订单信息服务器
 			var ISingleEnergyRate = tmp[7];
 			var BuyUrl = tmp[8];
 			LstGoodShow.Items.Add(new ListViewItem(tmp));
-			if (LstGoodShow.Items.Count > 10) LstGoodShow.Items[9].Remove();
+			if (LstGoodShow.Items.Count > 10) LstGoodShow.Items[0].Remove();
+			ManagerHttpBase.FitWebShowTime++;
+			var price = priceInfo.Split('/');
+			if (price.Length == 2)
+			{
+				var priceNum = Convert.ToDouble(price[0]);
+				var priceNumAssume = Convert.ToDouble(price[1]);
+				if (priceNum < priceNumAssume)
+				{
+					var earnNum = priceNumAssume - priceNum;
+					ManagerHttpBase.RecordMoneyGet += earnNum;
+					ManagerHttpBase.RecordMoneyGetTime++;
+				}
+			}
 			SendCmdToBrowserClient(serverName, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceInfo}</price>");
 		}
 		/// <summary>
@@ -328,7 +397,7 @@ namespace 订单信息服务器
 			{
 				IpTaskInterval.Text = interval.ToString();
 			}
-			s.Send(string.Format("<SynInit><interval>{0}</interval><task>{1}</task><timeout>{2}</timeout></SynInit>", interval, hdlServer, timeout));
+			s.Send(string.Format("<SynInit><interval>{0}</interval><task>{1}</task><timeout>{2}</timeout></SynInit><InnerTargetUrl>{3}</InnerTargetUrl>", interval, hdlServer, timeout, ManagerHttpBase.TargetUrl));
 		}
 		private class HdlServerInfo
 		{
@@ -573,6 +642,7 @@ namespace 订单信息服务器
 			var target = LstGoodShow.SelectedItems[0];
 			var targetUrl = target.SubItems[8].Text;
 			Clipboard.SetText(targetUrl);
+			ManagerHttpBase.UserWebShowTime++;
 			SendCmdToBrowserClient(target.SubItems[0].Text, $"<showWeb><targetUrl>{targetUrl}</targetUrl></showWeb>");
 		}
 

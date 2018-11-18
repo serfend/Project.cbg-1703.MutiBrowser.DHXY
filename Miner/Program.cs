@@ -42,10 +42,10 @@ namespace Miner
 		private static int disconnectTime=10;
 		private static int idleTime = 30;
 
-		public static string TcpMainTubeIp= "1s68948k74.imwork.net";
-		public static int TcpMainTubePort= 16397;
-		public static string TcpFileTubeIp= "1s68948k74.imwork.net";
-		public static int TcpFileTubePort=30712;
+		public static string TcpMainTubeIp= "2y155s0805.51mypc.cn";
+		public static int TcpMainTubePort= 12895;
+		public static string TcpFileTubeIp= "2y155s0805.51mypc.cn";
+		public static int TcpFileTubePort= 15514;
 		[STAThreadAttribute]
 		static void Main(string[] args)
 		{
@@ -187,7 +187,7 @@ namespace Miner
 		private static void TranslateFileStart()
 		{
 			Logger.SysLog("准备接收文件", "主记录");
-			var fileEngine = new TransferFileEngine(TcpFiletransfer.TcpTransferEngine.Connections.Connection.EngineModel.AsClient, "1s68948k74.imwork.net", 30712);
+			var fileEngine = new TransferFileEngine(TcpFiletransfer.TcpTransferEngine.Connections.Connection.EngineModel.AsClient,TcpFileTubeIp, TcpFileTubePort);
 			fileEngine.Connection.ConnectedToServer += (xs, xxx) => {
 				if (xxx.Success)
 				{
