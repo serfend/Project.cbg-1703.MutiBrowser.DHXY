@@ -40,6 +40,7 @@ namespace Miner
 		}
 		public static VpsStatus vpsStatus =0;
 		private static int disconnectTime=10;
+		private static int idleTime = 30;
 
 		public static string TcpMainTubeIp= "1s68948k74.imwork.net";
 		public static int TcpMainTubePort= 16397;
@@ -63,6 +64,7 @@ namespace Miner
 			}
 				
 			rootReg = new Reg("sfMinerDigger");
+			clientId = rootReg.In("Main").In("Setting");
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 			int systemBegin = Environment.TickCount;
 			Logger.OnLog += (x, xx) => { Console.WriteLine(xx.LogInfo); };
@@ -87,6 +89,15 @@ namespace Miner
 								
 								break;
 							}
+						case VpsStatus.Idle:
+							{
+								if(idleTime--<0 && anyTaskWorking == false)
+								{
+									HelloToServer();
+									idleTime = 30;
+								}
+								break;
+							}
 					}
 				}
 			}
@@ -98,12 +109,10 @@ namespace Miner
 				Thread.Sleep(5000);
 			}
 		}
+		private static Reg clientId;
 		private static void InitTcp()
 		{
-			var clientId = rootReg.In("Main").In("Setting");
-			var vpsName = clientId.GetInfo("VpsClientId", "null");
-			var clientDeviceId = clientId.GetInfo("clientDeviceId",HttpUtil.UUID);
-			clientId.SetInfo("clientDeviceId", clientDeviceId);
+			
 			if (Tcp != null)
 			{
 				Tcp.Dispose();
@@ -166,7 +175,14 @@ namespace Miner
 				Logger.SysLog("与服务器丢失连接", "主记录");
 				Program.vpsStatus = VpsStatus.WaitConnect;
 			};
-			Tcp.Send("clientConnect","<connectCmdRequire>" + vpsName + "</connectCmdRequire><clientDeviceId>"+ clientDeviceId+"</clientDeviceId>");
+			HelloToServer();
+		}
+		private static void HelloToServer()
+		{
+			var vpsName = clientId.GetInfo("VpsClientId", "null");
+			var clientDeviceId = clientId.GetInfo("clientDeviceId", HttpUtil.UUID);
+			clientId.SetInfo("clientDeviceId", clientDeviceId);
+			Tcp.Send("clientConnect", "<connectCmdRequire>" + vpsName + "</connectCmdRequire><clientDeviceId>" + clientDeviceId + "</clientDeviceId>");
 		}
 		private static void TranslateFileStart()
 		{

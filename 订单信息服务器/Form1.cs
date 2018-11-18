@@ -118,7 +118,7 @@ namespace 订单信息服务器
 									targetItem.SubItems[3].Text = "初始化";
 									targetItem.SubItems[0].Text = HttpUtil.GetElementInItem(InnerInfo, "connectCmdRequire");
 									s.ID = HttpUtil.GetElementInItem(InnerInfo, "clientDeviceId");
-									var clientName = regSetting.In(s.ID).GetInfo("clientName", targetItem.SubItems[0].Text);
+									var clientName = regSettingVps.In(s.ID).GetInfo("clientName", targetItem.SubItems[0].Text);
 									s.Send(string.Format("<setClientName>{0}</setClientName>", clientName));//用于确认当前名称并初始化
 								}
 							}
@@ -197,7 +197,7 @@ namespace 订单信息服务器
 						info[2] = x.Ip;
 						info[0] = x.clientName;
 						info[3] = "新建状态";
-						info[4] = "等待连接";//延迟
+						info[4] = "未开始采集";//延迟
 						info[5] = "暂无";
 						LstConnection.Items.Add(new ListViewItem(info));
 
@@ -219,8 +219,7 @@ namespace 订单信息服务器
 							var vps = allocServer[x.Ip];
 							foreach(var server in vps.hdlServer)
 							{
-								var s = serverInfoList[server];
-								s.NowNum--;
+								serverInfoList[server].NowNum++;
 							}
 							allocServer.Remove(x.Ip);
 							SynLstTask();
@@ -250,12 +249,15 @@ namespace 订单信息服务器
 			var IChengjiu = tmp[6];
 			var ISingleEnergyRate = tmp[7];
 			var BuyUrl = tmp[8];
-			var data = new string[8];
-			for (int i = 1; i <= data.Length; i++) data[i-1] = tmp[i];
-			LstGoodShow.Items.Add(new ListViewItem(data));
+			LstGoodShow.Items.Add(new ListViewItem(tmp));
 			if (LstGoodShow.Items.Count > 10) LstGoodShow.Items[9].Remove();
 			SendCmdToBrowserClient(serverName, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceInfo}</price>");
 		}
+		/// <summary>
+		/// 将订单信息发送至下单服务器
+		/// </summary>
+		/// <param name="serverName"></param>
+		/// <param name="cmdInfo"></param>
 		private void SendCmdToBrowserClient(string serverName, string cmdInfo)
 		{
 			if (!BrowserIp.ContainsKey(serverName))
@@ -325,7 +327,7 @@ namespace 订单信息服务器
 			}
 			s.Send(string.Format("<SynInit><interval>{0}</interval><task>{1}</task><timeout>{2}</timeout></SynInit>", interval, hdlServer, timeout));
 		}
-		private struct HdlServerInfo
+		private class HdlServerInfo
 		{
 			string id;
 			string name;
@@ -333,8 +335,8 @@ namespace 订单信息服务器
 			string aeroName;
 			int hdlNum;
 			int nowNum;
-
-			public HdlServerInfo(string id, string name, string aeroId, string aeroName, int hdlNum) : this()
+			bool enable;
+			public HdlServerInfo(string id, string name, string aeroId, string aeroName, int hdlNum) 
 			{
 				this.Id = id;
 				this.Name = name;
@@ -349,14 +351,15 @@ namespace 订单信息服务器
 			public string AeroName { get => aeroName; set => aeroName = value; }
 			public int HdlNum { get => hdlNum; set => hdlNum = value; }
 			public int NowNum { get => nowNum; set => nowNum = value; }
+			public bool Enable { get => enable; set => enable = value; }
 		}
-		private struct VPS
+		private class VPS
 		{
 			string name;
 			string ip;
 			public List<string> hdlServer;
 
-			public VPS(string name, string ip) : this()
+			public VPS(string name, string ip) 
 			{
 				this.Name = name;
 				this.Ip = ip;
@@ -366,6 +369,7 @@ namespace 订单信息服务器
 			public string Name { get => name; set => name = value; }
 			public string Ip { get => ip; set => ip = value; }
 		}
+		private Reg regServerInfo;
 		private Dictionary<string, HdlServerInfo> serverInfoList=new Dictionary<string, HdlServerInfo>();
 		private Dictionary<string, VPS> allocServer=new Dictionary<string, VPS>();//以ip对应终端
 		private void InitServerTaskList()
@@ -374,7 +378,7 @@ namespace 订单信息服务器
 			foreach(var server in serverInfo)
 			{
 				var info = server.Split(',');
-				var data = new string[4];
+				var data = new string[5];
 				if (info.Length < 4) {
 					AppendLog("【警告】无效的区信息:" + server);
 					continue;
@@ -391,6 +395,7 @@ namespace 订单信息服务器
 				data[1] = s.Name;//名称
 				data[2] = "0";//已分配
 				data[3] = s.HdlNum.ToString();//需分配
+				data[4] = regServerInfo.GetInfo(s.Id,"启用");
 				LstServerQueue.Items.Add(new ListViewItem(data));
 			}
 		}
@@ -407,9 +412,12 @@ namespace 订单信息服务器
 		}
 		
 		private Reg regSetting;
+		private Reg regSettingVps;
 		public Form1()
 		{
-			regSetting = new Reg("sfMinerDigger").In("Setting").In("vps");
+			regSetting = new Reg("sfMinerDigger").In("Setting");
+			regSettingVps = regSetting.In("vps");
+			regServerInfo = regSetting.In("ServerInfo");
 			InitializeComponent();
 			InitHistorySettingOnFormctl();
 			InitTransferEngine();
@@ -421,7 +429,7 @@ namespace 订单信息服务器
 		private bool ctlSaveLoaded = false;
 		private void InitHistorySettingOnFormctl()
 		{
-			var frmSetting = new Reg("sfMinerDigger").In("Setting").In("Form").In("ServerFormMain");
+			var frmSetting = regSetting.In("Form").In("ServerFormMain");
 			foreach (var ctl in this.Controls)
 			{
 				if(ctl is TextBox t)
@@ -455,7 +463,7 @@ namespace 订单信息服务器
 			foreach(var s in serverInfoList)
 			{
 				if (singleHdl <= 0) break;
-				if (s.Value.NowNum < s.Value.HdlNum)
+				if (s.Value.NowNum >0 && s.Value.Enable)
 				{
 					var t = s.Value;
 					t.NowNum--;
@@ -484,7 +492,7 @@ namespace 订单信息服务器
 				var ip = LstConnection.Items[e.Item].SubItems[2].Text;
 				TcpServer target = serverManager[ip];
 				var clientName = e.Label;
-				regSetting.In(target.ID).SetInfo("clientName", clientName);
+				regSettingVps.In(target.ID).SetInfo("clientName", clientName);
 				target.Send(string.Format("<setClientName>{0}</setClientName>", clientName));
 			}
 			catch (Exception ex)
@@ -524,6 +532,58 @@ namespace 订单信息服务器
 			var targetUrl = target.SubItems[9].Text;
 			Clipboard.SetText(targetUrl);
 			SendCmdToBrowserClient(target.SubItems[0].Text,$"<showWeb><targetUrl>{targetUrl}</targetUrl></showWeb>");
+		}
+
+		private void CmdDisconnect_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				var nowSelect = LstConnection.SelectedItems[0].SubItems[2].Text;
+				var tcp = serverManager[nowSelect];
+				tcp.Disconnect();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
+		}
+
+		private void CmdRedial_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if(LstConnection.SelectedItems[0].SubItems[1].Text != "vps")
+				{
+					MessageBox.Show("仅VPS终端支持重新拨号");
+					return;
+				}
+				var nowSelect = LstConnection.SelectedItems[0].SubItems[2].Text;
+				var tcp = serverManager[nowSelect];
+				tcp.Send("<reRasdial>");
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
+		}
+		/// <summary>
+		/// 切换启用状态
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void LstServerQueue_DoubleClick(object sender, EventArgs e)
+		{
+			if (LstServerQueue.SelectedItems[0].SubItems[4].Text == "启用")
+			{
+				LstServerQueue.SelectedItems[0].SubItems[4].Text = "禁用";
+				serverInfoList[LstServerQueue.SelectedItems[0].SubItems[0].Text].Enable = false;
+			}
+			else
+			{
+				serverInfoList[LstServerQueue.SelectedItems[0].SubItems[0].Text].Enable = true;
+				LstServerQueue.SelectedItems[0].SubItems[4].Text = "启用";
+			}
+			regServerInfo.SetInfo(LstServerQueue.SelectedItems[0].SubItems[0].Text, LstServerQueue.SelectedItems[0].SubItems[4].Text);
 		}
 	}
 }

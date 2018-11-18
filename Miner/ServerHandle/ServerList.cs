@@ -38,6 +38,8 @@ namespace Miner
 					Program.vpsStatus = Program.VpsStatus.WaitConnect;
 					return;
 				}
+
+				if (taskCmd == "Idle") return;
 				var tasks = taskCmd.Split('#');
 				hdlServer = new List<Server>(tasks.Length);
 				foreach (var task in tasks)
@@ -84,7 +86,7 @@ namespace Miner
 				if (hdlServer.Count == 0)
 				{
 					Program.setting.threadSetting.Status = ("无需处理的服务器");
-					Program.vpsStatus = Program.VpsStatus.WaitConnect;
+					Program.vpsStatus = Program.VpsStatus.Idle;
 				}
 				Program.setting.threadSetting.RefreshRunTime(0);
 			}
