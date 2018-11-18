@@ -38,11 +38,16 @@ namespace 多开浏览器子线程
 			this.FormClosing += (x, xx) => { frmClosing = true; RegUtil.SetFormPos(this); };
 			ipWebShowUrl.KeyPress += IpWebShowUrl_KeyPress;
 			ThreadMonitor = new Thread(() => {
+				int heartBeatCount = 0;
 				while (!frmClosing)
 				{
 					Thread.Sleep(200);
 					var cmd = CCmd.GetCmd(out string targetUrl);
 					CheckNewCmd(cmd,targetUrl);
+					if (heartBeatCount > 1000)
+					{
+						Program.Tcp.Send("heartBeat", "");
+					}
 				}
 			}) { IsBackground = true };
 
@@ -169,7 +174,7 @@ namespace 多开浏览器子线程
 			//未登录=》登录超时，请重新登录！
 			//返回订单信息
 			var cookiesLogin = "sid=" + GetNowLoginCookies();
-			Program.Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><buildBill></buildBill></client.command>");
+			Program.Tcp.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><buildBill></buildBill></client.command>");
 			http.Item.Request.Cookies +=  cookiesLogin;
 			http.GetHtml(url,callBack:(x)=> {
 				var info =x.response.DataString(Encoding.Default);
@@ -185,7 +190,7 @@ namespace 多开浏览器子线程
 								ReNavigateWeb(url);
 							});
 							var t = new Task(() => {
-								Program.Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
+								Program.Tcp.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
 								this.Invoke((EventHandler)delegate {
 									Text = ("下单成功 " + url);
 								});
@@ -197,7 +202,7 @@ namespace 多开浏览器子线程
 						{
 							var t = new Task(() => {
 								this.Invoke((EventHandler)delegate {
-									Program.Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>"+ result+"</client.command>");
+									Program.Tcp.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>"+ result+"</client.command>");
 									Text = (result + "\n" + url);
 								});
 							}
@@ -285,7 +290,7 @@ namespace 多开浏览器子线程
 					{
 						LbShowStatus.Text += ",用户主动提交";
 						WebShow.Document.GetElementById("equip_info").InvokeMember("submit");
-						Program.Tcp.Send("ClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
+						Program.Tcp.Send("BrowserClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
 					}
 					else if (canSubmit)
 					{

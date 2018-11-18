@@ -8,14 +8,20 @@ namespace 多开浏览器子线程
 {
 	static class Program
 	{
-		public static SfTcp.SfTcpClient Tcp = new TcpBrowserClient();
+		public static SfTcp.SfTcpClient Tcp ;
 
+		private static void InitTcp()
+		{
+			Tcp = new TcpBrowserClient();
+			Tcp.Disconnected += (x) => { InitTcp(); };
+		}
 		/// <summary>
 		/// 应用程序的主入口点。
 		/// </summary>
 		[STAThread]
 		static void Main(string[] args)
 		{
+			InitTcp();
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			Init(args);
