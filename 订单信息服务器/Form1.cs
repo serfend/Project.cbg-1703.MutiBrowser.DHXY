@@ -101,7 +101,7 @@ namespace 订单信息服务器
 						{
 							if (x.Contains("heartBeat"))
 							{
-							} else if (x.Contains("RefreshHeartbeat"))
+							} else if (x.Contains("RHB"))
 							{
 								targetItem.SubItems[4].Text = InnerInfo;
 							}
@@ -112,6 +112,7 @@ namespace 订单信息服务器
 									var hdlServerName = HttpUtil.GetElementInItem(InnerInfo, "browserInit");
 									targetItem.SubItems[3].Text = "等待订单";
 									targetItem.SubItems[0].Text = hdlServerName;
+									s.clientName = hdlServerName;
 									BrowserIp[hdlServerName] = s.Ip;
 								}
 								else
@@ -314,16 +315,22 @@ namespace 订单信息服务器
 			var BuyUrl = tmp[8];
 
 			var ordersn = HttpUtil.GetElement(BuyUrl, "ordersn=", "&");
-			if (regPreviousGood.GetInfo(ordersn) != "") return;
-			regPreviousGood.SetInfo(ordersn, "exist");
-			LstGoodShow.Items.Add(new ListViewItem(tmp));
-			if (LstGoodShow.Items.Count > 10) LstGoodShow.Items[0].Remove();
+			var previousRecord = regPreviousGood.GetInfo(ordersn);
+			if (previousRecord != "" && ordersn!="")
+			{
+				AppendLog(previousRecord+"已出现过此订单,"+ serverName);
+				return;
+			}
+			regPreviousGood.SetInfo(ordersn, DateTime.Now.ToString());
+			LstGoodShow.Items.Insert(0,new ListViewItem(tmp));
+			if (LstGoodShow.Items.Count > 10) LstGoodShow.Items[10].Remove();
 			ManagerHttpBase.FitWebShowTime++;
 			var price = priceInfo.Split('/');
+			double priceNum = 0, priceNumAssume = 0;
 			if (price.Length == 2)
 			{
-				var priceNum = Convert.ToDouble(price[0]);
-				var priceNumAssume = Convert.ToDouble(price[1]);
+				priceNum = Convert.ToDouble(price[0]);
+				priceNumAssume = Convert.ToDouble(price[1]);
 				if (priceNum < priceNumAssume)
 				{
 					var earnNum = priceNumAssume - priceNum;
@@ -331,7 +338,7 @@ namespace 订单信息服务器
 					ManagerHttpBase.RecordMoneyGetTime++;
 				}
 			}
-			SendCmdToBrowserClient(serverName, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceInfo}</price>");
+			SendCmdToBrowserClient(serverName, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceNum}</price><assumePrice>{priceNumAssume }</assumePrice>");
 		}
 		/// <summary>
 		/// 将订单信息发送至下单服务器
@@ -499,6 +506,7 @@ namespace 订单信息服务器
 			regSetting = new Reg("sfMinerDigger").In("Setting");
 			regSettingVps = regSetting.In("vps");
 			regServerInfo = regSetting.In("ServerInfo");
+			regPreviousGood = regSetting.In("Goods").In("history");
 			InitializeComponent();
 			InitHistorySettingOnFormctl();
 			InitTransferEngine();

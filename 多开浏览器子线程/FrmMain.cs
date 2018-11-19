@@ -69,19 +69,22 @@ namespace 多开浏览器子线程
 		}
 
 		#region 逻辑
-		private string price, assumePrice;
+		private double price, assumePrice;
 		private void ReceiveMessage(SfTcp.SfTcpClient s,string info){
 			if (info.Contains("<newCheckBill>"))
 			{
+				//<newCheckBill><targetUrl>baidu.com</targetUrl><price>999</price><assumePrice>0</assumePrice></newCheckBill>
 				var targetUrl = HttpUtil.GetElementInItem(info,"targetUrl");
-				price = HttpUtil.GetElementInItem(info, "price");
-				assumePrice = HttpUtil.GetElementInItem(info, "assumePrice");
-				CheckNewCmd(CmdInfo.SubmitBill,targetUrl);
-			}else if (info.Contains("<showWeb>"))
+				price = Convert.ToDouble(HttpUtil.GetElementInItem(info, "price"));
+				assumePrice =Convert.ToDouble( HttpUtil.GetElementInItem(info, "assumePrice"));
+				if (assumePrice > price)
+					CheckNewCmd(CmdInfo.SubmitBill, targetUrl);
+				else CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
+			} else if (info.Contains("<showWeb>"))
 			{
 				var targetUrl = HttpUtil.GetElementInItem(info, "targetUrl");
-				price = "999";
-				assumePrice = "0";
+				price = 999;
+				assumePrice = 0;
 				CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
 			}
 		}
@@ -133,9 +136,7 @@ namespace 多开浏览器子线程
 							this.Focus();
 							this.TopMost = true;
 							this.WindowState = FormWindowState.Normal;
-							
 							TrySubmitBill(targetUrl);
-							
 						});
 						break;
 					}
@@ -186,9 +187,6 @@ namespace 多开浏览器子线程
 						Program.reg.In("Bill").In("record").SetInfo(DateTime.Now.ToString("yyyyMMddhhmmss"), result);
 						if (success)
 						{
-							this.BeginInvoke((EventHandler)delegate {
-								ReNavigateWeb(url);
-							});
 							var t = new Task(() => {
 								Program.Tcp.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
 								this.Invoke((EventHandler)delegate {
@@ -209,6 +207,9 @@ namespace 多开浏览器子线程
 							);
 							t.Start();
 						};
+						this.BeginInvoke((EventHandler)delegate {
+							ReNavigateWeb(url);
+						});
 						Console.WriteLine(result);
 					}, this);
 				});
@@ -250,8 +251,8 @@ namespace 多开浏览器子线程
 			var submitTarget = WebShow.Document.GetElementById("buy_btn");
 			if (submitTarget != null)
 			{
-				if (price==null||price == "") price = "0";if (assumePrice==null|| assumePrice == "") assumePrice = "0";
-				bool canSubmit = Convert.ToDouble(price)<=Convert.ToDouble(assumePrice);
+				
+				bool canSubmit = price<=assumePrice && assumePrice>0;
 				string bidInfo = $"{price}/{assumePrice}";
 				ISPrice.Text = bidInfo;
 				LbShowStatus.Text = "检测到进入预约界面(" + (canSubmit ? "报价符合" : "报价不符") + " " + bidInfo + ")";

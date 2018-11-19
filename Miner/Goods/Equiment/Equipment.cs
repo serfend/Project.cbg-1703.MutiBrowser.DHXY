@@ -23,7 +23,7 @@ namespace Miner.Goods.Equiment
 		private string previousNameDescription="";//当存在【原物品】时有效
 		private bool init = false;
 		private Server.Server server;
-		private static Reg TypeConvertor=new Reg("sfMinerDigger").In("Setting").In("ServerData");
+		private static Reg TypeConvertor=new Reg("sfMinerDigger").In("Main").In("Setting").In("ServerData");
 		/// <summary>
 		/// 通过iType判断匹配装备的名称和描述
 		/// 其中，描述中将会包含装备的 阶数（如果是仙器）

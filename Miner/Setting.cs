@@ -51,14 +51,22 @@ namespace Miner
 				Program.Tcp.Send("Status", contentValue );
 			}
 		}
-
+		private int delaySumCount=0;
+		private int totalDelayTime = 0;
 		public void RefreshRunTime(int interval)
 		{
 			if (interval == 0)
 			{
 				Program.Tcp.Send("heartBeat", "");
-			}else
-			Program.Tcp.Send("RefreshHeartbeat",interval.ToString());
+			}
+			else
+			{
+				if (delaySumCount < 10) delaySumCount++;
+				 totalDelayTime += (interval-totalDelayTime)/ delaySumCount;
+				//记录10次刷新的平均值
+				Program.Tcp.Send("RHB", (totalDelayTime).ToString());
+				
+			}
 		}
 	}
 }

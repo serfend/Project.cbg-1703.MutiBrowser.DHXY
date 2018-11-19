@@ -109,9 +109,9 @@
 			// 
 			// CmdRedial
 			// 
-			this.CmdRedial.Location = new System.Drawing.Point(221, 690);
+			this.CmdRedial.Location = new System.Drawing.Point(290, 690);
 			this.CmdRedial.Name = "CmdRedial";
-			this.CmdRedial.Size = new System.Drawing.Size(106, 21);
+			this.CmdRedial.Size = new System.Drawing.Size(149, 34);
 			this.CmdRedial.TabIndex = 37;
 			this.CmdRedial.Text = "重新拨号(vps)";
 			this.CmdRedial.UseVisualStyleBackColor = true;
@@ -229,14 +229,14 @@
 			// 
 			this.IpSender.Location = new System.Drawing.Point(4, 663);
 			this.IpSender.Name = "IpSender";
-			this.IpSender.Size = new System.Drawing.Size(211, 21);
+			this.IpSender.Size = new System.Drawing.Size(529, 21);
 			this.IpSender.TabIndex = 25;
 			// 
 			// CmdDisconnect
 			// 
-			this.CmdDisconnect.Location = new System.Drawing.Point(221, 663);
+			this.CmdDisconnect.Location = new System.Drawing.Point(109, 690);
 			this.CmdDisconnect.Name = "CmdDisconnect";
-			this.CmdDisconnect.Size = new System.Drawing.Size(106, 21);
+			this.CmdDisconnect.Size = new System.Drawing.Size(175, 34);
 			this.CmdDisconnect.TabIndex = 24;
 			this.CmdDisconnect.Text = "断开连接";
 			this.CmdDisconnect.UseVisualStyleBackColor = true;

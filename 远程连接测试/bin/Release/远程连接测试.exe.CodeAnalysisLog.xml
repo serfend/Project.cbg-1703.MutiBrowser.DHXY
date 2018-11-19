@@ -2,17 +2,17 @@
 <?xml-stylesheet type="text/xsl" href="d:\program files (x86)\microsoft visual studio\2017\enterprise\team tools\static analysis tools\fxcop\Xml\CodeAnalysisReport.xsl"?>
 <FxCopReport Version="15.0">
  <Targets>
-  <Target Name="D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\订单信息服务器\bin\Debug\订单信息服务器.exe">
+  <Target Name="D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\远程连接测试\bin\Release\远程连接测试.exe">
    <Modules>
-    <Module Name="订单信息服务器.exe">
+    <Module Name="远程连接测试.exe">
      <Namespaces>
-      <Namespace Name="订单信息服务器.Properties">
+      <Namespace Name="远程连接测试.Properties">
        <Types>
         <Type Name="Resources" Kind="Class" Accessibility="Assembly" ExternallyVisible="False">
          <Members>
           <Member Name="#.ctor()" Kind="Method" Static="False" Accessibility="Assembly" ExternallyVisible="False">
            <Messages>
-            <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="ExcludedInSource" Created="2018-11-18 13:58:07Z" FixCategory="NonBreaking" LastSeen="0001-01-01 00:00:00Z" />
+            <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="ExcludedInSource" Created="2018-11-19 05:23:36Z" FixCategory="NonBreaking" LastSeen="0001-01-01 00:00:00Z" />
            </Messages>
           </Member>
          </Members>

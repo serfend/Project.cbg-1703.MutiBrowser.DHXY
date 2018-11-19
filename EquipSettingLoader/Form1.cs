@@ -30,7 +30,7 @@ namespace EquipSettingLoader
 			};
 			if (f.ShowDialog() == DialogResult.OK)
 			{
-				var filer = File.ReadAllText(f.FileName,Encoding.Default);
+				var filer = File.ReadAllText(f.FileName,Encoding.Default).Replace("\n","").Replace("\r","").Replace(";","");
 				var files = filer.Split(new string[] { "this." },StringSplitOptions.RemoveEmptyEntries);
 				StringBuilder counter = new StringBuilder();
 				foreach ( var line in files)
@@ -147,8 +147,9 @@ namespace EquipSettingLoader
 								}
 								else
 								{
-									throw new Exception("数据匹配失败");
+									//throw new Exception("数据匹配失败");
 								}
+								break;
 							}
 						case ',':
 							{
@@ -275,12 +276,13 @@ namespace EquipSettingLoader
 				//}
 				using (var fs = new StreamReader(f.FileName, Encoding.Default))
 				{
+					var cst = new StringBuilder();
 					while ((tmpInfo = fs.ReadLine()) != null)
 					{
 						var rawInf = EncryptHelper.AESDecrypt(tmpInfo);
-						OpShowLog.AppendText("\n");
-						OpShowLog.AppendText(rawInf);
+						cst.AppendLine(rawInf);
 					}
+					OpShowLog.Text=cst.ToString();
 				}
 			}
 		}
