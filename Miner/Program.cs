@@ -14,6 +14,7 @@ using System.IO;
 using File_Transfer;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Miner
 {
@@ -41,6 +42,7 @@ namespace Miner
 		public static VpsStatus vpsStatus =0;
 		private static int disconnectTime=10;
 		private static int idleTime = 30;
+		private static int connectFailTime = 0;
 
 		public static string TcpMainTubeIp= "2y155s0805.51mypc.cn";
 		public static int TcpMainTubePort= 12895;
@@ -80,24 +82,40 @@ namespace Miner
 					{
 						case VpsStatus.WaitConnect:
 							{
-								if (disconnectTime++ > 10 && anyTaskWorking==false)
+								if (disconnectTime++ > 10 && anyTaskWorking == false)
 								{
-									vpsStatus = VpsStatus.Connecting;
-									InitTcp();
+									if (connectFailTime++ > 30)
+									{
+										RedialToInternet();
+										Program.setting.LogInfo("连接到服务器失败次数达上限,重新拨号","通讯记录");
+									}
+									else {
+										vpsStatus = VpsStatus.Connecting;
+										InitTcp();
+									};//尝试连接次数过多，则重连宽带
+									
 									disconnectTime = 0;
 								}
-								
+
 								break;
 							}
 						case VpsStatus.Idle:
 							{
-								if(idleTime--<0 && anyTaskWorking == false)
+								if (idleTime-- < 0 && anyTaskWorking == false)
 								{
 									HelloToServer();
 									idleTime = 30;
 								}
 								break;
 							}
+						case VpsStatus.Running:
+						case VpsStatus.Syning:
+							{
+								connectFailTime = 0;
+								break;
+							}
+
+
 					}
 				}
 			}
@@ -165,14 +183,7 @@ namespace Miner
 				if (xx.Contains("<reRasdial>"))
 				{
 					Tcp.Send("reRasdial", "");
-					var p = new CmdRasdial();
-					p.DisRasdial();
-					var t = new Task(()=> {
-						Thread.Sleep(1000);
-						p.Rasdial();
-						Program.vpsStatus = VpsStatus.WaitConnect;
-					});
-					t.Start();
+					RedialToInternet();
 				}
 			};
 			Tcp.Disconnected = (x) => {
@@ -181,12 +192,25 @@ namespace Miner
 			};
 			HelloToServer();
 		}
+
+		private static void RedialToInternet()
+		{
+			var p = new CmdRasdial();
+			p.DisRasdial();
+			var t = new Task(() => {
+				Thread.Sleep(1000);
+				p.Rasdial();
+				Program.vpsStatus = VpsStatus.WaitConnect;
+			});
+			t.Start();
+		}
+
 		private static void HelloToServer()
 		{
 			var vpsName = clientId.GetInfo("VpsClientId", "null");
 			var clientDeviceId = clientId.GetInfo("clientDeviceId", HttpUtil.UUID);
 			clientId.SetInfo("clientDeviceId", clientDeviceId);
-			Tcp.Send("clientConnect", "<connectCmdRequire>" + vpsName + "</connectCmdRequire><clientDeviceId>" + clientDeviceId + "</clientDeviceId>");
+			Tcp.Send("clientConnect", $"<clientName>{vpsName}</clientName><clientDeviceId>{clientDeviceId}</clientDeviceId><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>");
 		}
 		private static void TranslateFileStart()
 		{

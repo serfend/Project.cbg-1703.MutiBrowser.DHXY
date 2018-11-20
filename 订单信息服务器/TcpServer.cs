@@ -84,9 +84,10 @@ namespace SfTcp
 					listener.Start();
 					client = listener.AcceptTcpClient();
 					listener.Stop();
-					var ip = this.client.Client.RemoteEndPoint.ToString();
-					if (ip.Contains("127.0.0.1")) IsLocal = true;
 					this.Ip = this.client.Client.RemoteEndPoint.ToString();
+					if (this.Ip.Contains("127.0.0.1")) IsLocal = true;
+					var checkPortOnly = Ip.IndexOf(':');
+					if (checkPortOnly > 0) Ip = Ip.Substring(checkPortOnly+1);
 					Connected?.BeginInvoke(this, (x) => { }, null);
 					var stream = client.GetStream();
 					writter = new BinaryWriter(stream);

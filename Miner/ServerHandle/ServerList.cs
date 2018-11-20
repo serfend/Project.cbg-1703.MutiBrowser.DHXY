@@ -114,7 +114,7 @@ namespace Miner
 				}
 
 
-				Program.setting.threadSetting.Status = string.Format("{1}次刷新 {0} 结束", hdlServer[nowIndex].ServerName, runTimeRecord);
+				Program.setting.threadSetting.Status = string.Format("{1}次: {0}", hdlServer[nowIndex].ServerName, runTimeRecord);
 				if (new Random().Next(1, 100) > 90)
 				{
 					var t = new Task(() => {

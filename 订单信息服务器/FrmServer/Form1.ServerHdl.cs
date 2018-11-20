@@ -1,0 +1,253 @@
+﻿using DotNet4.Utilities.UtilCode;
+using SfTcp;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace 订单信息服务器
+{
+	public partial class Form1 : Form
+	{
+
+		private void InitServerManager()
+		{
+			serverManager = new TcpServerManager()
+			{
+				NormalMessage = (s, x, InnerInfo) => {
+					this.Invoke((EventHandler)delegate
+					{
+						var targetItem = GetItem(s.Ip);
+						if (targetItem != null)
+						{
+							if (x.Contains("heartBeat"))
+							{
+							}
+							else if (x.Contains("RHB"))
+							{
+								targetItem.SubItems[4].Text = InnerInfo;
+							}
+							else if (x.Contains("clientConnect"))
+							{
+								var hdlServerName = HttpUtil.GetElementInItem(InnerInfo, "clientName");
+								var version = HttpUtil.GetElementInItem(InnerInfo, "version"); version = version.Length > 0 ? version : "未知";
+								version = "未知";//TODO 显示终端版本功能
+								targetItem.SubItems[6].Text = version;
+								targetItem.SubItems[0].Text = hdlServerName;
+								if (InnerInfo.Contains("<browserInit>"))
+								{
+									targetItem.SubItems[3].Text = "等待订单";
+									s.clientName = hdlServerName;
+									BrowserIp[hdlServerName] = s.Ip;
+								}
+								else
+								{
+									targetItem.SubItems[3].Text = "初始化";
+									s.ID = HttpUtil.GetElementInItem(InnerInfo, "clientDeviceId");
+									var clientName = regSettingVps.In(s.ID).GetInfo("clientName", targetItem.SubItems[0].Text);
+									s.Send(string.Format("<setClientName>{0}</setClientName>", clientName));//用于确认当前名称并初始化
+								}
+							}
+							else if (x.Contains("nameModefied"))
+							{
+								targetItem.SubItems[0].Text = HttpUtil.GetElementInItem(InnerInfo, "clientName");
+								bool flag = (s.clientName == "..." && InnerInfo.Contains("<AskForSynInit>"));//首次初始化时尝试发送vps终端初始化
+
+								s.clientName = targetItem.SubItems[0].Text;
+								if (flag)
+								{
+									BuildNewTaskToVps(s, out string taskTitle);
+									targetItem.SubItems[5].Text = taskTitle;
+									SynLstTask();
+								}
+							}
+							else if (x.Contains("InitComplete"))
+							{
+								//识别vps终端
+								s.IsLocal = true;
+								targetItem.SubItems[1].Text = "vps";
+
+								//终端已初始化完成
+								//synSetting,synFile
+								//遍历 【同步文件】 下所有文件
+								var dic = new DirectoryInfo(Application.StartupPath + "\\同步设置");
+								var tmp = new StringBuilder();
+								foreach (var f in dic.EnumerateFiles())
+								{
+									tmp.Append("<file><name>").Append(f.Name).Append("</name>").Append("<version>").Append(HttpUtil.GetMD5ByMD5CryptoService(f.FullName)).Append("</version></file>");
+								}
+								if (tmp.Length > 0)
+								{
+									tmp.Append("<versionCheck>");
+									s.Send(tmp.ToString());
+								}
+								else
+								{
+									s.Send("<serverRun>");//无需同步
+								}
+
+							}
+							else if (x.Contains("RequireFile"))//服务器接收到来自客户端请求文件的命令
+							{
+								this.Invoke((EventHandler)delegate { AppendLog("vps" + s.clientName + "请求获取文件"); });
+								HdlVpsFileSynRequest(InnerInfo, s);
+							}
+							else if (x.Contains("Status"))
+							{
+								targetItem.SubItems[3].Text = InnerInfo;
+								if (InnerInfo.Contains(" 失败"))
+								{
+									s.Send("<reRasdial>");
+								}
+							}
+							else if (x.Contains("newCheckBill"))
+							{
+								HdlNewCheckBill(s.clientName, InnerInfo);
+							}
+							else if (x.Contains("reRasdial"))
+							{
+								targetItem.SubItems[3].Text = "VPS重拨号中";
+								var tcp = serverManager[targetItem.SubItems[2].Text];
+								tcp.Disconnect();
+							}
+							else
+							{
+								AppendLog("新消息[" + s.clientName + "] " + x + ":" + InnerInfo);
+								targetItem.SubItems[3].Text = InnerInfo;
+							}
+						}
+
+					});
+				},
+				ServerConnected = (x) => {
+					this.Invoke((EventHandler)delegate {
+						//AppendLog("已连接:" + x.Ip);
+						var info = new string[7];
+						info[1] = x.IsLocal ? "主机" : "终端";
+						info[2] = x.Ip;
+						info[0] = x.clientName;
+						info[3] = "新建状态";
+						info[4] = "未开始采集";//延迟
+						info[5] = "暂无";//任务
+						info[6] = "未知";//版本
+						LstConnection.Items.Add(new ListViewItem(info));
+
+						var welcome = new Task(() => {
+							Thread.Sleep(3000);
+							x.Send("<welcome>" + DateTime.Now + "</welcome>");
+						});
+						welcome.Start();
+					});
+				},
+				ServerDisconnected = (x) => {
+					this.Invoke((EventHandler)delegate {
+						//AppendLog("已断开:" + x.Ip);
+						for (int i = 0; i < LstConnection.Items.Count; i++)
+							if (LstConnection.Items[i].SubItems[2].Text == x.Ip)
+								LstConnection.Items.RemoveAt(i);
+						if (allocServer.ContainsKey(x.Ip))
+						{
+							var vps = allocServer[x.Ip];
+							foreach (var server in vps.hdlServer)
+							{
+								serverInfoList[server].NowNum++;
+							}
+							allocServer.Remove(x.Ip);
+							SynLstTask();
+						}
+					});
+				},
+				HttpRequest = (x, s) => {
+					var cst = new StringBuilder();
+					cst.AppendLine($"<h1>Hey,测试服务器已开启</h1><br><p>当前连接数:{LstConnection.Items.Count }</p>");
+					cst.AppendLine($"<p>request: {x.Param}</p>");
+					var checkIfHaveValue = x.Param.IndexOf(':');
+					string requestPage, requestParam;
+					if (checkIfHaveValue > 0)
+					{
+						requestPage = x.Param.Substring(0, checkIfHaveValue);
+						requestParam = x.Param.Substring(checkIfHaveValue + 1);
+					}
+					else
+					{
+						requestPage = x.Param;
+						requestParam = string.Empty;
+					}
+					switch (requestPage)
+					{
+						case "Status":
+							{
+								this.Invoke((EventHandler)delegate {
+									var clientNum = this.LstConnection.Items.Count;
+									var columnsNum = LstConnection.Columns.Count;
+									cst.AppendLine($"<p>当前状态共有{clientNum}个连接</p><br>");
+									cst.AppendLine($"打开网页次数: 手动:{ManagerHttpBase.UserWebShowTime}  自动:{ManagerHttpBase.FitWebShowTime}<br>");
+									cst.AppendLine($"profit:{ManagerHttpBase.RecordMoneyGet}  times:{ManagerHttpBase.RecordMoneyGetTime}");
+									cst.AppendLine("<table border=\"1\">");
+									cst.AppendLine("<tr>");
+									for (int i = 0; i < columnsNum; i++)
+										cst.Append($"<th>{LstConnection.Columns[i].Text}</th>");
+
+									cst.AppendLine("</tr>");
+									for (int i = 0; i < clientNum; i++)
+									{
+										cst.AppendLine("<tr>");
+										for (int j = 0; j < columnsNum; j++) cst.Append($"<td>{LstConnection.Items[i].SubItems[j].Text}</td>");
+										cst.AppendLine("</tr>");
+									}
+									cst.Append("</table>");
+
+								});
+								break;
+							}
+						case "targetUrl":
+							{
+								var nowTargetUrl = ManagerHttpBase.TargetUrl;
+								if (checkIfHaveValue > 0)
+								{
+									ManagerHttpBase.TargetUrl = requestParam;
+								}
+								cst.AppendLine($"targetPrevious: {nowTargetUrl}");
+								cst.AppendLine($"targetNew: {ManagerHttpBase.TargetUrl}");
+								break;
+							}
+					}
+					s.Response(cst.ToString());
+				}
+			};
+		}
+		private void InitServerTaskList()
+		{
+			var serverInfo = File.ReadAllLines("ServerInfo.txt", Encoding.Default);
+			foreach (var server in serverInfo)
+			{
+				var info = server.Split(',');
+				var data = new string[5];
+				if (info.Length < 4)
+				{
+					AppendLog("【警告】无效的区信息:" + server);
+					continue;
+				}
+				var hdlNum = info.Length == 5 ? Convert.ToInt32(info[4]) : 1;
+				var s = new HdlServerInfo(info[0], info[1], info[2], info[3], hdlNum);
+				if (serverInfoList.ContainsKey(s.Id))
+				{
+					AppendLog("【警告】重复的区:" + server);
+					continue;
+				}
+				serverInfoList.Add(s.Id, s);
+				data[0] = s.Id;//区号
+				data[1] = s.Name;//名称
+				data[2] = "0";//已分配
+				data[3] = s.HdlNum.ToString();//需分配
+				data[4] = regServerInfo.GetInfo(s.Id, "启用");
+				s.Enable = (data[4] == "启用");
+				LstServerQueue.Items.Add(new ListViewItem(data));
+			}
+		}
+	}
+}

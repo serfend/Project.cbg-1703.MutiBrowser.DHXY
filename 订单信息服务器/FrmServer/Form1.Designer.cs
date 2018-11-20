@@ -32,6 +32,7 @@
 		{
 			this.TabMain = new System.Windows.Forms.TabControl();
 			this.TabMain_VpsManager = new System.Windows.Forms.TabPage();
+			this.CmdPauseTaskAllocate = new System.Windows.Forms.Button();
 			this.CmdRedial = new System.Windows.Forms.Button();
 			this.LstGoodShow = new System.Windows.Forms.ListView();
 			this.GoodShowServer = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -56,13 +57,16 @@
 			this.OpLog = new System.Windows.Forms.TextBox();
 			this.OpConnectionCount = new System.Windows.Forms.Label();
 			this.LstConnection = new System.Windows.Forms.ListView();
-			this.clientName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.Type = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.Ip = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.status = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.delay = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.Server = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LstConnection_ClientName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LstConnection_Type = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LstConnection_Ip = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LstConnection_status = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LstConnection_delay = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LstConnection_Server = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TabMain_Setting = new System.Windows.Forms.TabPage();
+			this.label7 = new System.Windows.Forms.Label();
+			this.label8 = new System.Windows.Forms.Label();
+			this.IpAssumePrice_Rate = new System.Windows.Forms.TextBox();
 			this.label5 = new System.Windows.Forms.Label();
 			this.label6 = new System.Windows.Forms.Label();
 			this.IpPerVPShdl = new System.Windows.Forms.TextBox();
@@ -72,6 +76,7 @@
 			this.IpTaskTimeOut = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.IpTaskInterval = new System.Windows.Forms.TextBox();
+			this.LstConnection_version = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TabMain.SuspendLayout();
 			this.TabMain_VpsManager.SuspendLayout();
 			this.TabMain_Setting.SuspendLayout();
@@ -89,6 +94,7 @@
 			// 
 			// TabMain_VpsManager
 			// 
+			this.TabMain_VpsManager.Controls.Add(this.CmdPauseTaskAllocate);
 			this.TabMain_VpsManager.Controls.Add(this.CmdRedial);
 			this.TabMain_VpsManager.Controls.Add(this.LstGoodShow);
 			this.TabMain_VpsManager.Controls.Add(this.OpLogCount);
@@ -107,11 +113,21 @@
 			this.TabMain_VpsManager.Text = "终端管理";
 			this.TabMain_VpsManager.UseVisualStyleBackColor = true;
 			// 
+			// CmdPauseTaskAllocate
+			// 
+			this.CmdPauseTaskAllocate.Location = new System.Drawing.Point(262, 690);
+			this.CmdPauseTaskAllocate.Name = "CmdPauseTaskAllocate";
+			this.CmdPauseTaskAllocate.Size = new System.Drawing.Size(88, 34);
+			this.CmdPauseTaskAllocate.TabIndex = 38;
+			this.CmdPauseTaskAllocate.Text = "暂停终端";
+			this.CmdPauseTaskAllocate.UseVisualStyleBackColor = true;
+			this.CmdPauseTaskAllocate.Click += new System.EventHandler(this.CmdPauseTaskAllocate_Click);
+			// 
 			// CmdRedial
 			// 
-			this.CmdRedial.Location = new System.Drawing.Point(290, 690);
+			this.CmdRedial.Location = new System.Drawing.Point(168, 690);
 			this.CmdRedial.Name = "CmdRedial";
-			this.CmdRedial.Size = new System.Drawing.Size(149, 34);
+			this.CmdRedial.Size = new System.Drawing.Size(88, 34);
 			this.CmdRedial.TabIndex = 37;
 			this.CmdRedial.Text = "重新拨号(vps)";
 			this.CmdRedial.UseVisualStyleBackColor = true;
@@ -234,9 +250,9 @@
 			// 
 			// CmdDisconnect
 			// 
-			this.CmdDisconnect.Location = new System.Drawing.Point(109, 690);
+			this.CmdDisconnect.Location = new System.Drawing.Point(79, 690);
 			this.CmdDisconnect.Name = "CmdDisconnect";
-			this.CmdDisconnect.Size = new System.Drawing.Size(175, 34);
+			this.CmdDisconnect.Size = new System.Drawing.Size(83, 34);
 			this.CmdDisconnect.TabIndex = 24;
 			this.CmdDisconnect.Text = "断开连接";
 			this.CmdDisconnect.UseVisualStyleBackColor = true;
@@ -246,7 +262,7 @@
 			// 
 			this.CmdServerOn.Location = new System.Drawing.Point(4, 690);
 			this.CmdServerOn.Name = "CmdServerOn";
-			this.CmdServerOn.Size = new System.Drawing.Size(99, 34);
+			this.CmdServerOn.Size = new System.Drawing.Size(69, 34);
 			this.CmdServerOn.TabIndex = 23;
 			this.CmdServerOn.Text = "发送";
 			this.CmdServerOn.UseVisualStyleBackColor = true;
@@ -272,12 +288,13 @@
 			// LstConnection
 			// 
 			this.LstConnection.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.clientName,
-            this.Type,
-            this.Ip,
-            this.status,
-            this.delay,
-            this.Server});
+            this.LstConnection_ClientName,
+            this.LstConnection_Type,
+            this.LstConnection_Ip,
+            this.LstConnection_status,
+            this.LstConnection_delay,
+            this.LstConnection_Server,
+            this.LstConnection_version});
 			this.LstConnection.FullRowSelect = true;
 			this.LstConnection.LabelEdit = true;
 			this.LstConnection.Location = new System.Drawing.Point(4, 26);
@@ -287,38 +304,41 @@
 			this.LstConnection.UseCompatibleStateImageBehavior = false;
 			this.LstConnection.View = System.Windows.Forms.View.Details;
 			// 
-			// clientName
+			// LstConnection_ClientName
 			// 
-			this.clientName.Text = "ID";
-			this.clientName.Width = 73;
+			this.LstConnection_ClientName.Text = "ID";
+			this.LstConnection_ClientName.Width = 57;
 			// 
-			// Type
+			// LstConnection_Type
 			// 
-			this.Type.Text = "连接";
-			this.Type.Width = 46;
+			this.LstConnection_Type.Text = "连接";
+			this.LstConnection_Type.Width = 46;
 			// 
-			// Ip
+			// LstConnection_Ip
 			// 
-			this.Ip.Text = "IP";
-			this.Ip.Width = 117;
+			this.LstConnection_Ip.Text = "端口";
+			this.LstConnection_Ip.Width = 57;
 			// 
-			// status
+			// LstConnection_status
 			// 
-			this.status.Text = "状态";
-			this.status.Width = 141;
+			this.LstConnection_status.Text = "状态";
+			this.LstConnection_status.Width = 141;
 			// 
-			// delay
+			// LstConnection_delay
 			// 
-			this.delay.Text = "延迟";
-			this.delay.Width = 67;
+			this.LstConnection_delay.Text = "延迟";
+			this.LstConnection_delay.Width = 48;
 			// 
-			// Server
+			// LstConnection_Server
 			// 
-			this.Server.Text = "任务";
-			this.Server.Width = 134;
+			this.LstConnection_Server.Text = "任务";
+			this.LstConnection_Server.Width = 77;
 			// 
 			// TabMain_Setting
 			// 
+			this.TabMain_Setting.Controls.Add(this.label7);
+			this.TabMain_Setting.Controls.Add(this.label8);
+			this.TabMain_Setting.Controls.Add(this.IpAssumePrice_Rate);
 			this.TabMain_Setting.Controls.Add(this.label5);
 			this.TabMain_Setting.Controls.Add(this.label6);
 			this.TabMain_Setting.Controls.Add(this.IpPerVPShdl);
@@ -335,6 +355,33 @@
 			this.TabMain_Setting.TabIndex = 1;
 			this.TabMain_Setting.Text = "设置";
 			this.TabMain_Setting.UseVisualStyleBackColor = true;
+			// 
+			// label7
+			// 
+			this.label7.AutoSize = true;
+			this.label7.Location = new System.Drawing.Point(422, 24);
+			this.label7.Name = "label7";
+			this.label7.Size = new System.Drawing.Size(11, 12);
+			this.label7.TabIndex = 47;
+			this.label7.Text = "%";
+			// 
+			// label8
+			// 
+			this.label8.AutoSize = true;
+			this.label8.Location = new System.Drawing.Point(249, 24);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(53, 12);
+			this.label8.TabIndex = 46;
+			this.label8.Text = "估价比率";
+			// 
+			// IpAssumePrice_Rate
+			// 
+			this.IpAssumePrice_Rate.Location = new System.Drawing.Point(308, 15);
+			this.IpAssumePrice_Rate.Name = "IpAssumePrice_Rate";
+			this.IpAssumePrice_Rate.Size = new System.Drawing.Size(108, 21);
+			this.IpAssumePrice_Rate.TabIndex = 45;
+			this.IpAssumePrice_Rate.Tag = "RecordReg";
+			this.IpAssumePrice_Rate.Text = "100";
 			// 
 			// label5
 			// 
@@ -361,6 +408,7 @@
 			this.IpPerVPShdl.Size = new System.Drawing.Size(108, 21);
 			this.IpPerVPShdl.TabIndex = 42;
 			this.IpPerVPShdl.Tag = "RecordReg";
+			this.IpPerVPShdl.Text = "1";
 			// 
 			// label4
 			// 
@@ -396,6 +444,7 @@
 			this.IpTaskTimeOut.Size = new System.Drawing.Size(108, 21);
 			this.IpTaskTimeOut.TabIndex = 38;
 			this.IpTaskTimeOut.Tag = "RecordReg";
+			this.IpTaskTimeOut.Text = "10000";
 			// 
 			// label1
 			// 
@@ -413,6 +462,12 @@
 			this.IpTaskInterval.Size = new System.Drawing.Size(108, 21);
 			this.IpTaskInterval.TabIndex = 36;
 			this.IpTaskInterval.Tag = "RecordReg";
+			this.IpTaskInterval.Text = "0";
+			// 
+			// LstConnection_version
+			// 
+			this.LstConnection_version.Text = "版本";
+			this.LstConnection_version.Width = 120;
 			// 
 			// Form1
 			// 
@@ -457,12 +512,12 @@
 		private System.Windows.Forms.TextBox OpLog;
 		private System.Windows.Forms.Label OpConnectionCount;
 		private System.Windows.Forms.ListView LstConnection;
-		private System.Windows.Forms.ColumnHeader clientName;
-		private System.Windows.Forms.ColumnHeader Type;
-		private System.Windows.Forms.ColumnHeader Ip;
-		private System.Windows.Forms.ColumnHeader status;
-		private System.Windows.Forms.ColumnHeader delay;
-		private System.Windows.Forms.ColumnHeader Server;
+		private System.Windows.Forms.ColumnHeader LstConnection_ClientName;
+		private System.Windows.Forms.ColumnHeader LstConnection_Type;
+		private System.Windows.Forms.ColumnHeader LstConnection_Ip;
+		private System.Windows.Forms.ColumnHeader LstConnection_status;
+		private System.Windows.Forms.ColumnHeader LstConnection_delay;
+		private System.Windows.Forms.ColumnHeader LstConnection_Server;
 		private System.Windows.Forms.TabPage TabMain_Setting;
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.Label label6;
@@ -475,6 +530,11 @@
 		private System.Windows.Forms.TextBox IpTaskInterval;
 		private System.Windows.Forms.Button CmdRedial;
 		private System.Windows.Forms.ColumnHeader serverTask_Enable;
+		private System.Windows.Forms.Label label7;
+		private System.Windows.Forms.Label label8;
+		private System.Windows.Forms.TextBox IpAssumePrice_Rate;
+		private System.Windows.Forms.Button CmdPauseTaskAllocate;
+		private System.Windows.Forms.ColumnHeader LstConnection_version;
 	}
 }
 
