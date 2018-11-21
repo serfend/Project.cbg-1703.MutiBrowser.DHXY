@@ -164,7 +164,7 @@ namespace 订单信息服务器
 					ManagerHttpBase.RecordMoneyGetTime++;
 				}
 			}
-			SendCmdToBrowserClient($"{sender}.{serverName}", $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceNum}</price><assumePrice>{priceNumAssume }</assumePrice>");
+			SendCmdToBrowserClient(serverName, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceNum}</price><assumePrice>{priceNumAssume }</assumePrice>");
 		}
 		
 		

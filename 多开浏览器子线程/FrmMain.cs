@@ -63,7 +63,7 @@ namespace 多开浏览器子线程
 				this.Close();
 			}
 			Program.Tcp.RecieveMessage += ReceiveMessage;
-			Program.Tcp.Send("clientConnect", $"<browserInit><clientName>{CCmd.GetWebInfo("name")}<clientName><version><version>{Assembly.GetExecutingAssembly().GetName().Version}</version></browserInit>");
+			Program.Tcp.Send("clientConnect", $"<browserInit><clientName>{CCmd.GetWebInfo("name")}</clientName><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>{Assembly.GetExecutingAssembly().GetName().Version}</version></browserInit>");
 
 			ThreadMonitor.Start();
 
