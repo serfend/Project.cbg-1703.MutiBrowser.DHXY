@@ -171,6 +171,7 @@ namespace 订单信息服务器
 					{
 						requestPage = x.Param.Substring(0, checkIfHaveValue);
 						requestParam = x.Param.Substring(checkIfHaveValue + 1);
+						requestParam = requestParam.Replace("%3C", "<").Replace("%3E",">");
 					}
 					else
 					{
@@ -193,13 +194,26 @@ namespace 订单信息服务器
 										cst.Append($"<th>{LstConnection.Columns[i].Text}</th>");
 
 									cst.AppendLine("</tr>");
+									var clientTypeCounter = new Dictionary<string, int>();
 									for (int i = 0; i < clientNum; i++)
 									{
+										clientTypeCounter[LstConnection.Items[i].SubItems[1].Text]++;
 										cst.AppendLine("<tr>");
-										for (int j = 0; j < columnsNum; j++) cst.Append($"<td>{LstConnection.Items[i].SubItems[j].Text}</td>");
+										for (int j = 0; j < columnsNum; j++) {
+											cst.Append($"<td>{LstConnection.Items[i].SubItems[j].Text}</td>");
+										}
+										cst.Append($"<td><a href=\"/CmdInfo:{LstConnection.Items[i].SubItems[2].Text}:<SubClose>\">关闭</td>");
+										cst.Append($"<td><a href=\"/CmdInfo:{LstConnection.Items[i].SubItems[2].Text}:<startNew>\">新增</td>");
+										cst.Append($"<td><a href=\"/CmdInfo:{LstConnection.Items[i].SubItems[2].Text}:<reRasdial>\">重连</td>");
 										cst.AppendLine("</tr>");
 									}
 									cst.Append("</table>");
+									cst.AppendLine("<div id=\"clientTypeCount\">");
+									foreach(var item in clientTypeCounter)
+									{
+										cst.AppendLine($"{item.Key}:{item.Value}");
+									}
+									cst.AppendLine("</div>");
 
 								});
 								break;
@@ -213,6 +227,26 @@ namespace 订单信息服务器
 								}
 								cst.AppendLine($"targetPrevious: {nowTargetUrl}");
 								cst.AppendLine($"targetNew: {ManagerHttpBase.TargetUrl}");
+								break;
+							}
+						case "CmdInfo":
+							{
+								var cmdInfo = requestParam.Split(':');
+								if (cmdInfo.Length < 2)
+								{
+									cst.AppendLine($"无效的指令{requestParam},指令格式:CmdInfo:target#cmd");
+									break;
+								}
+								var targetClient = serverManager[cmdInfo[0]];
+								if (targetClient == null)
+								{
+									cst.AppendLine("无效的IP");
+								}
+								else
+								{
+									targetClient.Send(cmdInfo[1]);
+									cst.AppendLine($"已向终端{targetClient.clientName}发送指令{cmdInfo[1]}");
+								}
 								break;
 							}
 					}

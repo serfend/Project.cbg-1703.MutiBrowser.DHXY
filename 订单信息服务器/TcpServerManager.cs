@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SfTcp
 {
@@ -22,7 +25,17 @@ namespace SfTcp
 		public TcpServerManager()
 		{
 			NewTcp();
+			threadCheckConnection = new Thread(()=> {
+				while (true)
+				{
+					Thread.Sleep(10000);
+					CheckConnection();
+				}
+			});
+			//TODO 自动清空无效连接
+			//threadCheckConnection.Start();
 		}
+		private readonly Thread threadCheckConnection;
 		private Action<TcpServer> Connected() {
 			return new Action<TcpServer>((x) =>
 			{
@@ -35,6 +48,7 @@ namespace SfTcp
 		private TcpServer NewTcp(int port=8009)
 		{
 			return new TcpServer((x,InnerInfo, s) => {
+				s.lastMessageTime = Environment.TickCount;
 				NormalMessage?.Invoke(s,x,InnerInfo);
 				if (x.Contains("BrowserClientReport"))
 				{
@@ -65,7 +79,20 @@ namespace SfTcp
 					list.Remove(x); }
 			};
 		}
-
+		public int CheckConnection()
+		{
+			var tick = Environment.TickCount;
+			var waitToDisConnect = new List<TcpServer>();
+			foreach (var client in list)
+			{
+				if (tick - client.lastMessageTime > 60000)waitToDisConnect.Add(client) ;
+			}
+			foreach(var client in waitToDisConnect)
+			{
+				client.Disconnect();
+			}
+			return waitToDisConnect.Count;
+		}
 	
 	}
 }

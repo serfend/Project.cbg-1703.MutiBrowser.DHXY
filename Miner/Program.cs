@@ -23,9 +23,15 @@ namespace Miner
 		public static Setting setting;
 		public static ServerList servers;
 		public static SfTcp.SfTcpClient Tcp;
+		private static void StartNewProgram()
+		{
+			Process.Start(Process.GetCurrentProcess().MainModule.FileName);
+		}
 		private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 		{
+
 			MessageBox.Show(e.ExceptionObject.ToString());
+			StartNewProgram();
 			Thread.Sleep(5000);
 			Environment.Exit(-1); //有此句则不弹异常对话框
 		}
@@ -86,8 +92,10 @@ namespace Miner
 								{
 									if (connectFailTime++ > 30)
 									{
-										RedialToInternet();
-										Program.setting.LogInfo("连接到服务器失败次数达上限,重新拨号","通讯记录");
+										//TODO 自动重拨号功能
+										//RedialToInternet();
+										//Program.setting.LogInfo("连接到服务器失败次数达上限,重新拨号", "通讯记录");
+										
 									}
 									else {
 										vpsStatus = VpsStatus.Connecting;
@@ -185,6 +193,14 @@ namespace Miner
 					Tcp.Send("reRasdial", "");
 					RedialToInternet();
 				}
+				if (xx.Contains("<startNew>"))
+				{
+					StartNewProgram();
+				}
+				if (xx.Contains("<SubClose>"))
+				{
+					Environment.Exit(0);
+				}
 			};
 			Tcp.Disconnected = (x) => {
 				Logger.SysLog("与服务器丢失连接", "主记录");
@@ -195,6 +211,7 @@ namespace Miner
 
 		private static void RedialToInternet()
 		{
+			
 			var p = new CmdRasdial();
 			p.DisRasdial();
 			var t = new Task(() => {

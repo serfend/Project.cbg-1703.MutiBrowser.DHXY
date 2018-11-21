@@ -20,23 +20,23 @@ namespace 订单信息服务器
 	
 		public static int UserWebShowTime
 		{
-			get => Convert.ToInt32(regMain.GetInfo("RecordMoneyGetTime", "0"));
-			set => regMain.SetInfo("RecordMoneyGetTime", value.ToString());
+			get => Convert.ToInt32(regMain.In(Today).GetInfo("RecordMoneyGetTime", "0"));
+			set => regMain.In(Today).SetInfo("RecordMoneyGetTime", value.ToString());
 		}
 		public static int FitWebShowTime
 		{
-			get => Convert.ToInt32(regMain.GetInfo("FitWebShowTime", "0"));
-			set => regMain.SetInfo("FitWebShowTime", value.ToString());
+			get => Convert.ToInt32(regMain.In(Today).GetInfo("FitWebShowTime", "0"));
+			set => regMain.In(Today).SetInfo("FitWebShowTime", value.ToString());
 		}
 		public static double RecordMoneyGet {
-			get => Convert.ToDouble(regMain.GetInfo("RecordMoneyGet","0"));
-			set =>regMain.SetInfo("RecordMoneyGet", value.ToString());
+			get => Convert.ToDouble(regMain.In(Today).GetInfo("RecordMoneyGet","0"));
+			set =>regMain.In(Today).SetInfo("RecordMoneyGet", value.ToString());
 		} 
 		public static int RecordMoneyGetTime
 		{
-			get => Convert.ToInt32(regMain.GetInfo("RecordMoneyGetTime", "0"));
-			set => regMain.SetInfo("RecordMoneyGetTime", value.ToString());
+			get => Convert.ToInt32(regMain.In(Today).GetInfo("RecordMoneyGetTime", "0"));
+			set => regMain.In(Today).SetInfo("RecordMoneyGetTime", value.ToString());
 		}
-	
+		private static string Today => DateTime.Now.ToString("yyyyMMdd");
 	}
 }

@@ -228,6 +228,7 @@ namespace SfTcp
 
 		#region IDisposable Support
 		private bool disposedValue = false; // 要检测冗余调用
+		internal int lastMessageTime;
 
 		protected virtual void Dispose(bool disposing)
 		{
