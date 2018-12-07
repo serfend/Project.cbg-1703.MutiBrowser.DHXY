@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DotNet4.Utilities.UtilCode;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace SfTcp
 		/// </summary>
 		public Action<TcpServer, string,string> NormalMessage;
 		public Action<TcpHttpMessage, TcpHttpResponse> HttpRequest;
+		
 		public TcpServer this[string ip]
 		{
 			get => list.Find((x) => x.Ip == ip);
@@ -25,15 +27,16 @@ namespace SfTcp
 		public TcpServerManager()
 		{
 			NewTcp();
-			threadCheckConnection = new Thread(()=> {
+			threadCheckConnection = new Thread(() =>
+			{
 				while (true)
 				{
 					Thread.Sleep(10000);
 					CheckConnection();
 				}
-			});
-			//TODO 自动清空无效连接
-			//threadCheckConnection.Start();
+			})
+			{ IsBackground=true};
+			threadCheckConnection.Start();
 		}
 		private readonly Thread threadCheckConnection;
 		private Action<TcpServer> Connected() {
@@ -57,15 +60,13 @@ namespace SfTcp
 						s.Send("<server.response>heartBeat</server.response>");
 						return;
 					}
-					if (s.IsLocal)
+					foreach (var p in list)
 					{
-						foreach (var p in list)
-						{
-							if (!p.IsLocal) p.Send("<server.command>" + InnerInfo + "</server.command>");
-						}
+						if (!p.IsLocal) p.Send("<server.command>" + InnerInfo + "</server.command>");
 					}
-					else
-						s.Send("<server.response>" + InnerInfo + "</server.response>");
+				}else if (x.Contains("ping"))
+				{
+					s.Send($"<ping></ping>");
 				}
 			}, (x,s) => {
 				HttpRequest.Invoke(x,s);

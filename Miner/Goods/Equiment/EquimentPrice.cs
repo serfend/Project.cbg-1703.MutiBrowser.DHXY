@@ -263,18 +263,22 @@ namespace Miner.Goods.Equiment
 		/// <returns></returns>
 		public static int GetPrice(Equipment e)
 		{
-
+			Program.setting.LogInfo($"装备=>{e.DesByWeb}", e.Server.ServerName);
+			if (e.DesByWeb.Contains("禁止交易")) {
+				Program.setting.LogInfo("不可交易的装备", e.Server.ServerName);
+				return 0;
+			} ;
 			int result = 0;
 			if (EquimentPrice.EquimentPrivityPrices.ContainsKey(e.Rank))
 			{
 				result += EquimentPrice.EquimentPrivityPrices[e.Rank].GetPrice(e.NowPrivity);
-				if(result>0)Program.setting.LogInfo(string.Format("{0}级装备默契:{1}/{2},价值:{3}", e.Rank, e.NowPrivity, e.MaxPrivity, result), e.Server.ServerName, true);
+				if (result > 0) Program.setting.LogInfo($"{e.Rank}级默契:{e.NowPrivity}/{e.MaxPrivity },价值:{result}", e.Server.ServerName);
 			}
 			else
 			{
 				Program.setting.LogInfo("不存在的等级规则:" + e.Rank, e.Server.ServerName);
 			}
-			var immotalsPrice= EquimentDescriptionPrice.GetPrice(e.DesByType + "#r"+ e.PreviousNameDescription,out string descriptionPrice);
+			var immotalsPrice = EquimentDescriptionPrice.GetPrice($"{e.DesByType}#r{e.PreviousNameDescription}",out string descriptionPrice);
 			/*if(immotalsPrice>0)*/Program.setting.LogInfo(descriptionPrice, e.Server.ServerName, true);//仙器估价
 			result += immotalsPrice;
 			//星符、普通属性估价

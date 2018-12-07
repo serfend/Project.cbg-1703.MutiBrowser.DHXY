@@ -1,5 +1,6 @@
 ﻿using DotNet4.Utilities.UtilCode;
 using DotNet4.Utilities.UtilReg;
+using Miner.util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,12 +22,14 @@ namespace Miner
 			private string serverName;
 			private string aeroId;
 			private string aeroName;
-			public Server(string id, string serverName, string aeroId, string aeroName)
+			private string loginSession;
+			public Server(string id, string serverName, string aeroId, string aeroName,string loginSession)
 			{
 				this.Id = id;
 				this.ServerName = serverName;
 				this.AeroId = aeroId;
 				this.AeroName = aeroName;
+				this.loginSession = loginSession;
 			}
 			public void Run(HttpClient http)
 			{
@@ -100,6 +103,47 @@ namespace Miner
 				firstGood.CheckAndSubmit();
 
 			}
+
+			internal static void NewCheckBill(string url,string mainInfo,string loginSession)
+			{
+				var handler = new HttpClientHandler() { UseCookies = false };
+				var client = new HttpClient(handler);
+				client.DefaultRequestHeaders.Add("Cookie", loginSession);
+				Program.Tcp.Send("newCheckBill", mainInfo);
+				var resultStream=client.GetAsync(url).Result.Content.ReadAsStreamAsync().Result;
+				using (var reader = new StreamReader(resultStream, Encoding.Default))
+				{
+					var info = reader.ReadToEnd();
+					var frmInfo = HttpUtil.GetElement(info, "usertrade.py", "返回");
+					var billPoster = new BillPoster(frmInfo, loginSession);
+					billPoster.Submit((result, success) =>
+					{
+						if (success)
+						{
+							var t = new Task(() =>
+							{
+								Program.Tcp.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
+								Program.setting.LogInfo( $"下单成功 {url}", "下单记录");
+							}
+								);
+							t.Start();
+						}
+						else
+						{
+							var t = new Task(() =>
+							{
+								Program.Tcp.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>" + result + "</client.command>");
+								Program.setting.LogInfo( $"{result}\n{url}","下单记录");
+							}
+							);
+							t.Start();
+						};
+					});
+
+				}
+
+			}
+
 			public string TargetUrl
 			{
 				get => string.Format("http://xy2.cbg.163.com/cgi-bin/equipquery.py?act=fair_show_list&server_id={0}&areaid={1}&page=1&kind_id=45&query_order=create_time+DESC&server_name={2}&kind_depth=2", Id, AeroId, ServerName);
@@ -108,6 +152,8 @@ namespace Miner
 			public string ServerName { get => serverName; set => serverName = value; }
 			public string AeroId { get => aeroId; set => aeroId = value; }
 			public string AeroName { get => aeroName; set => aeroName = value; }
+			public static double AssumePriceRate { get; internal set; }
+			public string LoginSession { get => loginSession; set => loginSession = value; }
 		}
 	}
 }

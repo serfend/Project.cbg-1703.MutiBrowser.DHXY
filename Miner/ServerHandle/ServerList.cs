@@ -25,7 +25,7 @@ namespace Miner
 			private List<Server> hdlServer;
 			public ServerList()
 			{
-				hdlServer = new List<Server>();
+				HdlServer = new List<Server>();
 
 				//此版本仅适用本机vps
 				http = new HttpClient();
@@ -41,21 +41,21 @@ namespace Miner
 
 				if (taskCmd == "Idle") return;
 				var tasks = taskCmd.Split('#');
-				hdlServer = new List<Server>(tasks.Length);
+				HdlServer = new List<Server>(tasks.Length);
 				foreach (var task in tasks)
 				{
 					if (task == "") continue;
-					var target = new Server(HttpUtil.GetElementInItem(task,"id"), HttpUtil.GetElementInItem(task, "serverName"), HttpUtil.GetElementInItem(task, "aeroId"), HttpUtil.GetElementInItem(task, "aeroName"));
-					hdlServer.Add(target);
+					var target = new Server(HttpUtil.GetElementInItem(task,"id"), HttpUtil.GetElementInItem(task, "serverName"), HttpUtil.GetElementInItem(task, "aeroId"), HttpUtil.GetElementInItem(task, "aeroName"),HttpUtil.GetElementInItem(task,"loginSession"));
+					HdlServer.Add(target);
 				}
-				Program.setting.threadSetting.Status = string.Format("目标服务器加载完成,共计{0}个", hdlServer.Count);
+				Program.setting.threadSetting.Status = string.Format("目标服务器加载完成,共计{0}个", HdlServer.Count);
 			}
 			private int runTimeRecord = 0;
-			public void Run(string taskInfo, int delayTime)
+			public void Run(string taskInfo, int delayTime,double assumePriceRate )
 			{
 				try
 				{
-					ResetConfig(taskInfo,delayTime);
+					ResetConfig(taskInfo,delayTime, assumePriceRate);
 					ServerRun(0);
 				}
 				catch (Exception ex)
@@ -78,12 +78,14 @@ namespace Miner
 				//}
 				//isUseSelfIp = netIp.Contains(selfIp);
 			//}
-			private void ResetConfig(string taskInfo, int delayTime)
+			private void ResetConfig(string taskInfo, int delayTime,double assumePriceRate)
 			{
 				ResetTask(taskInfo);
 				Server.DelayTime = delayTime;
 				Server.DelayTime = Server.DelayTime <= 100 ? 100 : Server.DelayTime;
-				if (hdlServer.Count == 0)
+				Server.AssumePriceRate = assumePriceRate;
+				
+				if (HdlServer.Count == 0)
 				{
 					Program.setting.threadSetting.Status = ("无需处理的服务器");
 					Program.vpsStatus = Program.VpsStatus.Idle;
@@ -95,18 +97,18 @@ namespace Miner
 			{
 				lastRunTime = Environment.TickCount;
 				runTimeRecord++;
-				if (hdlServer.Count == 0) {
+				if (HdlServer.Count == 0) {
 					Thread.Sleep(500);
 					Program.anyTaskWorking = false;
 					return;
 				}
-				if (nowIndex == hdlServer.Count) {nowIndex = 0;};
+				if (nowIndex == HdlServer.Count) {nowIndex = 0;};
 				if (Program.vpsStatus == Program.VpsStatus.Idle || Program.vpsStatus==Program.VpsStatus.WaitConnect)
 				{
 					Program.anyTaskWorking = false;
 					return;
 				}
-				hdlServer[nowIndex].Run(http);
+				HdlServer[nowIndex].Run(http);
 				if (Program.vpsStatus == Program.VpsStatus.Idle || Program.vpsStatus == Program.VpsStatus.WaitConnect)
 				{
 					Program.anyTaskWorking = false;
@@ -114,7 +116,7 @@ namespace Miner
 				}
 
 
-				Program.setting.threadSetting.Status = string.Format("{1}次: {0}", hdlServer[nowIndex].ServerName, runTimeRecord);
+				Program.setting.threadSetting.Status = string.Format("{1}次: {0}", HdlServer[nowIndex].ServerName, runTimeRecord);
 				if (new Random().Next(1, 100) > 90)
 				{
 					var t = new Task(() => {
@@ -135,6 +137,8 @@ namespace Miner
 
 			#region IDisposable Support
 			private bool disposedValue = false; // 要检测冗余调用
+
+			public List<Server> HdlServer { get => hdlServer; set => hdlServer = value; }
 
 			protected virtual void Dispose(bool disposing)
 			{

@@ -16,6 +16,8 @@ namespace 订单信息服务器
 			string name;
 			string aeroId;
 			string aeroName;
+
+			string loginSession;
 			int hdlNum;
 			int nowNum;
 			bool enable;
@@ -35,25 +37,28 @@ namespace 订单信息服务器
 			public int HdlNum { get => hdlNum; set => hdlNum = value; }
 			public int NowNum { get => nowNum; set => nowNum = value; }
 			public bool Enable { get => enable; set => enable = value; }
+			public string LoginSession { get => loginSession; set => loginSession = value; }
+
 		}
 		private class VPS
 		{
 			string name;
 			string ip;
-			public List<string> hdlServer;
+			private List<string> hdlServer;
 
 			public VPS(string name, string ip)
 			{
 				this.Name = name;
 				this.Ip = ip;
-				hdlServer = new List<string>();
+				HdlServer = new List<string>();
 			}
 
 			public string Name { get => name; set => name = value; }
 			public string Ip { get => ip; set => ip = value; }
+			public List<string> HdlServer { get => hdlServer; set => hdlServer = value; }
 		}
 		private Reg regServerInfo;
-		private Dictionary<string, HdlServerInfo> serverInfoList = new Dictionary<string, HdlServerInfo>();
+		private Dictionary<string, HdlServerInfo> serverInfoList = new Dictionary<string, HdlServerInfo>();//以区名对应区分配
 		private Dictionary<string, VPS> allocServer = new Dictionary<string, VPS>();//以ip对应终端
 		private Reg regSettingVps;
 		/// <summary>
@@ -78,7 +83,15 @@ namespace 订单信息服务器
 			}
 			string hdlServer = GetFreeServer(singleHdl, s.Ip, out taskTitle);
 			int interval = 1500, timeout = 100000;
-
+			double assumePriceRate = 100;
+			try
+			{
+				assumePriceRate = Convert.ToDouble(IpAssumePrice_Rate.Text);
+			}
+			catch (Exception)
+			{
+				IpAssumePrice_Rate.Text = assumePriceRate.ToString();
+			}
 			try
 			{
 				timeout = Convert.ToInt32(IpTaskTimeOut.Text);
@@ -95,7 +108,7 @@ namespace 订单信息服务器
 			{
 				IpTaskInterval.Text = interval.ToString();
 			}
-			s.Send(string.Format("<SynInit><interval>{0}</interval><task>{1}</task><timeout>{2}</timeout></SynInit><InnerTargetUrl>{3}</InnerTargetUrl>", interval, hdlServer, timeout, ManagerHttpBase.TargetUrl));
+			s.Send($"<SynInit><interval>{interval}</interval><task>{hdlServer}</task><timeout>{timeout}</timeout></SynInit><InnerTargetUrl>{ManagerHttpBase.TargetUrl}</InnerTargetUrl><assumePriceRate>{assumePriceRate}</assumePriceRate>");
 		}
 	}
 }

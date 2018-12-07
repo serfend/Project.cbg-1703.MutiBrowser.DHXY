@@ -87,8 +87,18 @@ namespace 多开浏览器子线程
 				price = 999;
 				assumePrice = 0;
 				CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
+			}else if (info.Contains("<loginSession>"))
+			{
+				SynLoginSession();
 			}
 		}
+
+		private void SynLoginSession()
+		{
+			Program.Tcp.Send("loginSession",$"sid={GetNowLoginCookies()}");
+			Text = "已同步登录状态到服务器";
+		}
+
 		public enum CmdInfo
 		{
 			None,
@@ -137,7 +147,8 @@ namespace 多开浏览器子线程
 							this.Focus();
 							this.TopMost = true;
 							this.WindowState = FormWindowState.Normal;
-							TrySubmitBill(targetUrl);
+							//ReNavigateWeb(targetUrl);//取消浏览器下单，改为vps下单
+							TrySubmitBill(targetUrl);//支持浏览器下单
 						});
 						break;
 					}
@@ -175,7 +186,7 @@ namespace 多开浏览器子线程
 			//使用webbrowser登录cookies进行获取订单？
 			//未登录=》登录超时，请重新登录！
 			//返回订单信息
-			var cookiesLogin = "sid=" + GetNowLoginCookies();
+			var cookiesLogin = $"sid={GetNowLoginCookies()}";
 			Program.Tcp.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><buildBill></buildBill></client.command>");
 			http.Item.Request.Cookies +=  cookiesLogin;
 			http.GetHtml(url,callBack:(x)=> {
@@ -357,6 +368,11 @@ namespace 多开浏览器子线程
 		{
 			GPctlInfo.Top = (int)(this.Height * 0.55);
 			GPctlInfo.Left = 0;
+		}
+
+		private void BtnSynLoginSession_Click(object sender, EventArgs e)
+		{
+			SynLoginSession();
 		}
 
 		private void BtnMinimun_Click(object sender, EventArgs e)

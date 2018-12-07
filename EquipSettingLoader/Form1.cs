@@ -253,37 +253,40 @@ namespace EquipSettingLoader
 			if (f.ShowDialog() == DialogResult.OK)
 			{
 				OpShowLog.Clear();
-				//var fo = new SaveFileDialog()
-				//{
-				//	Title="选择输出",
-				//	Filter="log|*.log"
-				//};
-				//if (fo.ShowDialog() == DialogResult.OK)
-				//{
+				bool devMode= (new Reg("sfMinerDigger").In("Setting").GetInfo("developeModel") == "1") ;
+				var fo = new SaveFileDialog()
+				{
+					Title = "选择输出",
+					Filter = "log|*.log"
+				};
+				StreamWriter fos=null;
+				if (devMode)
+				{
+					MessageBox.Show("2333");
+					if (fo.ShowDialog() == DialogResult.OK)
+					{
+						fos = new StreamWriter(fo.FileName, false, Encoding.Default);
+					}
+				}
 				string tmpInfo = "";
-				//	using (var fs = new StreamReader(f.FileName, Encoding.Default))
-				//	{
-				//		using (var fos = new StreamWriter(fo.FileName, false, Encoding.Default))
-				//		{
-				//			while ((tmpInfo = fs.ReadLine()) != null)
-				//			{
-				//				var rawInf = EncryptHelper.AESDecrypt(tmpInfo);
-				//				fos.WriteLine(rawInf);
-				//			}
-				//		}
-				//	}
-				//	MessageBox.Show("输出完成");
-				//}
+
+				
 				using (var fs = new StreamReader(f.FileName, Encoding.Default))
 				{
+
 					var cst = new StringBuilder();
 					while ((tmpInfo = fs.ReadLine()) != null)
 					{
 						var rawInf = EncryptHelper.AESDecrypt(tmpInfo);
 						cst.AppendLine(rawInf);
 					}
-					OpShowLog.Text=cst.ToString();
+					if (fos != null) {
+						fos.WriteLine(cst.ToString());
+						fos.Dispose();
+					}
+					OpShowLog.Text = cst.ToString();
 				}
+				
 			}
 		}
 

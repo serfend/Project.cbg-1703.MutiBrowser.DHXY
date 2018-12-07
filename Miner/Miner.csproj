@@ -58,7 +58,7 @@
     <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Interop.MSScriptControl">
@@ -109,6 +109,7 @@
     <Compile Include="..\订单信息服务器\TcpClient.cs">
       <Link>TcpClient.cs</Link>
     </Compile>
+    <Compile Include="ServerHandle\BillPoster.cs" />
     <Compile Include="Util\CmdRasdial.cs" />
     <Compile Include="Goods\Equiment\EquimentPrice.cs" />
     <Compile Include="Goods\Equiment\Equipment.cs" />

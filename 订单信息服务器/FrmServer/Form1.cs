@@ -82,12 +82,11 @@ namespace 订单信息服务器
 		/// <returns></returns>
 		private string GetFreeServer(int singleHdl, string ip, out string taskTitle)
 		{
-			//TODO 暂停终端功能
-			//if (taskAllocatePause)
-			//{
-			//	taskTitle = "休眠状态";
-			//	return "Idle";
-			//}
+			if (taskAllocatePause)
+			{
+				taskTitle = "休眠状态";
+				return "Idle";
+			}
 			var vps = new VPS("", ip);
 			var taskInfo = new StringBuilder();
 			var tTitle = new StringBuilder();
@@ -99,13 +98,13 @@ namespace 订单信息服务器
 					var t = s.Value;
 					t.NowNum--;
 					singleHdl--;
-					vps.hdlServer.Add(t.Id);
+					vps.HdlServer.Add(t.Name);
 					if (taskInfo.Length > 0)
 					{
 						tTitle.Append(",");
 						taskInfo.Append("#");
 					}
-					taskInfo.Append(string.Format("<id>{0}</id><serverName>{1}</serverName><aeroId>{2}</aeroId><aeroName>{3}</aeroName>", t.Id, t.Name, t.AeroId, t.AeroName));
+					taskInfo.Append($"<id>{t.Id}</id><serverName>{t.Name}</serverName><aeroId>{t.AeroId}</aeroId><aeroName>{t.AeroName}</aeroName><loginSession>{t.LoginSession}</loginSession>");
 					tTitle.Append(t.Name);
 				}
 			}
@@ -149,7 +148,7 @@ namespace 订单信息服务器
 			regPreviousGood.SetInfo(ordersn, DateTime.Now.ToString());
 			LstGoodShow.Items.Insert(0, new ListViewItem(tmp));
 			if (LstGoodShow.Items.Count > 10) LstGoodShow.Items[10].Remove();
-			ManagerHttpBase.FitWebShowTime++;
+			
 			var price = priceInfo.Split('/');
 			double priceNum = 0, priceNumAssume = 0;
 			if (price.Length == 2)
@@ -159,10 +158,15 @@ namespace 订单信息服务器
 				priceNumAssume *= (Convert.ToDouble(IpAssumePrice_Rate.Text) / 100);
 				if (priceNum < priceNumAssume)
 				{
+					
 					var earnNum = priceNumAssume - priceNum;
-					ManagerHttpBase.RecordMoneyGet += earnNum;
-					ManagerHttpBase.RecordMoneyGetTime++;
+					if (earnNum / priceNum < 5)
+					{
+						ManagerHttpBase.RecordMoneyGet += earnNum;
+						ManagerHttpBase.RecordMoneyGetTime++;
+					}
 				}
+				ManagerHttpBase.FitWebShowTime++;
 			}
 			SendCmdToBrowserClient(serverName, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceNum}</price><assumePrice>{priceNumAssume }</assumePrice>");
 		}
@@ -246,14 +250,21 @@ namespace 订单信息服务器
 		/// <param name="e"></param>
 		private void LstServerQueue_DoubleClick(object sender, EventArgs e)
 		{
+			var targetServer = LstServerQueue.SelectedItems[0].SubItems[1].Text;
+			if (!serverInfoList.ContainsKey(targetServer)) {
+				var list = new StringBuilder();
+				foreach (var item in serverInfoList) list.AppendLine($"{item.Value.Id}({item.Value.Name}):{item.Value.HdlNum}");
+				MessageBox.Show($"当前区:{targetServer}未进入到列表中:\n{list.ToString()}");
+				return;
+			}
 			if (LstServerQueue.SelectedItems[0].SubItems[4].Text == "启用")
 			{
 				LstServerQueue.SelectedItems[0].SubItems[4].Text = "禁用";
-				serverInfoList[LstServerQueue.SelectedItems[0].SubItems[0].Text].Enable = false;
+				serverInfoList[targetServer].Enable = false;
 			}
 			else
 			{
-				serverInfoList[LstServerQueue.SelectedItems[0].SubItems[0].Text].Enable = true;
+				serverInfoList[targetServer].Enable = true;
 				LstServerQueue.SelectedItems[0].SubItems[4].Text = "启用";
 			}
 			regServerInfo.SetInfo(LstServerQueue.SelectedItems[0].SubItems[0].Text, LstServerQueue.SelectedItems[0].SubItems[4].Text);

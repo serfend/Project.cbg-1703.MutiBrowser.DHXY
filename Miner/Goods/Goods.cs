@@ -83,10 +83,9 @@ namespace Miner
 					}
 					Program.setting.LogInfo(cstr.ToString(), server.ServerName);
 				}
-				Program.Tcp.Send("newCheckBill",MainInfo);
-
-				
-				
+				//TODO vps下单
+				//Server.Server.NewCheckBill(BuyUrl,MainInfo,server.LoginSession);
+				Program.Tcp.Send("newCheckBill",MainInfo);//服务器下单
 			}
 			public string MainInfo
 			{
@@ -171,9 +170,8 @@ namespace Miner
 
 				var sumPrice = goodsPrice + summonPrice + equimentPrice;
 				//var priceRate = Convert.ToDouble(Program.setting.MainReg.In("Setting").In("Price").GetInfo("rate", "100"));
-				var priceRate = 100;
-				Program.setting.LogInfo(string.Format("总估价:({0}+{1}+{2}={3}*{4}%={5}),TimeStamp={6}", goodsPrice,summonPrice,equimentPrice, sumPrice,priceRate, sumPrice*priceRate/100, HttpUtil.TimeStamp), server.ServerName);
-
+				var priceRate =Miner.Server.Server.AssumePriceRate;
+				Program.setting.LogInfo($"总估价:({goodsPrice}+{summonPrice}+{equimentPrice})*{priceRate}={summonPrice}*{priceRate}%={summonPrice*priceRate/100}),TimeStamp={HttpUtil.TimeStamp}",server.ServerName);
 				return sumPrice*priceRate/100;
 			}
 			private double GetGoodsPrice()

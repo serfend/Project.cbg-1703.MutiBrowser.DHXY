@@ -2,11 +2,11 @@
 <?xml-stylesheet type="text/xsl" href="d:\program files (x86)\microsoft visual studio\2017\enterprise\team tools\static analysis tools\fxcop\Xml\CodeAnalysisReport.xsl"?>
 <FxCopReport Version="15.0">
  <Targets>
-  <Target Name="D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\远程连接测试\bin\Debug\远程连接测试.exe">
+  <Target Name="D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\订单信息服务器\bin\Debug\订单信息服务器.exe">
    <Modules>
-    <Module Name="远程连接测试.exe">
+    <Module Name="订单信息服务器.exe">
      <Namespaces>
-      <Namespace Name="远程连接测试.Properties">
+      <Namespace Name="订单信息服务器.Properties">
        <Types>
         <Type Name="Resources" Kind="Class" Accessibility="Assembly" ExternallyVisible="False">
          <Members>

@@ -35,7 +35,6 @@ namespace 订单信息服务器
 							{
 								var hdlServerName = HttpUtil.GetElementInItem(InnerInfo, "clientName");
 								var version = HttpUtil.GetElementInItem(InnerInfo, "version"); version = version.Length > 0 ? version : "未知";
-								version = "未知";//TODO 显示终端版本功能
 								targetItem.SubItems[6].Text = version;
 								targetItem.SubItems[0].Text = hdlServerName;
 								if (InnerInfo.Contains("<browserInit>"))
@@ -114,6 +113,30 @@ namespace 订单信息服务器
 								var tcp = serverManager[targetItem.SubItems[2].Text];
 								tcp.Disconnect();
 							}
+							else if (x.Contains("loginSession"))
+							{
+								if (serverInfoList.ContainsKey(s.clientName))
+								{
+									serverInfoList[s.clientName].LoginSession = InnerInfo;
+									bool anyVpsApply = false;
+									foreach (var vps in allocServer)
+									{
+										if (vps.Value.HdlServer.Contains(s.clientName))
+										{
+											serverManager[vps.Value.Ip].Send($"<SynServerLoginSession><Server><name>{s.clientName}</name><login>{InnerInfo}</login></Server>");
+											anyVpsApply = true;
+										}
+									}
+									if (!anyVpsApply)
+									{
+										AppendLog($"当前无{s.clientName}所需要应用的vps终端");
+									}
+								}
+								else
+								{
+									AppendLog($"无效的浏览器终端:{s.clientName}");
+								}
+							}
 							else
 							{
 								AppendLog("新消息[" + s.clientName + "] " + x + ":" + InnerInfo);
@@ -152,7 +175,7 @@ namespace 订单信息服务器
 						if (allocServer.ContainsKey(x.Ip))
 						{
 							var vps = allocServer[x.Ip];
-							foreach (var server in vps.hdlServer)
+							foreach (var server in vps.HdlServer)
 							{
 								serverInfoList[server].NowNum++;
 							}
@@ -197,7 +220,9 @@ namespace 订单信息服务器
 									var clientTypeCounter = new Dictionary<string, int>();
 									for (int i = 0; i < clientNum; i++)
 									{
-										clientTypeCounter[LstConnection.Items[i].SubItems[1].Text]++;
+										var clientTypeName = LstConnection.Items[i].SubItems[1].Text;
+										if (!clientTypeCounter.ContainsKey(clientTypeName)) clientTypeCounter.Add(clientTypeName, 1);
+										else clientTypeCounter[clientTypeName]++;
 										cst.AppendLine("<tr>");
 										for (int j = 0; j < columnsNum; j++) {
 											cst.Append($"<td>{LstConnection.Items[i].SubItems[j].Text}</td>");
@@ -268,12 +293,12 @@ namespace 订单信息服务器
 				}
 				var hdlNum = info.Length == 5 ? Convert.ToInt32(info[4]) : 1;
 				var s = new HdlServerInfo(info[0], info[1], info[2], info[3], hdlNum);
-				if (serverInfoList.ContainsKey(s.Id))
+				if (serverInfoList.ContainsKey(s.Name))
 				{
 					AppendLog("【警告】重复的区:" + server);
 					continue;
 				}
-				serverInfoList.Add(s.Id, s);
+				serverInfoList.Add(s.Name, s);
 				data[0] = s.Id;//区号
 				data[1] = s.Name;//名称
 				data[2] = "0";//已分配

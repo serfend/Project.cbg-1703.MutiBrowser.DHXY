@@ -95,10 +95,19 @@ namespace Miner.Goods.Equiment
 		public bool Init { get => init; set => init = value; }
 		public Server.Server Server { get => server; set => server = value; }
 		public int Itype { get => itype; set => itype = value; }
+		/// <summary>
+		/// 以itype，取本地【equip_name_dict】库
+		/// </summary>
 		public string Name { get => name; set => name = value; }
+		/// <summary>
+		/// 以商品itype，取本地【equip_desc_dict】库
+		/// </summary>
 		public string DesByType { get => desByType; set => desByType = value; }
 		public string DesByWeb { get => desByWeb; set => desByWeb = value; }
 		public string DesInYellow { get => desInYellow; set => desInYellow = value; }
+		/// <summary>
+		/// 取“原物品”中的名称
+		/// </summary>
 		public string PreviousNameDescription { get => previousNameDescription; set => previousNameDescription = value; }
 	}
 }

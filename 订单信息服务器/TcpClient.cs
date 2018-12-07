@@ -26,7 +26,7 @@ namespace SfTcp
 		{
 			Console.WriteLine("尝试与服务器建立连接.");
 			client = new TcpClient(ip, port);
-			
+			Console.WriteLine("连接建立");
 			stream = client.GetStream();
 			bw = new BinaryWriter(stream);
 			br = new BinaryReader(stream);

@@ -29,9 +29,8 @@ namespace Miner
 		}
 		private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 		{
-
-			MessageBox.Show(e.ExceptionObject.ToString());
 			StartNewProgram();
+			new Task(()=> { MessageBox.Show(e.ExceptionObject.ToString()); }).Start();
 			Thread.Sleep(5000);
 			Environment.Exit(-1); //有此句则不弹异常对话框
 		}
@@ -92,10 +91,10 @@ namespace Miner
 								{
 									if (connectFailTime++ > 30)
 									{
-										//TODO 自动重拨号功能
-										//RedialToInternet();
-										//Program.setting.LogInfo("连接到服务器失败次数达上限,重新拨号", "通讯记录");
-										
+										connectFailTime = 0;
+										RedialToInternet();
+										Program.setting.LogInfo("连接到服务器失败次数达上限,重新拨号", "通讯记录");
+
 									}
 									else {
 										vpsStatus = VpsStatus.Connecting;
@@ -201,6 +200,10 @@ namespace Miner
 				{
 					Environment.Exit(0);
 				}
+				if (xx.Contains("<SynServerLoginSession>"))
+				{
+					SynServerLoginSession(xx);
+				}
 			};
 			Tcp.Disconnected = (x) => {
 				Logger.SysLog("与服务器丢失连接", "主记录");
@@ -208,7 +211,23 @@ namespace Miner
 			};
 			HelloToServer();
 		}
-
+		private static void SynServerLoginSession(string setting)
+		{
+			var modefyServers = HttpUtil.GetAllElements(setting, "<Server>", "</Server>");
+			foreach(var mdServer in modefyServers)
+			{
+				var name = HttpUtil.GetElementInItem(mdServer, "name");
+				var loginSession = HttpUtil.GetElementInItem(mdServer, "login");
+				foreach(var server in servers.HdlServer)
+				{
+					if (server.ServerName == name)
+					{
+						server.LoginSession = loginSession;
+						Program.setting.LogInfo($"服务器登录凭证更新:{server.ServerName}->{loginSession}");
+					}
+				}
+			}
+		}
 		private static void RedialToInternet()
 		{
 			
@@ -268,10 +287,12 @@ namespace Miner
 		public static string InnerTargetUrl { get; internal set; }
 		private static string settingTaskInfo;
 		private static int settingDelayTime;
+		private static double settingAssumePriceRate;
 		private static void InitSetting(string settingInfo)
 		{
 			settingTaskInfo = HttpUtil.GetElementInItem(settingInfo, "task");
 			settingDelayTime = Convert.ToInt32(HttpUtil.GetElementInItem(settingInfo, "interval"));
+			settingAssumePriceRate = Convert.ToDouble(HttpUtil.GetElementInItem(settingInfo, "assumePriceRate"));
 		}
 		private static void SynFile(string xx)
 		{
@@ -310,7 +331,7 @@ namespace Miner
 			SummomPriceRule.Init();
 			Goods.Equiment.EquimentPrice.Init();
 			Program.setting.threadSetting.Status = "初始化完成";
-			servers.Run(settingTaskInfo,settingDelayTime);
+			servers.Run(settingTaskInfo,settingDelayTime,settingAssumePriceRate);
 		}
 		private static void SynSetting(string raw) {
 			var settings = HttpUtil.GetAllElements(raw, "<setting>", "</setting>");

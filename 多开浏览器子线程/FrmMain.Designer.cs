@@ -44,6 +44,7 @@
 			this.ISPrice = new System.Windows.Forms.Label();
 			this.BtnMinimun = new System.Windows.Forms.Button();
 			this.BtnShowBuyList = new System.Windows.Forms.Button();
+			this.BtnSynLoginSession = new System.Windows.Forms.Button();
 			this.menuMain.SuspendLayout();
 			this.GPctlInfo.SuspendLayout();
 			this.SuspendLayout();
@@ -186,11 +187,23 @@
 			this.BtnShowBuyList.Text = "立即下单";
 			this.BtnShowBuyList.UseVisualStyleBackColor = true;
 			// 
+			// BtnSynLoginSession
+			// 
+			this.BtnSynLoginSession.Location = new System.Drawing.Point(142, 9);
+			this.BtnSynLoginSession.Margin = new System.Windows.Forms.Padding(2);
+			this.BtnSynLoginSession.Name = "BtnSynLoginSession";
+			this.BtnSynLoginSession.Size = new System.Drawing.Size(112, 22);
+			this.BtnSynLoginSession.TabIndex = 8;
+			this.BtnSynLoginSession.Text = "同步登录信息";
+			this.BtnSynLoginSession.UseVisualStyleBackColor = true;
+			this.BtnSynLoginSession.Click += new System.EventHandler(this.BtnSynLoginSession_Click);
+			// 
 			// FrmMain
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(900, 627);
+			this.Controls.Add(this.BtnSynLoginSession);
 			this.Controls.Add(this.GPctlInfo);
 			this.Controls.Add(this.LbShowStatus);
 			this.Controls.Add(this.BtnSetBootPage);
@@ -228,6 +241,7 @@
 		private System.Windows.Forms.Label ISPrice;
 		private System.Windows.Forms.Button BtnMinimun;
 		private System.Windows.Forms.Button BtnShowBuyList;
+		private System.Windows.Forms.Button BtnSynLoginSession;
 	}
 }
 
