@@ -85,7 +85,7 @@ namespace Miner
 				}
 				//TODO vps下单
 				//Server.Server.NewCheckBill(BuyUrl,MainInfo,server.LoginSession);
-				Program.Tcp.Send("newCheckBill",MainInfo);//服务器下单
+				Program.Tcp?.Send("newCheckBill",MainInfo);//服务器下单
 			}
 			public string MainInfo
 			{
@@ -296,7 +296,14 @@ namespace Miner
 
 				}
 			}
-
+			/// <summary>
+			/// 用于估价的商品
+			/// </summary>
+			/// <param name="ownerServer"></param>
+			/// <param name="name"></param>
+			/// <param name="id">商品的ordersn</param>
+			/// <param name="info">商品内置原始数据</param>
+			/// <param name="buyUrl"></param>
 			public Goods(Server.Server ownerServer, string name, string id, string info, string buyUrl)
 			{
 				this.BuyUrl = buyUrl;
@@ -314,7 +321,7 @@ namespace Miner
 			public string ID { get => id; set => id = value; }
 			public string BookStatus { get => bookStatus; set => bookStatus = value; }
 			public string Price { get => price; set => price = value; }
-			public string Rank { get => (IFlyupFlag == "1" ? "飞升" : "3转") + rank; set => rank = value; }
+			public string Rank { get =>  rank; set => rank = value; }
 			public string BuyUrl { get => buyUrl; set => buyUrl = value; }
 			public string IFlyupFlag { get => iFlyupFlag; set => iFlyupFlag = value; }
 			public string ITalent { get => iTalent; set => iTalent = value; }

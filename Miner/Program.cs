@@ -15,6 +15,7 @@ using File_Transfer;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Reflection;
+using Miner.ServerHandle;
 
 namespace Miner
 {
@@ -25,7 +26,11 @@ namespace Miner
 		public static SfTcp.SfTcpClient Tcp;
 		private static void StartNewProgram()
 		{
-			Process.Start(Process.GetCurrentProcess().MainModule.FileName);
+			new Thread(() =>
+			{
+				Thread.Sleep(3000);
+				Process.Start(Process.GetCurrentProcess().MainModule.FileName);
+			}).Start();
 		}
 		private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 		{
@@ -72,11 +77,17 @@ namespace Miner
 				
 			rootReg = new Reg("sfMinerDigger");
 			clientId = rootReg.In("Main").In("Setting");
-			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+			
 			int systemBegin = Environment.TickCount;
 			Logger.OnLog += (x, xx) => { Console.WriteLine(xx.LogInfo); };
 			if(rootReg.In("Setting").GetInfo("developeModel")=="1")
 				Logger.IsOnDevelopeModel = true;
+			
+			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+			//{
+			//	Program.setting = new Setting("test");
+			//	ServerRun();
+			//}
 			try
 			{
 				var mainThreadCounter =  rootReg.In("Main").In("Thread").In("Main");
@@ -228,9 +239,9 @@ namespace Miner
 				}
 			}
 		}
-		private static void RedialToInternet()
+		public static void RedialToInternet()
 		{
-			
+			Program.Tcp?.Dispose();
 			var p = new CmdRasdial();
 			p.DisRasdial();
 			var t = new Task(() => {

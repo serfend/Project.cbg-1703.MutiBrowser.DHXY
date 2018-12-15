@@ -14,6 +14,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Windows.Forms;
 using System.Net.Http;
+using Miner.ServerHandle;
 
 namespace Miner
 {
@@ -63,33 +64,36 @@ namespace Miner
 					MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
 				}
 			}
+			#region checkip
 			//private bool isUseSelfIp=true;
 			//private void CheckSelfIp()
 			//{
-				//string selfIp = Program.setting.MainReg.In("Setting").GetInfo("SelfIp");
-				//var result=http.GetAsync("http://pv.sohu.com/cityjson").Result;
-				//var netIp = result.Content.ReadAsStringAsync().Result;
-				//if(netIp.Contains("cip"))
-				//netIp = HttpUtil.GetElement(netIp, "cip\": \"", "\"");
-				//else
-				//{
-				//	Program.setting.threadSetting.Status = "检查本地ip失败"+netIp;
-				//	Environment.Exit(0);
-				//}
-				//isUseSelfIp = netIp.Contains(selfIp);
+			//string selfIp = Program.setting.MainReg.In("Setting").GetInfo("SelfIp");
+			//var result=http.GetAsync("http://pv.sohu.com/cityjson").Result;
+			//var netIp = result.Content.ReadAsStringAsync().Result;
+			//if(netIp.Contains("cip"))
+			//netIp = HttpUtil.GetElement(netIp, "cip\": \"", "\"");
+			//else
+			//{
+			//	Program.setting.threadSetting.Status = "检查本地ip失败"+netIp;
+			//	Environment.Exit(0);
 			//}
+			//isUseSelfIp = netIp.Contains(selfIp);
+			//}
+			#endregion
 			private void ResetConfig(string taskInfo, int delayTime,double assumePriceRate)
 			{
-				ResetTask(taskInfo);
+				//TODO 暂时关闭任务分配 ResetTask(taskInfo);
 				Server.DelayTime = delayTime;
 				Server.DelayTime = Server.DelayTime <= 100 ? 100 : Server.DelayTime;
 				Server.AssumePriceRate = assumePriceRate;
 				
-				if (HdlServer.Count == 0)
-				{
-					Program.setting.threadSetting.Status = ("无需处理的服务器");
-					Program.vpsStatus = Program.VpsStatus.Idle;
-				}
+				//if (HdlServer.Count == 0)
+				//{
+				//	Program.setting.threadSetting.Status = ("无需处理的服务器");
+				//	Program.vpsStatus = Program.VpsStatus.Idle;
+				//}
+
 				Program.setting.threadSetting.RefreshRunTime(0);
 			}
 			private int lastRunTime = 0;
@@ -97,18 +101,46 @@ namespace Miner
 			{
 				lastRunTime = Environment.TickCount;
 				runTimeRecord++;
-				if (HdlServer.Count == 0) {
-					Thread.Sleep(500);
+				var appInterface =new AppInterface();
+
+				var goodList = appInterface.GetGoodList();
+
+				try
+				{
+					var goodDetail = appInterface.GetGoodDetail(0)?.equip;
+					if (goodDetail != null)
+					{
+						var good = new Goods.Goods(new Server(goodDetail.serverid.ToString(), goodDetail.server_name, goodDetail.areaid.ToString(), goodDetail.area_name, ""), goodDetail.equip_name, goodDetail.game_ordersn, goodDetail.equip_desc, goodDetail.equip_detail_url)
+						{
+							Price = goodDetail.price_desc,
+							BookStatus = goodDetail.status_desc,
+							Rank = goodDetail.level_desc
+						};
+						good.CheckAndSubmit();
+					}
+				}
+				catch (GoodListNoDataException ex)
+				{
+					Server.ExitAftert ( $"#:{ex.Message}");
 					Program.anyTaskWorking = false;
 					return;
 				}
-				if (nowIndex == HdlServer.Count) {nowIndex = 0;};
-				if (Program.vpsStatus == Program.VpsStatus.Idle || Program.vpsStatus==Program.VpsStatus.WaitConnect)
+				var interval = Environment.TickCount - lastRunTime;
+				Program.setting.threadSetting.RefreshRunTime(interval);
+
+				#region 暂时关闭
+				//if (HdlServer.Count == 0) {
+				//	Thread.Sleep(500);
+				//	Program.anyTaskWorking = false;
+				//	return;
+				//}
+				//if (nowIndex == HdlServer.Count) {nowIndex = 0;};
+				if (Program.vpsStatus == Program.VpsStatus.Idle || Program.vpsStatus == Program.VpsStatus.WaitConnect)
 				{
 					Program.anyTaskWorking = false;
 					return;
 				}
-				HdlServer[nowIndex].Run(http);
+				//HdlServer[nowIndex].Run(http);
 				if (Program.vpsStatus == Program.VpsStatus.Idle || Program.vpsStatus == Program.VpsStatus.WaitConnect)
 				{
 					Program.anyTaskWorking = false;
@@ -116,7 +148,8 @@ namespace Miner
 				}
 
 
-				Program.setting.threadSetting.Status = string.Format("{1}次: {0}", HdlServer[nowIndex].ServerName, runTimeRecord);
+				Program.setting.threadSetting.Status = string.Format("{1}次: {0}", "App接口", runTimeRecord);
+				#endregion
 				if (new Random().Next(1, 100) > 90)
 				{
 					var t = new Task(() => {
@@ -127,8 +160,7 @@ namespace Miner
 					});
 					t.Start();
 				}
-				var interval = Environment.TickCount - lastRunTime;
-				Program.setting.threadSetting.RefreshRunTime(interval);
+				
 				Thread.Sleep(Server.DelayTime);
 				new Thread(() => {
 					ServerRun(nowIndex + 1);
