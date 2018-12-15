@@ -45,11 +45,12 @@ namespace Miner
 					HdlResult(str);
 				};
 			}
-			public void ExitAftert(string info)
+			public static void ExitAftert(string info)
 			{
 				Program.setting.threadSetting.Status =info;
 				Program.setting.LogInfo(info + "进程关闭","主记录");
 				Program.vpsStatus = Program.VpsStatus.WaitConnect;
+				Program.RedialToInternet();
 			}
 			private void HdlResult(string info)
 			{

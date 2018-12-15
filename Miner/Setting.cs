@@ -48,7 +48,7 @@ namespace Miner
 			set {
 				Program.setting.LogInfo("Status:"+value,"主记录");
 				var contentValue = value.Length > 10 ? value.Substring(0, 10) : value;
-				Program.Tcp.Send("Status", contentValue );
+				Program.Tcp?.Send("Status", contentValue );
 			}
 		}
 		private int delaySumCount=0;
@@ -57,14 +57,14 @@ namespace Miner
 		{
 			if (interval == 0)
 			{
-				Program.Tcp.Send("heartBeat", "");
+				Program.Tcp?.Send("heartBeat", "");
 			}
 			else
 			{
 				if (delaySumCount < 10) delaySumCount++;
 				 totalDelayTime += (interval-totalDelayTime)/ delaySumCount;
 				//记录10次刷新的平均值
-				Program.Tcp.Send("RHB", (totalDelayTime).ToString());
+				Program.Tcp?.Send("RHB", (totalDelayTime).ToString());
 				
 			}
 		}

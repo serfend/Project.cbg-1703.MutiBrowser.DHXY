@@ -1,6 +1,43 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="d:\program files (x86)\microsoft visual studio\2017\enterprise\team tools\static analysis tools\fxcop\Xml\CodeAnalysisReport.xsl"?>
 <FxCopReport Version="15.0">
+ <Targets>
+  <Target Name="D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Miner.exe">
+   <Modules>
+    <Module Name="miner.exe">
+     <Namespaces>
+      <Namespace Name="Miner.ServerHandle">
+       <Types>
+        <Type Name="AppInterface" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#Dispose(System.Boolean)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message Id="http" TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213" Status="Active" Created="2018-12-14 07:40:38Z" FixCategory="NonBreaking">
+             <Issue Certainty="75" Level="Warning" Path="D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\ServerHandle" File="AppInterface.cs" Line="84">'AppInterface' 包含 IDisposable 类型的字段 'AppInterface.http': 'HttpClient'。请更改 'AppInterface' 的 Dispose 方法，使其针对该字段调用 Dispose 或 Close。</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+ </Targets>
+ <Rules>
+  <Rule TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213">
+   <Name>应释放可释放的字段</Name>
+   <Description>如果实现了 IDisposable 的类型拥有同样实现 IDisposable 的字段，则封装类型的 Dispose() 实现应对每个可释放字段调用 Dispose()。</Description>
+   <Resolution Name="Default">{0} 包含 IDisposable 类型的字段 {1}: {2}。请更改 {0} 的 Dispose 方法，使其针对该字段调用 Dispose 或 Close。</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182328.aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="75">Warning</MessageLevel>
+   <File Name="usagerules.dll" Version="15.0.0.0" />
+  </Rule>
+ </Rules>
  <Localized>
   <String Key="Category">类别</String>
   <String Key="Certainty">确定性</String>

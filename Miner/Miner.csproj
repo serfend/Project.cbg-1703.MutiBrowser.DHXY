@@ -109,6 +109,8 @@
     <Compile Include="..\订单信息服务器\TcpClient.cs">
       <Link>TcpClient.cs</Link>
     </Compile>
+    <Compile Include="ServerHandle\AppInterface.cs" />
+    <Compile Include="ServerHandle\AppInterfaceData.cs" />
     <Compile Include="ServerHandle\BillPoster.cs" />
     <Compile Include="Util\CmdRasdial.cs" />
     <Compile Include="Goods\Equiment\EquimentPrice.cs" />

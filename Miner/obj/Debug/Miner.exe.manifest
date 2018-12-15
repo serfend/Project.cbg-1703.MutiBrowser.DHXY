@@ -3,7 +3,7 @@
   <asmv1:assemblyIdentity name="Miner.exe" version="1.0.1.1" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
   <application />
   <entryPoint>
-    <assemblyIdentity name="Miner" version="2.1.1.3" language="neutral" processorArchitecture="msil" />
+    <assemblyIdentity name="Miner" version="2.2.0.21" language="neutral" processorArchitecture="msil" />
     <commandLine file="Miner.exe" parameters="" />
   </entryPoint>
   <trustInfo>
@@ -54,14 +54,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Miner.exe" size="80896">
-      <assemblyIdentity name="Miner" version="2.1.1.3" language="neutral" processorArchitecture="msil" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Miner.exe" size="103424">
+      <assemblyIdentity name="Miner" version="2.2.0.21" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>MaOqxRe/T1+Fk0OoNyKMNNCEoMI=</dsig:DigestValue>
+        <dsig:DigestValue>vZgEdhnyf+yo/ZJVZ9BHQxZN/uc=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

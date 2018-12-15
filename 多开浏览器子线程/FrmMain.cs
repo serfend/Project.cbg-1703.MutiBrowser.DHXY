@@ -58,10 +58,7 @@ namespace 多开浏览器子线程
 			this.Top = tmpBounds[1];
 			this.Width = tmpBounds[2];
 			this.Height = tmpBounds[3];
-			if (Program.Tcp == null || Program.Tcp.client == null || !Program.Tcp.client.Connected)
-			{
-				this.Close();
-			}
+			
 			Program.Tcp.RecieveMessage += ReceiveMessage;
 			Program.Tcp.Send("clientConnect", $"<browserInit><clientName>{CCmd.GetWebInfo("name")}</clientName><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>{Assembly.GetExecutingAssembly().GetName().Version}</version></browserInit>");
 
