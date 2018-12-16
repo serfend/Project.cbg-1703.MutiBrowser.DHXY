@@ -60,7 +60,7 @@ namespace 订单信息服务器
 								if (flag)
 								{
 									BuildNewTaskToVps(s, out string taskTitle);
-									targetItem.SubItems[5].Text = taskTitle;
+									targetItem.SubItems[5].Text = "采集进程"; //taskTitle;
 									SynLstTask();
 								}
 							}
@@ -86,7 +86,11 @@ namespace 订单信息服务器
 								}
 								else
 								{
-									s.Send("<serverRun>");//无需同步
+									hdlVpsTaskScheduleQueue.Enqueue(s.Ip);//s.Send("<serverRun>");//无需同步
+									if (!AvailableVps.ContainsKey(s.Ip))
+										AvailableVps.Add(s.Ip, true);
+									else
+										AvailableVps[s.Ip]= true;
 								}
 
 							}
@@ -112,6 +116,28 @@ namespace 订单信息服务器
 								targetItem.SubItems[3].Text = "VPS重拨号中";
 								var tcp = serverManager[targetItem.SubItems[2].Text];
 								tcp.Disconnect();
+							}
+							else if (x.Contains("clientWait"))
+							{
+								var interval = Convert.ToInt32(InnerInfo);
+								if (interval == -101)
+								{
+									//已开始作业
+									targetItem.SubItems[3].Text = "采集作业中";
+								}else if (interval <= 0)
+								{
+									targetItem.SubItems[3].Text = $"已处理:{-interval},等待下次分配";
+									NewVpsAvailable(s.Ip);
+								}
+								else
+								{
+									targetItem.SubItems[3].Text = $"等待{interval}ms";
+								}
+							}
+							else if (x.Contains("clientConfigComplete"))
+							{
+								targetItem.SubItems[3].Text = "初始化完成";
+								NewVpsAvailable(s.Ip);
 							}
 							else if (x.Contains("loginSession"))
 							{
@@ -171,7 +197,11 @@ namespace 订单信息服务器
 						//AppendLog("已断开:" + x.Ip);
 						for (int i = 0; i < LstConnection.Items.Count; i++)
 							if (LstConnection.Items[i].SubItems[2].Text == x.Ip)
+							{
 								LstConnection.Items.RemoveAt(i);
+								AvailableVps[x.Ip] = false;
+								break;
+							}
 						if (allocServer.ContainsKey(x.Ip))
 						{
 							var vps = allocServer[x.Ip];
@@ -279,6 +309,16 @@ namespace 订单信息服务器
 				}
 			};
 		}
+
+		private void NewVpsAvailable(string ip)
+		{
+			hdlVpsTaskScheduleQueue.Enqueue(ip);//s.Send("<serverRun>");//无需同步
+			if (!AvailableVps.ContainsKey(ip))
+				AvailableVps.Add(ip, true);
+			else
+				AvailableVps[ip] = true;
+		}
+
 		private void InitServerTaskList()
 		{
 			var serverInfo = File.ReadAllLines("ServerInfo.txt", Encoding.Default);

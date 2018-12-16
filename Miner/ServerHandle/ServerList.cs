@@ -20,16 +20,13 @@ namespace Miner
 {
 	namespace Server
 	{
-		class ServerList:IDisposable
+		class ServerList
 		{
-			private HttpClient http;
 			private List<Server> hdlServer;
 			public ServerList()
 			{
 				HdlServer = new List<Server>();
 
-				//此版本仅适用本机vps
-				http = new HttpClient();
 			}
 			public void ResetTask(string taskCmd)
 			{
@@ -52,18 +49,7 @@ namespace Miner
 				Program.setting.threadSetting.Status = string.Format("目标服务器加载完成,共计{0}个", HdlServer.Count);
 			}
 			private int runTimeRecord = 0;
-			public void Run(string taskInfo, int delayTime,double assumePriceRate )
-			{
-				try
-				{
-					ResetConfig(taskInfo,delayTime, assumePriceRate);
-					ServerRun(0);
-				}
-				catch (Exception ex)
-				{
-					MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
-				}
-			}
+			
 			#region checkip
 			//private bool isUseSelfIp=true;
 			//private void CheckSelfIp()
@@ -81,7 +67,7 @@ namespace Miner
 			//isUseSelfIp = netIp.Contains(selfIp);
 			//}
 			#endregion
-			private void ResetConfig(string taskInfo, int delayTime,double assumePriceRate)
+			public void ResetConfig(string taskInfo, int delayTime,double assumePriceRate)
 			{
 				//TODO 暂时关闭任务分配 ResetTask(taskInfo);
 				Server.DelayTime = delayTime;
@@ -97,101 +83,99 @@ namespace Miner
 				Program.setting.threadSetting.RefreshRunTime(0);
 			}
 			private int lastRunTime = 0;
-			private void ServerRun(int nowIndex)
+			private AppInterface appInterface = new AppInterface();
+			public void ServerRun()
 			{
 				lastRunTime = Environment.TickCount;
 				runTimeRecord++;
-				var appInterface =new AppInterface();
-
-				var goodList = appInterface.GetGoodList();
-
+				int hdlGoodNum = 0;
 				try
 				{
-					var goodDetail = appInterface.GetGoodDetail(0)?.equip;
-					if (goodDetail != null)
+					var goodList = appInterface.GetGoodList();
+					var list = appInterface.GetNeedHandle();
+					foreach(var goodItem in list)
 					{
-						var good = new Goods.Goods(new Server(goodDetail.serverid.ToString(), goodDetail.server_name, goodDetail.areaid.ToString(), goodDetail.area_name, ""), goodDetail.equip_name, goodDetail.game_ordersn, goodDetail.equip_desc, goodDetail.equip_detail_url)
+						var goodDetailRaw =appInterface.GetGoodDetail(goodItem);
+						if (goodDetailRaw != null)
 						{
-							Price = goodDetail.price_desc,
-							BookStatus = goodDetail.status_desc,
-							Rank = goodDetail.level_desc
-						};
-						good.CheckAndSubmit();
+							var goodDetail = goodDetailRaw.equip;
+							var good = new Goods.Goods(new Server(goodDetail.serverid.ToString(), goodDetail.server_name, goodDetail.areaid.ToString(), goodDetail.area_name, ""), goodDetail.equip_name, goodDetail.game_ordersn, goodDetail.equip_desc, goodDetail.equip_detail_url)
+							{
+								Price = goodDetail.price_desc,
+								BookStatus = goodDetail.status_desc,
+								Rank = goodDetail.level_desc
+							};
+							good.CheckAndSubmit();
+							hdlGoodNum++;
+						}
 					}
+					Thread.Sleep(200);//TODO 后期需要时取消
+					Program.Tcp?.Send("clientWait", $"-{hdlGoodNum}");
 				}
-				catch (GoodListNoDataException ex)
-				{
-					Server.ExitAftert ( $"#:{ex.Message}");
-					Program.anyTaskWorking = false;
-					return;
-				}
-				var interval = Environment.TickCount - lastRunTime;
-				Program.setting.threadSetting.RefreshRunTime(interval);
-
-				#region 暂时关闭
-				//if (HdlServer.Count == 0) {
-				//	Thread.Sleep(500);
+				//catch (GoodListNoDataException ex)
+				//{
+				//	Program.Tcp?.Send("clientWait", "-1");
+				//	Server.ExitAftert ( $"#:{ex.Message}");
 				//	Program.anyTaskWorking = false;
 				//	return;
 				//}
-				//if (nowIndex == HdlServer.Count) {nowIndex = 0;};
-				if (Program.vpsStatus == Program.VpsStatus.Idle || Program.vpsStatus == Program.VpsStatus.WaitConnect)
+				catch (Exception ex)
 				{
+					Program.Tcp?.Send("clientWait", "-1");
+					Server.ExitAftert($"#:{ex.Message}");
 					Program.anyTaskWorking = false;
 					return;
 				}
-				//HdlServer[nowIndex].Run(http);
-				if (Program.vpsStatus == Program.VpsStatus.Idle || Program.vpsStatus == Program.VpsStatus.WaitConnect)
+				try
 				{
+
+					var interval = Environment.TickCount - lastRunTime;
+					Program.setting.threadSetting.RefreshRunTime(interval);
+
+					#region 暂时关闭
+					//if (HdlServer.Count == 0) {
+					//	Thread.Sleep(500);
+					//	Program.anyTaskWorking = false;
+					//	return;
+					//}
+					//if (nowIndex == HdlServer.Count) {nowIndex = 0;};
+					if (Program.vpsStatus == Program.VpsStatus.Idle || Program.vpsStatus == Program.VpsStatus.WaitConnect)
+					{
+						Program.anyTaskWorking = false;
+						return;
+					}
+					if (Program.vpsStatus == Program.VpsStatus.Idle || Program.vpsStatus == Program.VpsStatus.WaitConnect)
+					{
+						Program.anyTaskWorking = false;
+						return;
+					}
+
+
+					//Program.setting.threadSetting.Status = string.Format("{1}次: {0}", "App接口", runTimeRecord);
+					#endregion
+					//if (new Random().Next(1, 100) > 90)
+					//{
+					//	var t = new Task(() => {
+					//		var targetUrl = Program.InnerTargetUrl;
+					//		if (targetUrl == null || targetUrl.Length == 0 || targetUrl == "null") return;
+					//		var targetResult = http.GetAsync(targetUrl);
+					//		var myResponseStream = targetResult.Result.Content.ReadAsStreamAsync().Result;
+					//	});
+					//	t.Start();
+					//}
+
+				}
+				catch (Exception ex)
+				{
+					Program.Tcp?.Send("clientWait", "-1");
+					Server.ExitAftert($"处理结束后发生异常:{ex.Message}");
 					Program.anyTaskWorking = false;
 					return;
 				}
-
-
-				Program.setting.threadSetting.Status = string.Format("{1}次: {0}", "App接口", runTimeRecord);
-				#endregion
-				if (new Random().Next(1, 100) > 90)
-				{
-					var t = new Task(() => {
-						var targetUrl = Program.InnerTargetUrl;
-						if (targetUrl==null||targetUrl.Length == 0|| targetUrl=="null") return;
-						var targetResult=http.GetAsync(targetUrl);
-						var myResponseStream = targetResult.Result.Content.ReadAsStreamAsync().Result;
-					});
-					t.Start();
-				}
-				
-				Thread.Sleep(Server.DelayTime);
-				new Thread(() => {
-					ServerRun(nowIndex + 1);
-				}).Start();
 			}
-
-			#region IDisposable Support
-			private bool disposedValue = false; // 要检测冗余调用
 
 			public List<Server> HdlServer { get => hdlServer; set => hdlServer = value; }
 
-			protected virtual void Dispose(bool disposing)
-			{
-				if (!disposedValue)
-				{
-					if (disposing)
-					{
-						if (http != null) http.Dispose();
-					}
-					http = null;
-					disposedValue = true;
-				}
-			}
-
-			// 添加此代码以正确实现可处置模式。
-			public void Dispose()
-			{
-				// 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
-				Dispose(true);
-			}
-			#endregion
 
 		}
 		

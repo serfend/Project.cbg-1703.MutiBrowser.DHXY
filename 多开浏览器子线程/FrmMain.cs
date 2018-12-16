@@ -47,7 +47,7 @@ namespace 多开浏览器子线程
 					CheckNewCmd(cmd,targetUrl);
 					if (heartBeatCount > 1000)
 					{
-						Program.Tcp.Send("heartBeat", "");
+						Program.Tcp?.Send("heartBeat", "");
 					}
 				}
 			}) { IsBackground = true };
@@ -60,7 +60,7 @@ namespace 多开浏览器子线程
 			this.Height = tmpBounds[3];
 			
 			Program.Tcp.RecieveMessage += ReceiveMessage;
-			Program.Tcp.Send("clientConnect", $"<browserInit><clientName>{CCmd.GetWebInfo("name")}</clientName><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>{Assembly.GetExecutingAssembly().GetName().Version}</version></browserInit>");
+			Program.Tcp?.Send("clientConnect", $"<browserInit><clientName>{CCmd.GetWebInfo("name")}</clientName><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>{Assembly.GetExecutingAssembly().GetName().Version}</version></browserInit>");
 
 			ThreadMonitor.Start();
 
@@ -92,7 +92,7 @@ namespace 多开浏览器子线程
 
 		private void SynLoginSession()
 		{
-			Program.Tcp.Send("loginSession",$"sid={GetNowLoginCookies()}");
+			Program.Tcp?.Send("loginSession",$"sid={GetNowLoginCookies()}");
 			Text = "已同步登录状态到服务器";
 		}
 
@@ -184,7 +184,7 @@ namespace 多开浏览器子线程
 			//未登录=》登录超时，请重新登录！
 			//返回订单信息
 			var cookiesLogin = $"sid={GetNowLoginCookies()}";
-			Program.Tcp.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><buildBill></buildBill></client.command>");
+			Program.Tcp?.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><buildBill></buildBill></client.command>");
 			http.Item.Request.Cookies +=  cookiesLogin;
 			http.GetHtml(url,callBack:(x)=> {
 				var info =x.response.DataString(Encoding.Default);
@@ -197,7 +197,7 @@ namespace 多开浏览器子线程
 						if (success)
 						{
 							var t = new Task(() => {
-								Program.Tcp.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
+								Program.Tcp?.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
 								this.Invoke((EventHandler)delegate {
 									Text = ("下单成功 " + url);
 								});
@@ -209,7 +209,7 @@ namespace 多开浏览器子线程
 						{
 							var t = new Task(() => {
 								this.Invoke((EventHandler)delegate {
-									Program.Tcp.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>"+ result+"</client.command>");
+									Program.Tcp?.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>"+ result+"</client.command>");
 									Text = (result + "\n" + url);
 								});
 							}
@@ -300,7 +300,7 @@ namespace 多开浏览器子线程
 					{
 						LbShowStatus.Text += ",用户主动提交";
 						WebShow.Document.GetElementById("equip_info").InvokeMember("submit");
-						Program.Tcp.Send("BrowserClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
+						Program.Tcp?.Send("BrowserClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
 					}
 					else if (canSubmit)
 					{

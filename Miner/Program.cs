@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Reflection;
 using Miner.ServerHandle;
+using Miner.Util;
 
 namespace Miner
 {
@@ -35,7 +36,7 @@ namespace Miner
 		private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
 		{
 			StartNewProgram();
-			new Task(()=> { MessageBox.Show(e.ExceptionObject.ToString()); }).Start();
+			new Task(()=> { MessageBox.Show("UnhandledException"+e.ExceptionObject.ToString()); }).Start();
 			Thread.Sleep(5000);
 			Environment.Exit(-1); //有此句则不弹异常对话框
 		}
@@ -83,7 +84,7 @@ namespace Miner
 			if(rootReg.In("Setting").GetInfo("developeModel")=="1")
 				Logger.IsOnDevelopeModel = true;
 			
-			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+			//AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 			//{
 			//	Program.setting = new Setting("test");
 			//	ServerRun();
@@ -100,7 +101,7 @@ namespace Miner
 							{
 								if (disconnectTime++ > 10 && anyTaskWorking == false)
 								{
-									if (connectFailTime++ > 30)
+									if (connectFailTime++ > 2)
 									{
 										connectFailTime = 0;
 										RedialToInternet();
@@ -129,7 +130,15 @@ namespace Miner
 						case VpsStatus.Running:
 						case VpsStatus.Syning:
 							{
-								connectFailTime = 0;
+								
+								if (Tcp==null)
+								{
+									vpsStatus = VpsStatus.WaitConnect;
+								}
+								else
+								{
+									connectFailTime =0;
+								}
 								break;
 							}
 
@@ -157,7 +166,6 @@ namespace Miner
 			}
 			try
 			{
-
 				Tcp = new SfTcp.SfTcpClient(TcpMainTubeIp, TcpMainTubePort);
 			}
 			catch (Exception ex)
@@ -166,6 +174,7 @@ namespace Miner
 				vpsStatus = VpsStatus.WaitConnect;
 				return;
 			}
+			if (Tcp == null) return;
 			Tcp.RecieveMessage = (x, xx) =>{
 				Logger.SysLog(xx, "通讯记录");
 				if (xx.Contains("<setClientName>"))
@@ -182,7 +191,7 @@ namespace Miner
 					Tcp.Send("InitComplete", "");
 				}
 				if (xx.Contains("<serverRun>")){
-					ServerRun();
+					ServerResetConfig();
 				}
 				if (xx.Contains("<setting>"))
 				{
@@ -215,10 +224,41 @@ namespace Miner
 				{
 					SynServerLoginSession(xx);
 				}
+				if (xx.Contains("<newScheduleServerRun>"))
+				{
+					vpsStatus = VpsStatus.Running;
+					//TODO 此处实现时统无效，待以后修正
+					//var sendStamp =Convert.ToInt64( HttpUtil.GetElementInItem(xx,"sendStamp"));
+					//var sendStampStruct =SystemTimeWin32.FromStamp(sendStamp);
+					//var result = SystemTimeWin32.SetSystemTime(ref sendStampStruct);
+					new Thread(()=> {
+						var nextRuntimeStamp = Convert.ToInt64(HttpUtil.GetElementInItem(xx, "taskStamp"));
+						//var tickCount = HttpUtil.TimeStamp;
+						//Console.WriteLine(tickCount);
+						var beginTime = Environment.TickCount;
+						if (nextRuntimeStamp > 0)
+						{
+							while(beginTime - Environment.TickCount + nextRuntimeStamp >= 500)
+							{
+								long interval = beginTime- Environment.TickCount  + nextRuntimeStamp;
+								Tcp.Send("clientWait", interval.ToString());
+								Thread.Sleep(500);
+							}
+							long leftInterval = beginTime - Environment.TickCount + nextRuntimeStamp;
+							if(leftInterval>0)Thread.Sleep((int)leftInterval);
+						}
+						Tcp.Send("clientWait", "-101");
+						servers.ServerRun();
+					}).Start();
+				}
 			};
 			Tcp.Disconnected = (x) => {
 				Logger.SysLog("与服务器丢失连接", "主记录");
+				Tcp.Dispose();
+				Tcp = null;
+				anyTaskWorking = false;
 				Program.vpsStatus = VpsStatus.WaitConnect;
+				
 			};
 			HelloToServer();
 		}
@@ -257,7 +297,7 @@ namespace Miner
 			var vpsName = clientId.GetInfo("VpsClientId", "null");
 			var clientDeviceId = clientId.GetInfo("clientDeviceId", HttpUtil.UUID);
 			clientId.SetInfo("clientDeviceId", clientDeviceId);
-			Tcp.Send("clientConnect", $"<clientName>{vpsName}</clientName><clientDeviceId>{clientDeviceId}</clientDeviceId><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>");
+			Tcp?.Send("clientConnect", $"<clientName>{vpsName}</clientName><clientDeviceId>{clientDeviceId}</clientDeviceId><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>");
 		}
 		private static void TranslateFileStart()
 		{
@@ -281,7 +321,7 @@ namespace Miner
 					if (fileNowReceive >= fileWaitToUpdate)
 					{
 						setting.LogInfo("文件已同步完成");
-						ServerRun();
+						ServerResetConfig();
 						return;
 					}
 					fileEngine.ReceiveFile(Environment.CurrentDirectory + "/setting");
@@ -330,19 +370,19 @@ namespace Miner
 			}
 			else
 			{
-				ServerRun();
+				ServerResetConfig();
 			}
 		}
 		public static bool anyTaskWorking = false;
-		private  static void ServerRun()
+		private  static void ServerResetConfig()
 		{
 			vpsStatus = VpsStatus.Running;
 			anyTaskWorking = true;
 			servers = new ServerList();
 			SummomPriceRule.Init();
 			Goods.Equiment.EquimentPrice.Init();
-			Program.setting.threadSetting.Status = "初始化完成";
-			servers.Run(settingTaskInfo,settingDelayTime,settingAssumePriceRate);
+			servers.ResetConfig(settingTaskInfo,settingDelayTime,settingAssumePriceRate);
+			Tcp.Send("clientConfigComplete", "");
 		}
 		private static void SynSetting(string raw) {
 			var settings = HttpUtil.GetAllElements(raw, "<setting>", "</setting>");

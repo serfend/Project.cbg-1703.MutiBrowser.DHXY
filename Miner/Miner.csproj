@@ -55,10 +55,16 @@
     <ManifestKeyFile>Miner_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Interop.MSScriptControl">
@@ -126,6 +132,7 @@
     <Compile Include="Setting.cs" />
     <Compile Include="Goods\Summon\Summon.cs" />
     <Compile Include="Goods\Summon\SummonPrice.cs" />
+    <Compile Include="Util\NativeMethod.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\..\..\..\..\util\Input\InputBox.resx">
@@ -134,6 +141,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Properties\app.manifest" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="WinHttp">

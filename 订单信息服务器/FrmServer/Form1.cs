@@ -17,19 +17,18 @@ namespace 订单信息服务器
 	public partial class Form1 : Form
 	{
 		private TcpServerManager serverManager;
-		private Reg regPreviousGood;
 		private Reg regSetting;
 		public Form1()
 		{
 			regSetting = new Reg("sfMinerDigger").In("Setting");
 			regSettingVps = regSetting.In("vps");
 			regServerInfo = regSetting.In("ServerInfo");
-			regPreviousGood = regSetting.In("Goods").In("history");
 			InitializeComponent();
 			InitHistorySettingOnFormctl();
 			InitTransferEngine();
 			InitServerTaskList();
 			InitServerManager();
+			StartTaskSchedule();
 			LstConnection.AfterLabelEdit += CheckIfUserEditName;
 		}
 		private bool ctlSaveLoaded = false;
@@ -72,7 +71,7 @@ namespace 订单信息服务器
 
 
 
-		private bool taskAllocatePause = false;
+		private bool _taskAllocatePause = false;
 		/// <summary>
 		/// 无需要的任务时则返回"Idle"，终端进入休眠模式，30秒后再次询问
 		/// </summary>
@@ -82,7 +81,7 @@ namespace 订单信息服务器
 		/// <returns></returns>
 		private string GetFreeServer(int singleHdl, string ip, out string taskTitle)
 		{
-			if (taskAllocatePause)
+			if (_taskAllocatePause)
 			{
 				taskTitle = "休眠状态";
 				return "Idle";
@@ -114,7 +113,10 @@ namespace 订单信息服务器
 			allocServer.Add(vps.Ip, vps);
 			return taskInfo.ToString();
 		}
-
+		/// <summary>
+		/// 检查订单号是否被处理过
+		/// </summary>
+		private Dictionary<string, bool> _BillRecord = new Dictionary<string, bool>();
 		/// <summary>
 		/// 将新的物品添加到商品列表
 		/// </summary>
@@ -122,53 +124,58 @@ namespace 订单信息服务器
 		/// <param name="InnerInfo"></param>
 		private void HdlNewCheckBill(string sender, string InnerInfo)
 		{
-			var tmp = InnerInfo.Split(new string[] { "##" }, StringSplitOptions.None);
-			if (tmp.Length < 9)
+			try
 			{
-				AppendLog(sender + " 无效的订单信息:" + InnerInfo);
-				return;
-			}
-			var serverName = tmp[0];
-			var goodName = tmp[1];
-			var priceInfo = tmp[2];
-			var Rank = tmp[3];
-			var ITalent = tmp[4];
-			var IAchievement = tmp[5];
-			var IChengjiu = tmp[6];
-			var ISingleEnergyRate = tmp[7];
-			var BuyUrl = tmp[8];
-
-			var ordersn = HttpUtil.GetElement(BuyUrl, "ordersn=", "&");
-			var previousRecord = regPreviousGood.GetInfo(ordersn);
-			if (previousRecord != "" && ordersn != "")
-			{
-				AppendLog(previousRecord + "已出现过此订单," + serverName);
-				return;
-			}
-			regPreviousGood.SetInfo(ordersn, DateTime.Now.ToString());
-			LstGoodShow.Items.Insert(0, new ListViewItem(tmp));
-			if (LstGoodShow.Items.Count > 10) LstGoodShow.Items[10].Remove();
-			
-			var price = priceInfo.Split('/');
-			double priceNum = 0, priceNumAssume = 0;
-			if (price.Length == 2)
-			{
-				priceNum = Convert.ToDouble(price[0]);
-				priceNumAssume = Convert.ToDouble(price[1]);
-				priceNumAssume *= (Convert.ToDouble(IpAssumePrice_Rate.Text) / 100);
-				if (priceNum < priceNumAssume)
+				var tmp = InnerInfo.Split(new string[] { "##" }, StringSplitOptions.None);
+				if (tmp.Length < 9)
 				{
-					
-					var earnNum = priceNumAssume - priceNum;
-					if (earnNum / priceNum < 5)
-					{
-						ManagerHttpBase.RecordMoneyGet += earnNum;
-						ManagerHttpBase.RecordMoneyGetTime++;
-					}
+					AppendLog(sender + " 无效的订单信息:" + InnerInfo);
+					return;
 				}
-				ManagerHttpBase.FitWebShowTime++;
+				var serverName = tmp[0];
+				var goodName = tmp[1];
+				var priceInfo = tmp[2];
+				var Rank = tmp[3];
+				var ITalent = tmp[4];
+				var IAchievement = tmp[5];
+				var IChengjiu = tmp[6];
+				var ISingleEnergyRate = tmp[7];
+				var BuyUrl = tmp[8];
+				if (_BillRecord.ContainsKey(BuyUrl))
+				{
+					//AppendLog(ordersn + "已出现过此订单," + serverName);
+					return;
+				}
+				AppendLog("新的订单:" + BuyUrl);
+				_BillRecord.Add(BuyUrl, true);
+				LstGoodShow.Items.Insert(0, new ListViewItem(tmp));
+				if (LstGoodShow.Items.Count > 10) LstGoodShow.Items[10].Remove();
+
+				var price = priceInfo.Split('/');
+				double priceNum = 0, priceNumAssume = 0;
+				if (price.Length == 2)
+				{
+					priceNum = Convert.ToDouble(price[0]);
+					priceNumAssume = Convert.ToDouble(price[1]);
+					//priceNumAssume *= (Convert.ToDouble(IpAssumePrice_Rate.Text) / 100);
+					if (priceNum < priceNumAssume)
+					{
+
+						var earnNum = priceNumAssume - priceNum;
+						if (earnNum / priceNum < 5)
+						{
+							ManagerHttpBase.RecordMoneyGet += earnNum;
+							ManagerHttpBase.RecordMoneyGetTime++;
+						}
+					}
+					ManagerHttpBase.FitWebShowTime++;
+				}
+				SendCmdToBrowserClient(serverName, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceNum}</price><assumePrice>{priceNumAssume }</assumePrice>");
 			}
-			SendCmdToBrowserClient(serverName, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceNum}</price><assumePrice>{priceNumAssume }</assumePrice>");
+			catch (Exception ex)
+			{
+				AppendLog("订单处理异常:"+ex.Message);
+			}
 		}
 		
 		
@@ -294,8 +301,8 @@ namespace 订单信息服务器
 		}
 		private void CmdPauseTaskAllocate_Click(object sender, EventArgs e)
 		{
-			taskAllocatePause = !taskAllocatePause;
-			if (taskAllocatePause) CmdPauseTaskAllocate.Text = "唤醒终端";
+			_taskAllocatePause = !_taskAllocatePause;
+			if (_taskAllocatePause) CmdPauseTaskAllocate.Text = "唤醒终端";
 			else CmdPauseTaskAllocate.Text = "暂停终端";
 		}
 		#endregion

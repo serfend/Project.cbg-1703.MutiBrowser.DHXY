@@ -82,6 +82,7 @@ namespace 订单信息服务器
 				IpPerVPShdl.Text = singleHdl.ToString();
 			}
 			string hdlServer = GetFreeServer(singleHdl, s.Ip, out taskTitle);
+			hdlServer = "";//TODO 取消区分配
 			int interval = 1500, timeout = 100000;
 			double assumePriceRate = 100;
 			try

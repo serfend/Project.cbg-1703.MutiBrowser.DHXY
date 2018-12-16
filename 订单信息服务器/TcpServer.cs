@@ -153,7 +153,9 @@ namespace SfTcp
 			var title = HttpUtil.GetElement(info, "<", ">");
 			if (info.IndexOf("</" + title + ">", 0) < 0) return;
 			var content = HttpUtil.GetElement(info, ">", "<");
-			if(TcpServer.UseAesTransport)content = EncryptHelper.AESDecrypt(content);
+			if (TcpServer.UseAesTransport) {
+				content = EncryptHelper.AESDecrypt(content);
+			}
 			else content = EncryptHelper.Base64Decode(content);
 			Receive?.BeginInvoke(title, content, this,(x)=> { },null);
 		}

@@ -110,7 +110,7 @@ namespace Miner
 				var handler = new HttpClientHandler() { UseCookies = false };
 				var client = new HttpClient(handler);
 				client.DefaultRequestHeaders.Add("Cookie", loginSession);
-				Program.Tcp.Send("newCheckBill", mainInfo);
+				Program.Tcp?.Send("newCheckBill", mainInfo);
 				var resultStream=client.GetAsync(url).Result.Content.ReadAsStreamAsync().Result;
 				using (var reader = new StreamReader(resultStream, Encoding.Default))
 				{
@@ -123,7 +123,7 @@ namespace Miner
 						{
 							var t = new Task(() =>
 							{
-								Program.Tcp.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
+								Program.Tcp?.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
 								Program.setting.LogInfo( $"下单成功 {url}", "下单记录");
 							}
 								);
@@ -133,7 +133,7 @@ namespace Miner
 						{
 							var t = new Task(() =>
 							{
-								Program.Tcp.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>" + result + "</client.command>");
+								Program.Tcp?.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>" + result + "</client.command>");
 								Program.setting.LogInfo( $"{result}\n{url}","下单记录");
 							}
 							);

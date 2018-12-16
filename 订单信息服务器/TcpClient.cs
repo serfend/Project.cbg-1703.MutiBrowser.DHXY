@@ -25,15 +25,7 @@ namespace SfTcp
 		public SfTcpClient(string ip,int port)
 		{
 			Console.WriteLine("尝试与服务器建立连接.");
-			try
-			{
-				client = new TcpClient(ip, port);
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show("连接建立失败:"+ ex.Message);
-				return;
-			}
+			client = new TcpClient(ip, port);
 			Console.WriteLine("连接建立");
 			stream = client.GetStream();
 			bw = new BinaryWriter(stream);

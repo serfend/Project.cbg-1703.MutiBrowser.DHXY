@@ -75,7 +75,6 @@ namespace Miner
 				}
 				else
 				{
-
 					var cstr = new StringBuilder("新物品召唤兽种类:\n");
 					foreach (var summon in summons)
 					{

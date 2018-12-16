@@ -20,6 +20,7 @@ namespace Miner.ServerHandle
 		private readonly string device_id;
 		private HttpClient http;
 		private GoodList data;
+		private bool isFirstTime = true;
 		private static bool RemoteCertificateValidate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors error)=>true;
 		public AppInterface()
 		{
@@ -47,19 +48,30 @@ namespace Miner.ServerHandle
 			{
 				MessageBox.Show("处理AppInterface.GetGoodList()失败\n"+ex.Message+"\n"+info);
 			}
-			return data;
-		}
-		internal GoodDetail GetGoodDetail(int index)
-		{
 			if (data.equip_list==null)
 			{
 				throw new GoodListNoDataException(data.msg);
 			}
-			if (data.equip_list.Count < index + 1)
+			return data;
+		}
+		private Dictionary<string, int> goodsBeenHandle = new Dictionary<string, int>();
+		internal List<Equip_listItem> GetNeedHandle()
+		{
+			var list = new List<Equip_listItem>();
+			foreach(var item in data.equip_list)
 			{
-				return null;
+				if (!goodsBeenHandle.ContainsKey(item.game_ordersn))
+				{
+					goodsBeenHandle.Add(item.game_ordersn,1);
+					if(!isFirstTime)
+						list.Add(item);
+				}
 			}
-			var targetGood = data.equip_list[index];
+			isFirstTime = false;
+			return list;
+		}
+		internal GoodDetail GetGoodDetail(Equip_listItem targetGood)
+		{
 			var url = string.Format(goodDetailUrl, device_id,targetGood.game_ordersn,targetGood.serverid);
 			var response = http.GetAsync(url).Result;
 			var rawInfo = response.Content.ReadAsStringAsync().Result;

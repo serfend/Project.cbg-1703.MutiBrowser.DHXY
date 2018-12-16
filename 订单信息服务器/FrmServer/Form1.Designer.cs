@@ -63,6 +63,7 @@
 			this.LstConnection_status = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LstConnection_delay = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LstConnection_Server = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LstConnection_version = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TabMain_Setting = new System.Windows.Forms.TabPage();
 			this.label7 = new System.Windows.Forms.Label();
 			this.label8 = new System.Windows.Forms.Label();
@@ -76,7 +77,6 @@
 			this.IpTaskTimeOut = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.IpTaskInterval = new System.Windows.Forms.TextBox();
-			this.LstConnection_version = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TabMain.SuspendLayout();
 			this.TabMain_VpsManager.SuspendLayout();
 			this.TabMain_Setting.SuspendLayout();
@@ -212,9 +212,9 @@
             this.serverTask_Num,
             this.serverTask_Enable});
 			this.LstServerQueue.FullRowSelect = true;
-			this.LstServerQueue.Location = new System.Drawing.Point(539, 138);
+			this.LstServerQueue.Location = new System.Drawing.Point(539, 583);
 			this.LstServerQueue.Name = "LstServerQueue";
-			this.LstServerQueue.Size = new System.Drawing.Size(366, 586);
+			this.LstServerQueue.Size = new System.Drawing.Size(366, 141);
 			this.LstServerQueue.TabIndex = 26;
 			this.LstServerQueue.UseCompatibleStateImageBehavior = false;
 			this.LstServerQueue.View = System.Windows.Forms.View.Details;
@@ -273,7 +273,7 @@
 			this.OpLog.Location = new System.Drawing.Point(539, 26);
 			this.OpLog.Multiline = true;
 			this.OpLog.Name = "OpLog";
-			this.OpLog.Size = new System.Drawing.Size(366, 106);
+			this.OpLog.Size = new System.Drawing.Size(366, 551);
 			this.OpLog.TabIndex = 20;
 			// 
 			// OpConnectionCount
@@ -333,6 +333,11 @@
 			// 
 			this.LstConnection_Server.Text = "任务";
 			this.LstConnection_Server.Width = 77;
+			// 
+			// LstConnection_version
+			// 
+			this.LstConnection_version.Text = "版本";
+			this.LstConnection_version.Width = 120;
 			// 
 			// TabMain_Setting
 			// 
@@ -463,11 +468,6 @@
 			this.IpTaskInterval.TabIndex = 36;
 			this.IpTaskInterval.Tag = "RecordReg";
 			this.IpTaskInterval.Text = "0";
-			// 
-			// LstConnection_version
-			// 
-			this.LstConnection_version.Text = "版本";
-			this.LstConnection_version.Width = 120;
 			// 
 			// Form1
 			// 

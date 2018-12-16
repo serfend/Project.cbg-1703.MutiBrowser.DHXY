@@ -60,6 +60,9 @@
     <Compile Include="FrmServer\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmServer\Form1.TaskScheduleHdl.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="FrmServer\Form1.VpsHdl.cs">
       <SubType>Form</SubType>
     </Compile>
