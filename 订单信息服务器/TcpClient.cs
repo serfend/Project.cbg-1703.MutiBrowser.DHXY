@@ -139,12 +139,12 @@ namespace SfTcp
 			{
 				if (disposing)
 				{
-					receiverThread?.Abort();
-					reporterThread?.Abort();
-					bw?.Dispose();
-					br?.Dispose();
-					stream?.Dispose();
-					client?.Close();
+					if(receiverThread!=null)receiverThread.Abort();
+					if(reporterThread!=null)reporterThread.Abort();
+					if(bw!=null)bw.Dispose();
+					if(br!=null)br.Dispose();
+					if(stream!=null)stream.Dispose();
+					if(client!=null)client.Close();
 				}
 				client = null;
 				stream = null;

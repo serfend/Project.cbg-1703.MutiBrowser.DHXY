@@ -86,7 +86,7 @@ namespace SfTcp
 			var waitToDisConnect = new List<TcpServer>();
 			foreach (var client in list)
 			{
-				if (tick - client.lastMessageTime > 60000)waitToDisConnect.Add(client) ;
+				if (tick - client.lastMessageTime > 60000&&  client.ID!="...") waitToDisConnect.Add(client) ;
 			}
 			foreach(var client in waitToDisConnect)
 			{

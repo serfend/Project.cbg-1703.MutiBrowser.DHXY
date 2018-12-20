@@ -155,8 +155,14 @@ namespace SfTcp
 			var content = HttpUtil.GetElement(info, ">", "<");
 			if (TcpServer.UseAesTransport) {
 				content = EncryptHelper.AESDecrypt(content);
+				if (content == string.Empty) content = EncryptHelper.Base64Decode(content);
+				if (content == string.Empty) content = HttpUtil.GetElement(info, ">", "<");
 			}
-			else content = EncryptHelper.Base64Decode(content);
+			else
+			{
+				content = EncryptHelper.Base64Decode(content);
+				if(content== string.Empty) content = EncryptHelper.AESDecrypt(content);
+			}
 			Receive?.BeginInvoke(title, content, this,(x)=> { },null);
 		}
 		public void Disconnect()
