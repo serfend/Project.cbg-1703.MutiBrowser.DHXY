@@ -21,7 +21,7 @@ namespace SfTcp
 			Method = method;
 			this.Param = param;
 			this.HttpVersion = httpVersion;
-			Console.WriteLine(param);
+			Console.WriteLine($"TcpHttpMessage(){method}:{param}/{httpVersion}");
 		}
 		public string Param { get => param; set => param = value; }
 		public string HttpVersion { get => httpVersion; set => httpVersion = value; }
@@ -145,23 +145,24 @@ namespace SfTcp
 				var lineInfo = firstLine.Split(' ');
 				if (lineInfo.Length == 3)
 				{
-					OnHttpRequest?.BeginInvoke(new TcpHttpMessage(lineInfo[0], lineInfo[1].Substring(1), lineInfo[2]), new TcpHttpResponse(this),(x)=> { },null);
+					OnHttpRequest?.BeginInvoke(new TcpHttpMessage(lineInfo[0], lineInfo[1].StartsWith("/")?lineInfo[1].Substring(1):lineInfo[1], lineInfo[2]), new TcpHttpResponse(this),(x)=> { },null);
 					return;
 				}
 			}
 			if (!info.StartsWith("<")) return;
 			var title = HttpUtil.GetElement(info, "<", ">");
 			if (info.IndexOf("</" + title + ">", 0) < 0) return;
-			var content = HttpUtil.GetElement(info, ">", "<");
+			var raw = HttpUtil.GetElement(info, ">", "<");
+			string content = string.Empty;
 			if (TcpServer.UseAesTransport) {
-				content = EncryptHelper.AESDecrypt(content);
-				if (content == string.Empty) content = EncryptHelper.Base64Decode(content);
-				if (content == string.Empty) content = HttpUtil.GetElement(info, ">", "<");
+				content = EncryptHelper.AESDecrypt(raw);
+				if (content == string.Empty) content = EncryptHelper.Base64Decode(raw);
+				if (content == string.Empty) content = raw;
 			}
 			else
 			{
-				content = EncryptHelper.Base64Decode(content);
-				if(content== string.Empty) content = EncryptHelper.AESDecrypt(content);
+				content = EncryptHelper.Base64Decode(raw);
+				if(content== string.Empty) content = EncryptHelper.AESDecrypt(raw);
 			}
 			Receive?.BeginInvoke(title, content, this,(x)=> { },null);
 		}
