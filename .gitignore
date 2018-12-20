@@ -16,3 +16,8 @@
 *.application
 *.dll
 *.manifest
+*._
+*.xml
+*.nupkg
+*.p7s
+*.dll

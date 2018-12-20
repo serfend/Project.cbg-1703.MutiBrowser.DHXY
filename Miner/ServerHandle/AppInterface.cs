@@ -98,7 +98,7 @@ namespace Miner.ServerHandle
 			{
 				if (disposing)
 				{
-					http?.Dispose();
+					if(http!=null)http.Dispose();
 				}
 				http = null;
 				disposedValue = true;

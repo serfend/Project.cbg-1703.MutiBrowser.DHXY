@@ -20,11 +20,24 @@ namespace 多开浏览器子线程
 	
 	partial class FrmMain : Form
 	{
+		private  void InitTcp()
+		{
+			Program.Tcp = new TcpBrowserClient();
+			Program.Tcp.RecieveMessage += ReceiveMessage;
+			Program.Tcp.Disconnected += (x) => {
+				Thread.Sleep(500);
+				InitTcp();
+			};
+			Thread.Sleep(500);
+			Program.Tcp?.Send("clientConnect", $"<browserInit><clientName>{CCmd.GetWebInfo("name")}</clientName><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>{Assembly.GetExecutingAssembly().GetName().Version}</version></browserInit>");
+		}
+
 		private bool frmClosing = false;
 		Thread ThreadMonitor;
 		private Inner.Ccmd CCmd = new Inner.Ccmd();
 		public FrmMain()
 		{
+			
 			//RegUtil.SetIEBrowserTempPath();
 			InitializeComponent();
 			//HttpClient.UsedFidder = true;
@@ -42,10 +55,11 @@ namespace 多开浏览器子线程
 				int heartBeatCount = 0;
 				while (!frmClosing)
 				{
-					Thread.Sleep(200);
+					Thread.Sleep(1000);
 					var cmd = CCmd.GetCmd(out string targetUrl);
-					CheckNewCmd(cmd,targetUrl);
-					if (heartBeatCount > 1000)
+					CheckNewCmd(cmd, targetUrl);
+					heartBeatCount++;
+					if (heartBeatCount > 10)
 					{
 						Program.Tcp?.Send("heartBeat", "");
 					}
@@ -58,9 +72,8 @@ namespace 多开浏览器子线程
 			this.Top = tmpBounds[1];
 			this.Width = tmpBounds[2];
 			this.Height = tmpBounds[3];
-			
-			Program.Tcp.RecieveMessage += ReceiveMessage;
-			Program.Tcp?.Send("clientConnect", $"<browserInit><clientName>{CCmd.GetWebInfo("name")}</clientName><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>{Assembly.GetExecutingAssembly().GetName().Version}</version></browserInit>");
+
+			InitTcp();
 
 			ThreadMonitor.Start();
 
@@ -313,6 +326,7 @@ namespace 多开浏览器子线程
 					}
 
 				}
+				assumePrice = 0;//重置估价
 			}
 		}
 
