@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Reflection;
 using Miner.ServerHandle;
-using Miner.Util;
 
 namespace Miner
 {
@@ -174,14 +173,19 @@ namespace Miner
 				vpsStatus = VpsStatus.WaitConnect;
 				return;
 			}
-			if (Tcp == null) return;
-			Tcp.RecieveMessage = (x, xx) =>{
+			InitCallBackTcp();
+			HelloToServer();
+		}
+		private static void HdlRecieveMessage(SfTcp.SfTcpClient x,string xx)
+		{
+			try
+			{
 				Logger.SysLog(xx, "通讯记录");
 				if (xx.Contains("<setClientName>"))
 				{
 					var ClientName = HttpUtil.GetElementInItem(xx, "setClientName");
 					setting = new Setting(ClientName);
-					clientId.SetInfo("VpsClientId",ClientName);
+					clientId.SetInfo("VpsClientId", ClientName);
 					Tcp.Send("nameModefied", string.Format("<clientName>{0}</clientName><AskForSynInit>", ClientName));
 				}
 				if (xx.Contains("SynInit"))
@@ -190,17 +194,20 @@ namespace Miner
 					Program.vpsStatus = VpsStatus.Syning;
 					Tcp.Send("InitComplete", "");
 				}
-				if (xx.Contains("<serverRun>")){
+				if (xx.Contains("<serverRun>"))
+				{
 					ServerResetConfig();
 				}
 				if (xx.Contains("<setting>"))
 				{
 					SynSetting(xx);
 				}
-				if (xx.Contains("<versionCheck>")){
+				if (xx.Contains("<versionCheck>"))
+				{
 					SynFile(xx);
 				}
-				if (xx.Contains("<ensureFileTransfer>")) {//客户端接收到来自服务器【可以开始传输】的指令
+				if (xx.Contains("<ensureFileTransfer>"))
+				{//客户端接收到来自服务器【可以开始传输】的指令
 					TranslateFileStart();
 				}
 				if (xx.Contains("<InnerTargetUrl>"))
@@ -231,36 +238,50 @@ namespace Miner
 					//var sendStamp =Convert.ToInt64( HttpUtil.GetElementInItem(xx,"sendStamp"));
 					//var sendStampStruct =SystemTimeWin32.FromStamp(sendStamp);
 					//var result = SystemTimeWin32.SetSystemTime(ref sendStampStruct);
-					new Thread(()=> {
+					new Thread(() => {
 						var nextRuntimeStamp = Convert.ToInt64(HttpUtil.GetElementInItem(xx, "taskStamp"));
 						//var tickCount = HttpUtil.TimeStamp;
 						//Console.WriteLine(tickCount);
 						var beginTime = Environment.TickCount;
 						if (nextRuntimeStamp > 0)
 						{
-							while(beginTime - Environment.TickCount + nextRuntimeStamp >= 500)
+							while (beginTime - Environment.TickCount + nextRuntimeStamp >= 500)
 							{
-								long interval = beginTime- Environment.TickCount  + nextRuntimeStamp;
+								long interval = beginTime - Environment.TickCount + nextRuntimeStamp;
 								Tcp.Send("clientWait", interval.ToString());
 								Thread.Sleep(500);
 							}
 							long leftInterval = beginTime - Environment.TickCount + nextRuntimeStamp;
-							if(leftInterval>0)Thread.Sleep((int)leftInterval);
+							if (leftInterval > 0) Thread.Sleep((int)leftInterval);
 						}
 						Tcp.Send("clientWait", "-101");
 						servers.ServerRun();
 					}).Start();
 				}
-			};
-			Tcp.Disconnected = (x) => {
-				Logger.SysLog("与服务器丢失连接", "主记录");
-				Tcp.Dispose();
-				Tcp = null;
-				anyTaskWorking = false;
-				Program.vpsStatus = VpsStatus.WaitConnect;
-				
-			};
-			HelloToServer();
+			}
+			catch (Exception ex)
+			{
+				Logger.SysLog("HdlReceiveMessage()" + ex.Message,"ExceptionLog");
+			}
+		}
+		private static void InitCallBackTcp()
+		{
+			try
+			{
+				if (Tcp == null) return;
+				Tcp.RecieveMessage = HdlRecieveMessage;
+				Tcp.Disconnected = (x) => {
+					Logger.SysLog("与服务器丢失连接", "主记录");
+					Tcp?.Dispose();
+					Tcp = null;
+					anyTaskWorking = false;
+					Program.vpsStatus = VpsStatus.WaitConnect;
+				};
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("InitCallBackTcp()"+ex.Message);
+			}
 		}
 		private static void SynServerLoginSession(string setting)
 		{
@@ -294,10 +315,18 @@ namespace Miner
 
 		private static void HelloToServer()
 		{
-			var vpsName = clientId.GetInfo("VpsClientId", "null");
-			var clientDeviceId = clientId.GetInfo("clientDeviceId", HttpUtil.UUID);
-			clientId.SetInfo("clientDeviceId", clientDeviceId);
-			Tcp?.Send("clientConnect", $"<clientName>{vpsName}</clientName><clientDeviceId>{clientDeviceId}</clientDeviceId><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>");
+			try
+			{
+
+				var vpsName = clientId.GetInfo("VpsClientId", "null");
+				var clientDeviceId = clientId.GetInfo("clientDeviceId", HttpUtil.UUID);
+				clientId.SetInfo("clientDeviceId", clientDeviceId);
+				Tcp?.Send("clientConnect", $"<clientName>{vpsName}</clientName><clientDeviceId>{clientDeviceId}</clientDeviceId><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("HelloToServer()"+ex.Message);
+			}
 		}
 		private static void TranslateFileStart()
 		{
