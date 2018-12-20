@@ -63,6 +63,7 @@ namespace 订单信息服务器
 		private Reg regSettingVps;
 		/// <summary>
 		/// 将从任务列表中提取可用任务分配给VPS，VPS断开时撤回
+		/// //TODO 取消区分配
 		/// </summary>
 		/// <param name="s"></param>
 		private void BuildNewTaskToVps(TcpServer s, out string taskTitle)
@@ -82,7 +83,9 @@ namespace 订单信息服务器
 				IpPerVPShdl.Text = singleHdl.ToString();
 			}
 			string hdlServer = GetFreeServer(singleHdl, s.Ip, out taskTitle);
-			hdlServer = "";//TODO 取消区分配
+
+			hdlServer = "";
+
 			int interval = 1500, timeout = 100000;
 			double assumePriceRate = 100;
 			try
@@ -93,14 +96,7 @@ namespace 订单信息服务器
 			{
 				IpAssumePrice_Rate.Text = assumePriceRate.ToString();
 			}
-			try
-			{
-				timeout = Convert.ToInt32(IpTaskTimeOut.Text);
-			}
-			catch (Exception)
-			{
-				IpTaskTimeOut.Text = timeout.ToString();
-			}
+
 			try
 			{
 				interval = Convert.ToInt32(IpTaskInterval.Text);

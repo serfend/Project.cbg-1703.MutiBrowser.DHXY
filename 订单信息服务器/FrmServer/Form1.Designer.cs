@@ -71,21 +71,28 @@
 			this.label5 = new System.Windows.Forms.Label();
 			this.label6 = new System.Windows.Forms.Label();
 			this.IpPerVPShdl = new System.Windows.Forms.TextBox();
-			this.label4 = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
-			this.label2 = new System.Windows.Forms.Label();
-			this.IpTaskTimeOut = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.IpTaskInterval = new System.Windows.Forms.TextBox();
+			this.TabMain_Pay = new System.Windows.Forms.TabPage();
+			this.CmdPay_EditVerify = new System.Windows.Forms.Button();
+			this.CmdPay_NewVerify = new System.Windows.Forms.Button();
+			this.label2 = new System.Windows.Forms.Label();
+			this.LstPayClient = new System.Windows.Forms.ListView();
+			this.PhoneNum = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.Verify = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.ServerHdl = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TabMain.SuspendLayout();
 			this.TabMain_VpsManager.SuspendLayout();
 			this.TabMain_Setting.SuspendLayout();
+			this.TabMain_Pay.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// TabMain
 			// 
 			this.TabMain.Controls.Add(this.TabMain_VpsManager);
 			this.TabMain.Controls.Add(this.TabMain_Setting);
+			this.TabMain.Controls.Add(this.TabMain_Pay);
 			this.TabMain.Location = new System.Drawing.Point(2, -1);
 			this.TabMain.Name = "TabMain";
 			this.TabMain.SelectedIndex = 0;
@@ -347,10 +354,7 @@
 			this.TabMain_Setting.Controls.Add(this.label5);
 			this.TabMain_Setting.Controls.Add(this.label6);
 			this.TabMain_Setting.Controls.Add(this.IpPerVPShdl);
-			this.TabMain_Setting.Controls.Add(this.label4);
 			this.TabMain_Setting.Controls.Add(this.label3);
-			this.TabMain_Setting.Controls.Add(this.label2);
-			this.TabMain_Setting.Controls.Add(this.IpTaskTimeOut);
 			this.TabMain_Setting.Controls.Add(this.label1);
 			this.TabMain_Setting.Controls.Add(this.IpTaskInterval);
 			this.TabMain_Setting.Location = new System.Drawing.Point(4, 22);
@@ -364,7 +368,7 @@
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(422, 24);
+			this.label7.Location = new System.Drawing.Point(179, 75);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(11, 12);
 			this.label7.TabIndex = 47;
@@ -373,7 +377,7 @@
 			// label8
 			// 
 			this.label8.AutoSize = true;
-			this.label8.Location = new System.Drawing.Point(249, 24);
+			this.label8.Location = new System.Drawing.Point(6, 75);
 			this.label8.Name = "label8";
 			this.label8.Size = new System.Drawing.Size(53, 12);
 			this.label8.TabIndex = 46;
@@ -381,7 +385,7 @@
 			// 
 			// IpAssumePrice_Rate
 			// 
-			this.IpAssumePrice_Rate.Location = new System.Drawing.Point(308, 15);
+			this.IpAssumePrice_Rate.Location = new System.Drawing.Point(65, 66);
 			this.IpAssumePrice_Rate.Name = "IpAssumePrice_Rate";
 			this.IpAssumePrice_Rate.Size = new System.Drawing.Size(108, 21);
 			this.IpAssumePrice_Rate.TabIndex = 45;
@@ -391,7 +395,7 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(179, 78);
+			this.label5.Location = new System.Drawing.Point(179, 48);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(53, 12);
 			this.label5.TabIndex = 44;
@@ -400,7 +404,7 @@
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(6, 78);
+			this.label6.Location = new System.Drawing.Point(6, 48);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(53, 12);
 			this.label6.TabIndex = 43;
@@ -408,21 +412,12 @@
 			// 
 			// IpPerVPShdl
 			// 
-			this.IpPerVPShdl.Location = new System.Drawing.Point(65, 69);
+			this.IpPerVPShdl.Location = new System.Drawing.Point(65, 39);
 			this.IpPerVPShdl.Name = "IpPerVPShdl";
 			this.IpPerVPShdl.Size = new System.Drawing.Size(108, 21);
 			this.IpPerVPShdl.TabIndex = 42;
 			this.IpPerVPShdl.Tag = "RecordReg";
 			this.IpPerVPShdl.Text = "1";
-			// 
-			// label4
-			// 
-			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(179, 50);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(17, 12);
-			this.label4.TabIndex = 41;
-			this.label4.Text = "ms";
 			// 
 			// label3
 			// 
@@ -432,24 +427,6 @@
 			this.label3.Size = new System.Drawing.Size(17, 12);
 			this.label3.TabIndex = 40;
 			this.label3.Text = "ms";
-			// 
-			// label2
-			// 
-			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(6, 51);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(53, 12);
-			this.label2.TabIndex = 39;
-			this.label2.Text = "采集超时";
-			// 
-			// IpTaskTimeOut
-			// 
-			this.IpTaskTimeOut.Location = new System.Drawing.Point(65, 42);
-			this.IpTaskTimeOut.Name = "IpTaskTimeOut";
-			this.IpTaskTimeOut.Size = new System.Drawing.Size(108, 21);
-			this.IpTaskTimeOut.TabIndex = 38;
-			this.IpTaskTimeOut.Tag = "RecordReg";
-			this.IpTaskTimeOut.Text = "10000";
 			// 
 			// label1
 			// 
@@ -469,6 +446,77 @@
 			this.IpTaskInterval.Tag = "RecordReg";
 			this.IpTaskInterval.Text = "0";
 			// 
+			// TabMain_Pay
+			// 
+			this.TabMain_Pay.Controls.Add(this.CmdPay_EditVerify);
+			this.TabMain_Pay.Controls.Add(this.CmdPay_NewVerify);
+			this.TabMain_Pay.Controls.Add(this.label2);
+			this.TabMain_Pay.Controls.Add(this.LstPayClient);
+			this.TabMain_Pay.Location = new System.Drawing.Point(4, 22);
+			this.TabMain_Pay.Name = "TabMain_Pay";
+			this.TabMain_Pay.Size = new System.Drawing.Size(909, 965);
+			this.TabMain_Pay.TabIndex = 2;
+			this.TabMain_Pay.Text = "付款";
+			this.TabMain_Pay.UseVisualStyleBackColor = true;
+			// 
+			// CmdPay_EditVerify
+			// 
+			this.CmdPay_EditVerify.Location = new System.Drawing.Point(118, 790);
+			this.CmdPay_EditVerify.Name = "CmdPay_EditVerify";
+			this.CmdPay_EditVerify.Size = new System.Drawing.Size(98, 33);
+			this.CmdPay_EditVerify.TabIndex = 3;
+			this.CmdPay_EditVerify.Text = "编辑";
+			this.CmdPay_EditVerify.UseVisualStyleBackColor = true;
+			this.CmdPay_EditVerify.Click += new System.EventHandler(this.CmdPay_EditVerify_Click);
+			// 
+			// CmdPay_NewVerify
+			// 
+			this.CmdPay_NewVerify.Location = new System.Drawing.Point(14, 790);
+			this.CmdPay_NewVerify.Name = "CmdPay_NewVerify";
+			this.CmdPay_NewVerify.Size = new System.Drawing.Size(98, 33);
+			this.CmdPay_NewVerify.TabIndex = 2;
+			this.CmdPay_NewVerify.Text = "新增";
+			this.CmdPay_NewVerify.UseVisualStyleBackColor = true;
+			this.CmdPay_NewVerify.Click += new System.EventHandler(this.CmdPay_NewVerify_Click);
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(11, 10);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(101, 12);
+			this.label2.TabIndex = 1;
+			this.label2.Text = "付款登录凭证管理";
+			// 
+			// LstPayClient
+			// 
+			this.LstPayClient.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.PhoneNum,
+            this.Verify,
+            this.ServerHdl});
+			this.LstPayClient.FullRowSelect = true;
+			this.LstPayClient.Location = new System.Drawing.Point(13, 25);
+			this.LstPayClient.Name = "LstPayClient";
+			this.LstPayClient.Size = new System.Drawing.Size(464, 754);
+			this.LstPayClient.TabIndex = 0;
+			this.LstPayClient.UseCompatibleStateImageBehavior = false;
+			this.LstPayClient.View = System.Windows.Forms.View.Details;
+			// 
+			// PhoneNum
+			// 
+			this.PhoneNum.Text = "手机号";
+			this.PhoneNum.Width = 120;
+			// 
+			// Verify
+			// 
+			this.Verify.Text = "凭证";
+			this.Verify.Width = 40;
+			// 
+			// ServerHdl
+			// 
+			this.ServerHdl.Text = "管理区";
+			this.ServerHdl.Width = 300;
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -482,6 +530,8 @@
 			this.TabMain_VpsManager.PerformLayout();
 			this.TabMain_Setting.ResumeLayout(false);
 			this.TabMain_Setting.PerformLayout();
+			this.TabMain_Pay.ResumeLayout(false);
+			this.TabMain_Pay.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -522,10 +572,7 @@
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.TextBox IpPerVPShdl;
-		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.TextBox IpTaskTimeOut;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.TextBox IpTaskInterval;
 		private System.Windows.Forms.Button CmdRedial;
@@ -535,6 +582,14 @@
 		private System.Windows.Forms.TextBox IpAssumePrice_Rate;
 		private System.Windows.Forms.Button CmdPauseTaskAllocate;
 		private System.Windows.Forms.ColumnHeader LstConnection_version;
+		private System.Windows.Forms.TabPage TabMain_Pay;
+		private System.Windows.Forms.Button CmdPay_EditVerify;
+		private System.Windows.Forms.Button CmdPay_NewVerify;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.ListView LstPayClient;
+		private System.Windows.Forms.ColumnHeader PhoneNum;
+		private System.Windows.Forms.ColumnHeader Verify;
+		private System.Windows.Forms.ColumnHeader ServerHdl;
 	}
 }
 

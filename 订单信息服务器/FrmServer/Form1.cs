@@ -12,6 +12,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using 订单信息服务器.Bill;
+
 namespace 订单信息服务器
 {
 	public partial class Form1 : Form
@@ -29,6 +31,7 @@ namespace 订单信息服务器
 			InitServerTaskList();
 			InitServerManager();
 			StartTaskSchedule();
+			InitPaySession();
 			LstConnection.AfterLabelEdit += CheckIfUserEditName;
 		}
 		private bool ctlSaveLoaded = false;
@@ -114,6 +117,42 @@ namespace 订单信息服务器
 			return taskInfo.ToString();
 		}
 		/// <summary>
+		/// 提交当前订单付款行为
+		/// 【future】当密码或将军令为空时，将从基类中获取数据
+		/// </summary>
+		/// <param name="session">付款凭证</param>
+		/// <param name="psw">预置密码</param>
+		/// <param name="authKey">预置将军令</param>
+		private void PayCurrentBill(string session,string psw=null,string authKey=null)
+		{
+			BillInfo root = null;
+			try
+			{
+				root = new BillInfo(session);
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show("加载订单列表失败:" + ex.Message);
+				return;
+			}
+
+			root.GetData();
+			var f = new EnterPassword(psw, root);
+			f.Submit();
+			if (!f.Success)
+			{
+				MessageBox.Show("密码提交失败:" + f.Data.errorMsg);
+				return;
+			}
+			var f2 = new EnterAuthKey(root);
+			f2.Submit(authKey);
+			if (!f2.Success)
+			{
+				MessageBox.Show("将军令提交失败:" + f2.Data.errorMsg);
+				return;
+			}
+		}
+		/// <summary>
 		/// 检查订单号是否被处理过
 		/// </summary>
 		private Dictionary<string, bool> _BillRecord = new Dictionary<string, bool>();
@@ -127,7 +166,7 @@ namespace 订单信息服务器
 			try
 			{
 				var tmp = InnerInfo.Split(new string[] { "##" }, StringSplitOptions.None);
-				if (tmp.Length < 9)
+				if (tmp.Length < 10)
 				{
 					AppendLog(sender + " 无效的订单信息:" + InnerInfo);
 					return;
@@ -141,6 +180,7 @@ namespace 订单信息服务器
 				var IChengjiu = tmp[6];
 				var ISingleEnergyRate = tmp[7];
 				var BuyUrl = tmp[8];
+				var serverNum = tmp[9];
 				if (_BillRecord.ContainsKey(BuyUrl))
 				{
 					//AppendLog(ordersn + "已出现过此订单," + serverName);
@@ -170,6 +210,27 @@ namespace 订单信息服务器
 					}
 					ManagerHttpBase.FitWebShowTime++;
 				}
+				if (_payServerHdl.ContainsKey(serverNum))
+				{
+					var phoneTarget = _payServerHdl[serverNum];
+					if (_paySession.ContainsKey(phoneTarget))
+					{
+						//TODO 获取支付凭证并付款
+						var session = _paySession[phoneTarget];
+						if (MessageBox.Show(this, $"订单:\n{InnerInfo}", "付款确认", MessageBoxButtons.YesNo)==DialogResult.Yes)
+						{
+							//PayCurrentBill(session, "121212", PayAuthKey);
+						}
+					}
+					else
+					{
+						AppendLog($"当前区{serverNum}管理的账号{phoneTarget}无支付凭证");
+					}
+				}
+				else {
+					AppendLog($"当前区{serverNum}暂无管理的账号");
+				};
+				
 				SendCmdToBrowserClient(serverName, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceNum}</price><assumePrice>{priceNumAssume }</assumePrice>");
 			}
 			catch (Exception ex)
@@ -305,8 +366,9 @@ namespace 订单信息服务器
 			if (_taskAllocatePause) CmdPauseTaskAllocate.Text = "唤醒终端";
 			else CmdPauseTaskAllocate.Text = "暂停终端";
 		}
+
 		#endregion
 
-
+		
 	}
 }

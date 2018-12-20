@@ -26,6 +26,7 @@ namespace 订单信息服务器
 						{
 							if (x.Contains("heartBeat"))
 							{
+								s.Send("heartBeatResponse");
 							}
 							else if (x.Contains("RHB"))
 							{
@@ -42,6 +43,11 @@ namespace 订单信息服务器
 									targetItem.SubItems[3].Text = "等待订单";
 									s.clientName = hdlServerName;
 									BrowserIp[hdlServerName] = s.Ip;
+								}
+								else if (InnerInfo.Contains("<androidAuthInit>"))
+								{
+									targetItem.SubItems[3].Text = "同步将军令";
+									s.clientName = hdlServerName;
 								}
 								else
 								{
@@ -163,6 +169,10 @@ namespace 订单信息服务器
 									AppendLog($"无效的浏览器终端:{s.clientName}");
 								}
 							}
+							else if (x.Contains("payAuthKey"))
+							{
+								PayAuthKey = InnerInfo;
+							}
 							else
 							{
 								AppendLog("新消息[" + s.clientName + "] " + x + ":" + InnerInfo);
@@ -184,7 +194,6 @@ namespace 订单信息服务器
 						info[5] = "暂无";//任务
 						info[6] = "未知";//版本
 						LstConnection.Items.Add(new ListViewItem(info));
-
 						var welcome = new Task(() => {
 							Thread.Sleep(3000);
 							x.Send("<welcome>" + DateTime.Now + "</welcome>");
