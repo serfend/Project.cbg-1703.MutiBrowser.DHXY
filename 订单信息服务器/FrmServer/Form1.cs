@@ -1,4 +1,5 @@
 ﻿using DotNet4.Utilities.UtilCode;
+using DotNet4.Utilities.UtilInput;
 using DotNet4.Utilities.UtilReg;
 using SfTcp;
 using System;
@@ -28,7 +29,7 @@ namespace 订单信息服务器
 			InitializeComponent();
 			InitHistorySettingOnFormctl();
 			InitTransferEngine();
-			InitServerTaskList();
+			//InitServerTaskList();
 			InitServerManager();
 			StartTaskSchedule();
 			InitPaySession();
@@ -246,8 +247,18 @@ namespace 订单信息服务器
 			else CmdPauseTaskAllocate.Text = "暂停终端";
 		}
 
+
 		#endregion
 
-		
+		private void CmdPayBill_Click(object sender, EventArgs e)
+		{
+			var targetUser = InputBox.ShowInputBox("输入付款手机号", "输入付款手机号", "");
+			if (!_paySession.ContainsKey(targetUser))
+			{
+				MessageBox.Show("无效的手机号");
+				return;
+			}
+			PayCurrentBill(_paySession[targetUser]);
+		}
 	}
 }

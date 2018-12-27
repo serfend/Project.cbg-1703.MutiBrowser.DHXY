@@ -30,6 +30,10 @@ namespace 订单信息服务器.Bill
 		public SubmitResult Data { get => data; set => data = value; }
 
 		private string SecurityValid => $"{{\"eKey\":\"{AuthKey}\"}}";
+
+		public string RawInfo { get => rawInfo; set => rawInfo = value; }
+
+		private string rawInfo;
 		public void Submit(string authKey)
 		{
 			AuthKey = authKey;
@@ -44,6 +48,7 @@ namespace 订单信息服务器.Bill
 			};
 			message.Headers.Add("Cookie", $"NTES_SESS={parent.NTES_SESS}");
 			var result = parent.billHttp.http.SendAsync(message).Result.Content.ReadAsStringAsync().Result;
+			rawInfo = result;
 			Data = Json.JsonDeserializeBySingleData<SubmitResult>(result);
 			Success = Data.result == "success";
 		}

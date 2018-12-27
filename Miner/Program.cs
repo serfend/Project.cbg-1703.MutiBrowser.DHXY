@@ -238,7 +238,8 @@ namespace Miner
 					//var sendStamp =Convert.ToInt64( HttpUtil.GetElementInItem(xx,"sendStamp"));
 					//var sendStampStruct =SystemTimeWin32.FromStamp(sendStamp);
 					//var result = SystemTimeWin32.SetSystemTime(ref sendStampStruct);
-					new Thread(() => {
+					var s=new Thread(() =>
+					{
 						var nextRuntimeStamp = Convert.ToInt64(HttpUtil.GetElementInItem(xx, "taskStamp"));
 						//var tickCount = HttpUtil.TimeStamp;
 						//Console.WriteLine(tickCount);
@@ -256,7 +257,9 @@ namespace Miner
 						}
 						Tcp.Send("clientWait", "-101");
 						servers.ServerRun();
-					}).Start();
+					})
+					{ IsBackground=true};
+					s.Start();
 				}
 			}
 			catch (Exception ex)

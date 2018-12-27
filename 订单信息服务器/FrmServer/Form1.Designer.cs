@@ -32,6 +32,7 @@
 		{
 			this.TabMain = new System.Windows.Forms.TabControl();
 			this.TabMain_VpsManager = new System.Windows.Forms.TabPage();
+			this.CmdPayBill = new System.Windows.Forms.Button();
 			this.CmdPauseTaskAllocate = new System.Windows.Forms.Button();
 			this.CmdRedial = new System.Windows.Forms.Button();
 			this.LstGoodShow = new System.Windows.Forms.ListView();
@@ -75,6 +76,7 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.IpTaskInterval = new System.Windows.Forms.TextBox();
 			this.TabMain_Pay = new System.Windows.Forms.TabPage();
+			this.OpAuthCodeShow = new System.Windows.Forms.Label();
 			this.CmdPay_EditVerify = new System.Windows.Forms.Button();
 			this.CmdPay_NewVerify = new System.Windows.Forms.Button();
 			this.label2 = new System.Windows.Forms.Label();
@@ -82,6 +84,8 @@
 			this.PhoneNum = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.Verify = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.ServerHdl = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.Psw = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.GoodShowServerNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TabMain.SuspendLayout();
 			this.TabMain_VpsManager.SuspendLayout();
 			this.TabMain_Setting.SuspendLayout();
@@ -101,6 +105,7 @@
 			// 
 			// TabMain_VpsManager
 			// 
+			this.TabMain_VpsManager.Controls.Add(this.CmdPayBill);
 			this.TabMain_VpsManager.Controls.Add(this.CmdPauseTaskAllocate);
 			this.TabMain_VpsManager.Controls.Add(this.CmdRedial);
 			this.TabMain_VpsManager.Controls.Add(this.LstGoodShow);
@@ -119,6 +124,16 @@
 			this.TabMain_VpsManager.TabIndex = 0;
 			this.TabMain_VpsManager.Text = "终端管理";
 			this.TabMain_VpsManager.UseVisualStyleBackColor = true;
+			// 
+			// CmdPayBill
+			// 
+			this.CmdPayBill.Location = new System.Drawing.Point(464, 690);
+			this.CmdPayBill.Name = "CmdPayBill";
+			this.CmdPayBill.Size = new System.Drawing.Size(69, 34);
+			this.CmdPayBill.TabIndex = 39;
+			this.CmdPayBill.Text = "付款";
+			this.CmdPayBill.UseVisualStyleBackColor = true;
+			this.CmdPayBill.Click += new System.EventHandler(this.CmdPayBill_Click);
 			// 
 			// CmdPauseTaskAllocate
 			// 
@@ -151,7 +166,8 @@
             this.GoodShowAchievement,
             this.GoodShowSociatyAchievement,
             this.GoodShowFamilyRank,
-            this.GoodShowBuyUrl});
+            this.GoodShowBuyUrl,
+            this.GoodShowServerNo});
 			this.LstGoodShow.FullRowSelect = true;
 			this.LstGoodShow.Location = new System.Drawing.Point(4, 730);
 			this.LstGoodShow.Name = "LstGoodShow";
@@ -448,6 +464,7 @@
 			// 
 			// TabMain_Pay
 			// 
+			this.TabMain_Pay.Controls.Add(this.OpAuthCodeShow);
 			this.TabMain_Pay.Controls.Add(this.CmdPay_EditVerify);
 			this.TabMain_Pay.Controls.Add(this.CmdPay_NewVerify);
 			this.TabMain_Pay.Controls.Add(this.label2);
@@ -458,6 +475,15 @@
 			this.TabMain_Pay.TabIndex = 2;
 			this.TabMain_Pay.Text = "付款";
 			this.TabMain_Pay.UseVisualStyleBackColor = true;
+			// 
+			// OpAuthCodeShow
+			// 
+			this.OpAuthCodeShow.AutoSize = true;
+			this.OpAuthCodeShow.Location = new System.Drawing.Point(118, 10);
+			this.OpAuthCodeShow.Name = "OpAuthCodeShow";
+			this.OpAuthCodeShow.Size = new System.Drawing.Size(47, 12);
+			this.OpAuthCodeShow.TabIndex = 4;
+			this.OpAuthCodeShow.Text = "将军令:";
 			// 
 			// CmdPay_EditVerify
 			// 
@@ -493,11 +519,12 @@
 			this.LstPayClient.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.PhoneNum,
             this.Verify,
-            this.ServerHdl});
+            this.ServerHdl,
+            this.Psw});
 			this.LstPayClient.FullRowSelect = true;
 			this.LstPayClient.Location = new System.Drawing.Point(13, 25);
 			this.LstPayClient.Name = "LstPayClient";
-			this.LstPayClient.Size = new System.Drawing.Size(464, 754);
+			this.LstPayClient.Size = new System.Drawing.Size(690, 754);
 			this.LstPayClient.TabIndex = 0;
 			this.LstPayClient.UseCompatibleStateImageBehavior = false;
 			this.LstPayClient.View = System.Windows.Forms.View.Details;
@@ -516,6 +543,15 @@
 			// 
 			this.ServerHdl.Text = "管理区";
 			this.ServerHdl.Width = 300;
+			// 
+			// Psw
+			// 
+			this.Psw.Text = "密码";
+			this.Psw.Width = 150;
+			// 
+			// GoodShowServerNo
+			// 
+			this.GoodShowServerNo.Text = "区号";
 			// 
 			// Form1
 			// 
@@ -590,6 +626,10 @@
 		private System.Windows.Forms.ColumnHeader PhoneNum;
 		private System.Windows.Forms.ColumnHeader Verify;
 		private System.Windows.Forms.ColumnHeader ServerHdl;
+		private System.Windows.Forms.ColumnHeader Psw;
+		private System.Windows.Forms.Label OpAuthCodeShow;
+		private System.Windows.Forms.Button CmdPayBill;
+		private System.Windows.Forms.ColumnHeader GoodShowServerNo;
 	}
 }
 

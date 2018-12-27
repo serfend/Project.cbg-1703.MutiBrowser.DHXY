@@ -34,7 +34,29 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Interop.MSScriptControl">
+      <HintPath>..\Miner\Interop.MSScriptControl.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http, Version=4.1.1.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -70,6 +92,9 @@
     <Compile Include="..\..\..\..\..\util\coder\codeUtil.cs">
       <Link>Util\Coder\codeUtil.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\..\..\util\coder\JShelp.cs">
+      <Link>Util\JShelp.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\..\..\util\coder\jsonUtil.cs">
       <Link>Util\Coder\jsonUtil.cs</Link>
     </Compile>
@@ -80,6 +105,9 @@
     <Compile Include="..\..\..\..\..\util\reg.cs">
       <Link>Util\Coder\reg.cs</Link>
     </Compile>
+    <Compile Include="Bill\BillInfoJson.cs" />
+    <Compile Include="Bill\EnterPaySubmit.cs" />
+    <Compile Include="Bill\ETokenByJs.cs" />
     <Compile Include="FrmServer\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -98,15 +126,17 @@
     <Compile Include="ManagerHttpBase.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Bill\BillDetail.cs" />
-    <Compile Include="Properties\Bill\BillHttp.cs" />
-    <Compile Include="Properties\Bill\EnterAuthKey.cs" />
-    <Compile Include="Properties\Bill\EnterPassword.cs" />
-    <Compile Include="Properties\Bill\Info.cs" />
-    <Compile Include="Properties\Bill\SubmitResult.cs" />
+    <Compile Include="Bill\BillDetail.cs" />
+    <Compile Include="Bill\BillHttp.cs" />
+    <Compile Include="Bill\EnterAuthKey.cs" />
+    <Compile Include="Bill\EnterPassword.cs" />
+    <Compile Include="Bill\Info.cs" />
+    <Compile Include="Bill\PayUser.cs" />
+    <Compile Include="Bill\SubmitResult.cs" />
     <Compile Include="TcpClient.cs" />
     <Compile Include="TcpServer.cs" />
     <Compile Include="TcpServerManager.cs" />
+    <Compile Include="Util\JsConsole.cs" />
     <EmbeddedResource Include="..\..\..\..\..\util\Input\InputBox.resx">
       <Link>Util\Coder\InputBox.resx</Link>
     </EmbeddedResource>
@@ -143,6 +173,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="PayProtocal\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

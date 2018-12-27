@@ -49,8 +49,6 @@ namespace SfTcp
 	}
 	public class TcpServer:IDisposable
 	{
-
-		public static bool UseAesTransport = true;
 		#region 属性
 		TcpListener listener;
 		private Thread thread;
@@ -69,6 +67,13 @@ namespace SfTcp
 		public string Ip;
 		public string ID = "null";
 		public string clientName = "...";
+		public enum ConnectProtocal
+		{
+			Null,
+			Base64,
+			Aes
+		}
+		public ConnectProtocal connectProtocal=ConnectProtocal.Aes;
 		#endregion
 		public TcpServer( Action<string,string,TcpServer> ReceiveInfo = null,Action<TcpHttpMessage, TcpHttpResponse> ReceiveHttp=null,int port=8009)
 		{
@@ -79,48 +84,47 @@ namespace SfTcp
 		}
 		public void Connect()
 		{
-			var t = new Thread(() =>
+			try
 			{
-				try
-				{
-					listener.Start();
-					client = listener.AcceptTcpClient();
-					listener.Stop();
-					this.Ip = this.client.Client.RemoteEndPoint.ToString();
-					if (this.Ip.Contains("127.0.0.1")) IsLocal = true;
-					var checkPortOnly = Ip.IndexOf(':');
-					if (checkPortOnly > 0) Ip = Ip.Substring(checkPortOnly+1);
-					Connected?.BeginInvoke(this, (x) => { }, null);
-					var stream = client.GetStream();
-					writter = new BinaryWriter(stream);
-					reader = new BinaryReader(stream);
-					thread = new Thread(Reciving) { IsBackground = true };
-					thread.Start();
-					reporter = new Thread(() => {
-						while (true)
+				listener.Start();
+				while (!listener.Pending()) {
+					Thread.Sleep(10);
+				}
+				client = listener.AcceptTcpClient();
+				listener.Stop();
+				this.Ip = this.client.Client.RemoteEndPoint.ToString();
+				if (this.Ip.Contains("127.0.0.1")) IsLocal = true;
+				var checkPortOnly = Ip.IndexOf(':');
+				if (checkPortOnly > 0) Ip = Ip.Substring(checkPortOnly+1);
+				Connected?.BeginInvoke(this, (x) => { }, null);
+				var stream = client.GetStream();
+				writter = new BinaryWriter(stream);
+				reader = new BinaryReader(stream);
+				thread = new Thread(Reciving) { IsBackground = true };
+				thread.Start();
+				reporter = new Thread(() => {
+					while (true)
+					{
+						var thisLen = cstr.Length;
+						if (thisLen == lastLength && thisLen > 0 && reporterCounter++ > 50)
 						{
-							var thisLen = cstr.Length;
-							if (thisLen == lastLength && thisLen > 0 && reporterCounter++ > 50)
-							{
-								RecieveComplete();
-							}
-							else
-							{
-								lastLength = thisLen;
-							}
-							Thread.Sleep(10);
+							RecieveComplete();
 						}
-					})
-					{ IsBackground = true };
-					reporter.Start();
-				}
-				catch (Exception ex)
-				{
-					MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
-				}
-			})
-			{ IsBackground=true};
-			t.Start();
+						else
+						{
+							lastLength = thisLen;
+						}
+						Thread.Sleep(10);
+					}
+				})
+				{ IsBackground = true };
+				reporter.Start();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
+			}
+			
 			
 		}
 		private void RecieveComplete(bool getEndPoint=false)
@@ -151,20 +155,45 @@ namespace SfTcp
 			}
 			if (!info.StartsWith("<")) return;
 			var title = HttpUtil.GetElement(info, "<", ">");
-			if (info.IndexOf("</" + title + ">", 0) < 0) return;
 			var raw = HttpUtil.GetElement(info, ">", "<");
-			string content = string.Empty;
-			if (TcpServer.UseAesTransport) {
-				content = EncryptHelper.AESDecrypt(raw);
-				if (content == string.Empty) content = EncryptHelper.Base64Decode(raw);
-				if (content == string.Empty) content = raw;
-			}
-			else
-			{
-				content = EncryptHelper.Base64Decode(raw);
-				if(content== string.Empty) content = EncryptHelper.AESDecrypt(raw);
-			}
+			if (info.IndexOf("</" + title + ">", 0) < 0) return;
+			var content = GetContent(raw);
 			Receive?.BeginInvoke(title, content, this,(x)=> { },null);
+		}
+		private bool _protocalEnsure = false;
+		public string GetContent(string raw)
+		{
+			string content = string.Empty;
+			switch (this.connectProtocal)
+			{
+				case ConnectProtocal.Aes:
+					{
+						content = EncryptHelper.AESDecrypt(raw);
+						if (content == string.Empty && !_protocalEnsure)
+						{
+							this.connectProtocal = ConnectProtocal.Base64;
+							return GetContent(raw);
+						}
+						_protocalEnsure = true;
+						break;
+					}
+				case ConnectProtocal.Base64:
+					{
+						content = EncryptHelper.Base64Decode(raw);
+						if (content == string.Empty)
+						{
+							this.connectProtocal = ConnectProtocal.Null;
+							return GetContent(raw);
+						}
+						break;
+					}
+				case ConnectProtocal.Null:
+					{
+						this.connectProtocal = ConnectProtocal.Aes;
+						return raw;
+					}
+			}
+			return content;
 		}
 		public void Disconnect()
 		{

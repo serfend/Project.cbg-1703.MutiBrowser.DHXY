@@ -46,6 +46,8 @@ namespace 订单信息服务器
 								}
 								else if (InnerInfo.Contains("<androidAuthInit>"))
 								{
+									var phone = HttpUtil.GetElementInItem(InnerInfo, "phone");
+									_clientPayUser[s.Ip] = phone;
 									targetItem.SubItems[3].Text = "同步将军令";
 									s.clientName = hdlServerName;
 								}
@@ -171,7 +173,7 @@ namespace 订单信息服务器
 							}
 							else if (x.Contains("payAuthKey"))
 							{
-								PayAuthKey = InnerInfo;
+								AuthKey=InnerInfo;
 							}
 							else
 							{
@@ -194,6 +196,7 @@ namespace 订单信息服务器
 						info[5] = "暂无";//任务
 						info[6] = "未知";//版本
 						LstConnection.Items.Add(new ListViewItem(info));
+						_clientPayUser.Add(x.Ip, "...");
 						var welcome = new Task(() => {
 							Thread.Sleep(3000);
 							x.Send("<welcome>" + DateTime.Now + "</welcome>");
@@ -202,7 +205,7 @@ namespace 订单信息服务器
 					});
 				},
 				ServerDisconnected = (x) => {
-					this.Invoke((EventHandler)delegate {
+					this?.Invoke((EventHandler)delegate {
 						//AppendLog("已断开:" + x.Ip);
 						for (int i = 0; i < LstConnection.Items.Count; i++)
 							if (LstConnection.Items[i].SubItems[2].Text == x.Ip)
@@ -248,6 +251,7 @@ namespace 订单信息服务器
 									var clientNum = this.LstConnection.Items.Count;
 									var columnsNum = LstConnection.Columns.Count;
 									cst.AppendLine($"<p>当前状态共有{clientNum}个连接</p><br>");
+									cst.AppendLine($"<p>authKey:{AuthKey}</p>");
 									cst.AppendLine($"打开网页次数: 手动:{ManagerHttpBase.UserWebShowTime}  自动:{ManagerHttpBase.FitWebShowTime}<br>");
 									cst.AppendLine($"profit:{ManagerHttpBase.RecordMoneyGet}  times:{ManagerHttpBase.RecordMoneyGetTime}");
 									cst.AppendLine("<table border=\"1\">");
@@ -278,7 +282,7 @@ namespace 订单信息服务器
 										cst.AppendLine($"{item.Key}:{item.Value}");
 									}
 									cst.AppendLine("</div>");
-
+									cst.AppendLine($"<div>{OpLog.Text}</div>");
 								});
 								break;
 							}
@@ -317,6 +321,7 @@ namespace 订单信息服务器
 					s.Response(cst.ToString());
 				}
 			};
+			serverManager.StartListening();
 		}
 
 		private void NewVpsAvailable(string ip)

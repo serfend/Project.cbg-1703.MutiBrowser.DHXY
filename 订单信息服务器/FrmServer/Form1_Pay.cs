@@ -10,23 +10,22 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using 订单信息服务器.Bill;
+using 订单信息服务器.Properties.Bill;
 
 namespace 订单信息服务器
 {
+	
 	public partial class Form1 : Form
 	{
 		/// <summary>
-		/// 同步将军令
-		/// </summary>
-		private string _payAuthKey = "";
-		/// <summary>
 		/// 手机号对应的登录
 		/// </summary>
-		private Dictionary<string, string> _paySession=new Dictionary<string, string>();
+		private Dictionary<string, PayUser> _paySession=new Dictionary<string, PayUser>();
 		/// <summary>
 		/// 区号对应手机号
 		/// </summary>
 		private Dictionary<string, string> _payServerHdl = new Dictionary<string, string>();
+
 		private Reg regMain = new Reg().In("Setting").In("PaySession");
 
 		/// <summary>
@@ -34,14 +33,7 @@ namespace 订单信息服务器
 		/// </summary>
 		private Dictionary<int, string> _keyPairPaySession=new Dictionary<int, string>();
 
-		public string PayAuthKey { get => _payAuthKey; set {
-				_payAuthKey = value;
-				if (value.Length != 6)
-				{
-					MessageBox.Show($"【警告】新的将军令可能有误,其为:{value}");
-				}
-			} }
-
+		private string _authKey;
 		/// <summary>
 		/// 初始化支付登录凭证记录
 		/// </summary>
@@ -55,10 +47,13 @@ namespace 订单信息服务器
 				var item = regMain.In(name);
 				var session = item.GetInfo("session");
 				var hdlServer = item.GetInfo("hdlServer");
-				var data = new string[3];
+				var psw = item.GetInfo("psw");
+				var data = new string[4];
 				data[0] = name;
 				data[1] = session;
 				data[2] = hdlServer;
+				data[3] = psw;
+				_paySession.Add(name, new PayUser(name, session, hdlServer, psw));
 				var tmp = new ListViewItem(data);
 				LstPayClient.Items.Add(tmp);
 			}
@@ -67,11 +62,14 @@ namespace 订单信息服务器
 		{
 			var phone = InputBox.ShowInputBox("输入账号", "支付页面登录的账号");
 			var item = GetVerifyItem(phone);
+			
 			if (item == null)
 			{
-				var data = new string[3];
+				var data = new string[4];
 				data[0] = phone;
 				item = new ListViewItem(data);
+				LstPayClient.MultiSelect = false;
+				item.Selected = true;
 				LstPayClient.Items.Add(item);
 			}
 			else
@@ -80,8 +78,7 @@ namespace 订单信息服务器
 					return;
 				} ;
 			}
-			LstPayClient.MultiSelect = false;
-			item.Selected = true;
+			
 			CmdPay_EditVerify_Click(this, EventArgs.Empty);
 		}
 
@@ -93,12 +90,15 @@ namespace 订单信息服务器
 				return;
 			}
 			var item = LstPayClient.SelectedItems[0];
-			var key = InputBox.ShowInputBox("输入登录凭证", "凭证可从网页cookies中复制NTES_SESS的值", item.SubItems[1].Text);
+			var session = InputBox.ShowInputBox("输入登录凭证", "凭证可从网页cookies中复制NTES_SESS的值", item.SubItems[1].Text);
 			var hdlServer = InputBox.ShowInputBox("输入管理区", "管理区以区号码记录，\"|\"分割",item.SubItems[2].Text);
-			item.SubItems[1].Text = key;
+			var psw = InputBox.ShowInputBox("输入密码", "账号的密码", item.SubItems[3].Text);
+			item.SubItems[1].Text = session;
 			item.SubItems[2].Text = hdlServer;
-			if (!_paySession.ContainsKey(item.SubItems[0].Text)) _paySession.Add(item.SubItems[0].Text, key);
-			else _paySession[item.SubItems[0].Text] = key;
+			item.SubItems[3].Text = psw;
+			var user= new PayUser(item.SubItems[0].Text, session, hdlServer, psw);
+			if (!_paySession.ContainsKey(item.SubItems[0].Text)) _paySession.Add(user.UserName, user);
+			else _paySession[user.UserName] = user;
 			var list = item.SubItems[2].Text.Split('|');
 			foreach(var i in list)
 			{
@@ -111,9 +111,9 @@ namespace 订单信息服务器
 					_payServerHdl[i] = item.SubItems[0].Text;
 				}
 			}
-			CmdPaySaveItem(item.SubItems[0].Text, key, hdlServer);
+			CmdPaySaveItem(item.SubItems[0].Text, session, hdlServer,psw);
 		}
-		private void CmdPaySaveItem(string phone,string session,string hdlServer)
+		private void CmdPaySaveItem(string phone,string session,string hdlServer,string psw)
 		{
 			var item = regMain.In(phone);
 			if (!_keyPairPaySession.ContainsValue(phone))
@@ -123,7 +123,40 @@ namespace 订单信息服务器
 			}
 			item.SetInfo("session", session) ;
 			item.SetInfo("hdlServer",hdlServer);
-
+			item.SetInfo("psw", psw);
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="serverNo"></param>
+		/// <param name="InnerInfo"></param>
+		private void PayCurrentBill(string serverNo,string InnerInfo="")
+		{
+			if (_payServerHdl.ContainsKey(serverNo))
+			{
+				var phoneTarget = _payServerHdl[serverNo];
+				if (_paySession.ContainsKey(phoneTarget))
+				{
+					//TODO 获取支付凭证并付款
+					var session = _paySession[phoneTarget];
+					if (MessageBox.Show(this, $"订单:\n{InnerInfo}", "付款确认", MessageBoxButtons.YesNo) == DialogResult.Yes)
+					{
+						PayCurrentBill(session);
+					}
+				}
+				else
+				{
+					AppendLog($"当前区{serverNo}管理的账号{phoneTarget}无支付凭证");
+				}
+			}
+			else
+			{
+				AppendLog($"当前区{serverNo}暂无管理的账号");
+			};
+		}
+		private void PayCurrentBill(PayUser user)
+		{
+			PayCurrentBill(user.Session, user.Psw, AuthKey);
 		}
 		/// <summary>
 		/// 提交当前订单付款行为
@@ -134,18 +167,19 @@ namespace 订单信息服务器
 		/// <param name="authKey">预置将军令</param>
 		private void PayCurrentBill(string session, string psw = null, string authKey = null)
 		{
-			BillInfo root = null;
+			if (authKey == null) authKey = InputBox.ShowInputBox("输入将军令", "当前将军令为空，请输入");
+			 BillInfo root = null;
 			try
 			{
 				root = new BillInfo(session);
+				var rootData = root.GetData();
+				if (rootData == null) return;
 			}
 			catch (Exception ex)
 			{
 				MessageBox.Show("加载订单列表失败:" + ex.Message);
 				return;
 			}
-
-			root.GetData();
 			var f = new EnterPassword(psw, root);
 			f.Submit();
 			if (!f.Success)
@@ -160,11 +194,32 @@ namespace 订单信息服务器
 				MessageBox.Show("将军令提交失败:" + f2.Data.errorMsg);
 				return;
 			}
+			var f3 = new EnterPaySubmit(root);
+			f3.Submit();
+			if (f3.Success)
+			{
+				MessageBox.Show($"付款完成:{f3.RawInfo}");
+			}
+			else
+			{
+				MessageBox.Show($"最终步骤失败:{f3.Data.errorMsg}");
+			}
 		}
 		/// <summary>
 		/// 检查订单号是否被处理过
 		/// </summary>
 		private Dictionary<string, bool> _BillRecord = new Dictionary<string, bool>();
+
+		public string AuthKey { get => _authKey; set {
+				if (value.Length != 6)
+				{
+					AppendLog($"【警告】新的将军令可能有误,其为:{value}");
+					return;
+				}
+				OpAuthCodeShow.Text = $"将军令:{value}";
+				_authKey = value;
+			} }
+
 		/// <summary>
 		/// 将新的物品添加到商品列表
 		/// </summary>
@@ -209,37 +264,17 @@ namespace 订单信息服务器
 					//priceNumAssume *= (Convert.ToDouble(IpAssumePrice_Rate.Text) / 100);
 					if (priceNum < priceNumAssume)
 					{
-
 						var earnNum = priceNumAssume - priceNum;
 						if (earnNum / priceNum < 5)
 						{
 							ManagerHttpBase.RecordMoneyGet += earnNum;
 							ManagerHttpBase.RecordMoneyGetTime++;
 						}
+						PayCurrentBill(serverNum,InnerInfo);
 					}
 					ManagerHttpBase.FitWebShowTime++;
 				}
-				if (_payServerHdl.ContainsKey(serverNum))
-				{
-					var phoneTarget = _payServerHdl[serverNum];
-					if (_paySession.ContainsKey(phoneTarget))
-					{
-						//TODO 获取支付凭证并付款
-						var session = _paySession[phoneTarget];
-						if (MessageBox.Show(this, $"订单:\n{InnerInfo}", "付款确认", MessageBoxButtons.YesNo) == DialogResult.Yes)
-						{
-							//PayCurrentBill(session, "121212", PayAuthKey);
-						}
-					}
-					else
-					{
-						AppendLog($"当前区{serverNum}管理的账号{phoneTarget}无支付凭证");
-					}
-				}
-				else
-				{
-					AppendLog($"当前区{serverNum}暂无管理的账号");
-				};
+				
 
 				SendCmdToBrowserClient(serverName, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceNum}</price><assumePrice>{priceNumAssume }</assumePrice>");
 			}

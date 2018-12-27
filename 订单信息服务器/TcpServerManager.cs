@@ -26,7 +26,6 @@ namespace SfTcp
 		}
 		public TcpServerManager()
 		{
-			NewTcp();
 			threadCheckConnection = new Thread(() =>
 			{
 				while (true)
@@ -45,14 +44,26 @@ namespace SfTcp
 				ServerConnected?.Invoke(x);
 				Console.WriteLine("新的用户连接"+x.client.Client.RemoteEndPoint.ToString());
 				list.Add(x);
-				NewTcp();//继续侦听其他客户端
 			});
+		}
+		private Thread threadListenClient;
+		public void StartListening()
+		{
+			threadListenClient = new Thread(() =>
+			{
+				while (true)
+				{
+					NewTcp();
+				}
+			})
+			{ IsBackground=true};
+			threadListenClient.Start();
 		}
 		private TcpServer NewTcp(int port=8009)
 		{
 			return new TcpServer((x,InnerInfo, s) => {
 				s.lastMessageTime = Environment.TickCount;
-				NormalMessage?.Invoke(s,x,InnerInfo);
+				
 				if (x.Contains("BrowserClientReport"))
 				{
 					if (InnerInfo.Contains("heartBeat"))
@@ -67,7 +78,9 @@ namespace SfTcp
 				}else if (x.Contains("ping"))
 				{
 					s.Send($"<ping></ping>");
+					return;
 				}
+				NormalMessage?.Invoke(s, x, InnerInfo);
 			}, (x,s) => {
 				HttpRequest.Invoke(x,s);
 			}

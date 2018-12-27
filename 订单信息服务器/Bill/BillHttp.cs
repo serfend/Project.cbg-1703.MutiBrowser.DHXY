@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace 订单信息服务器.Bill
@@ -19,10 +21,12 @@ namespace 订单信息服务器.Bill
 			http = new HttpClient(new HttpClientHandler()
 			{
 				UseProxy = true,
-				Proxy = new WebProxy("127.0.0.1:8009"),
+				Proxy = new WebProxy("127.0.0.1:8888"),
 				UseCookies = false
 			});
+			ServicePointManager.ServerCertificateValidationCallback += RemoteCertificateValidate;
 		}
+		private static bool RemoteCertificateValidate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors error) => true;
 
 		#region IDisposable Support
 		private bool disposedValue = false; // 要检测冗余调用

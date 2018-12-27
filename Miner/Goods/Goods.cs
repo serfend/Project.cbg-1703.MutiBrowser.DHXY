@@ -101,7 +101,8 @@ namespace Miner
 						Append(IAchievement).Append(split).
 						Append(IChengjiu).Append(split).
 						Append(ISingleEnergyRate).Append(split).
-						Append(BuyUrl);
+						Append(BuyUrl).Append(split).
+						Append(server.Id);
 					return cstr.ToString();
 				}
 			}

@@ -45,7 +45,6 @@ namespace 订单信息服务器
 			string name;
 			string ip;
 			private List<string> hdlServer;
-
 			public VPS(string name, string ip)
 			{
 				this.Name = name;
@@ -60,6 +59,10 @@ namespace 订单信息服务器
 		private Reg regServerInfo;
 		private Dictionary<string, HdlServerInfo> serverInfoList = new Dictionary<string, HdlServerInfo>();//以区名对应区分配
 		private Dictionary<string, VPS> allocServer = new Dictionary<string, VPS>();//以ip对应终端
+		/// <summary>
+		/// ip对应终端手机号
+		/// </summary>
+		private Dictionary<string, string> _clientPayUser=new Dictionary<string, string>();
 		private Reg regSettingVps;
 		/// <summary>
 		/// 将从任务列表中提取可用任务分配给VPS，VPS断开时撤回
