@@ -98,6 +98,9 @@
     <Compile Include="..\..\..\..\..\util\coder\jsonUtil.cs">
       <Link>Util\Coder\jsonUtil.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\..\..\util\HttpClient\HttpClient.cs">
+      <Link>Util\HttpClient.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\..\..\util\Input\InputBox.cs">
       <Link>Util\Coder\InputBox.cs</Link>
       <SubType>Form</SubType>
@@ -107,7 +110,6 @@
     </Compile>
     <Compile Include="Bill\BillInfoJson.cs" />
     <Compile Include="Bill\EnterPaySubmit.cs" />
-    <Compile Include="Bill\ETokenByJs.cs" />
     <Compile Include="FrmServer\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -137,6 +139,7 @@
     <Compile Include="TcpServer.cs" />
     <Compile Include="TcpServerManager.cs" />
     <Compile Include="Util\JsConsole.cs" />
+    <Compile Include="Util\ServerJsManager.cs" />
     <EmbeddedResource Include="..\..\..\..\..\util\Input\InputBox.resx">
       <Link>Util\Coder\InputBox.resx</Link>
     </EmbeddedResource>
@@ -176,6 +179,17 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="PayProtocal\" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="WinHttp">
+      <Guid>{662901FC-6951-4854-9EB2-D9A2570F2B2E}</Guid>
+      <VersionMajor>5</VersionMajor>
+      <VersionMinor>1</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

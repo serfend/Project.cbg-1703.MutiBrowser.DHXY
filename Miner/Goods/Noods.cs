@@ -43,7 +43,7 @@ namespace Goods
 				this.parent = parent;
 				child = new List<Node>();
 			}
-			private int nowRank;
+			private readonly int nowRank;
 			public void Init(ref string info, int start, int length)
 			{
 				bool matchingString = false;

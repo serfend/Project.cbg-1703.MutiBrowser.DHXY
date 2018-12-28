@@ -91,10 +91,7 @@ console.log("51 : console.log('45 : 					function f(a) {  is calling');//TODO ma
 						f(function(d, c) {
 							a.ip = d;
 							a.dns = c;
-							var f = h(y, e, b[353]);
-							tb(f, {
-								G: a
-							})
+							
 						})
 					})({
 						tid: Y,
@@ -111,16 +108,16 @@ console.log("51 : console.log('45 : 					function f(a) {  is calling');//TODO ma
 					})
 				}
 				function h(a, c, f) {
-console.log("113 : 				function h(a, c, f) {  is calling");//TODO marked by IDE
+console.log("110 : 				function h(a, c, f) {  is calling");//TODO marked by IDE
 console.log("107 : 				function h(a, c, f) {  is calling");//TODO marked by IDE
-console.log("115 : console.log('107 : 				function h(a, c, f) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("112 : console.log('107 : 				function h(a, c, f) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					c = vb(c.replace(/^https:\/\/?/, b[0]));
 					return (f = f ? vb(f) : b[0]) ? a + B[10] + c.trim() + b[33] + f : a + B[10] + c
 				}
 				function k(a, c, f) {
-console.log("120 : 				function k(a, c, f) {  is calling");//TODO marked by IDE
+console.log("117 : 				function k(a, c, f) {  is calling");//TODO marked by IDE
 console.log("112 : 				function k(a, c, f) {  is calling");//TODO marked by IDE
-console.log("122 : console.log('112 : 				function k(a, c, f) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("119 : console.log('112 : 				function k(a, c, f) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					console.log("k(a,c,f) is calling");
 					var x = document.head || document[b[627]](b[843])[0],
 						y = document[b[168]](b[236]);
@@ -139,20 +136,20 @@ console.log("122 : console.log('112 : 				function k(a, c, f) {  is calling');//
 					x[b[13]](y)
 				}
 				function m(d) {
-console.log("141 : 				function m(d) {  is calling");//TODO marked by IDE
+console.log("138 : 				function m(d) {  is calling");//TODO marked by IDE
 console.log("131 : 				function m(d) {  is calling");//TODO marked by IDE
-console.log("143 : console.log('131 : 				function m(d) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("140 : console.log('131 : 				function m(d) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					console.log("m(d) is calling");
 					function c(b, d) {
-console.log("146 : 					function c(b, d) {  is calling");//TODO marked by IDE
+console.log("143 : 					function c(b, d) {  is calling");//TODO marked by IDE
 console.log("134 : 					function c(b, d) {  is calling");//TODO marked by IDE
-console.log("148 : console.log('134 : 					function c(b, d) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("145 : console.log('134 : 					function c(b, d) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 						return b || b === a[5] ? b : d
 					}
 					function f(b, a) {
-console.log("152 : 					function f(b, a) {  is calling");//TODO marked by IDE
+console.log("149 : 					function f(b, a) {  is calling");//TODO marked by IDE
 console.log("138 : 					function f(b, a) {  is calling");//TODO marked by IDE
-console.log("154 : console.log('138 : 					function f(b, a) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("151 : console.log('138 : 					function f(b, a) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 						return typeof b === p[47] ? b : a
 					}
 					var x = d.buildVersion,
@@ -229,9 +226,9 @@ console.log("154 : console.log('138 : 					function f(b, a) {  is calling');//TO
 					}
 				}
 				function fa(d) {
-console.log("231 : 				function fa(d) {  is calling");//TODO marked by IDE
+console.log("228 : 				function fa(d) {  is calling");//TODO marked by IDE
 console.log("215 : 				function fa(d) {  is calling");//TODO marked by IDE
-console.log("233 : console.log('215 : 				function fa(d) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("230 : console.log('215 : 				function fa(d) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					void 0 === d && (d = []);
 					var c = ub[b[343]];
 					if (!c || !d.length) return b[0];
@@ -249,9 +246,9 @@ console.log("233 : console.log('215 : 				function fa(d) {  is calling');//TODO 
 					return b[0]
 				}
 				function xa(a) {
-console.log("251 : 				function xa(a) {  is calling");//TODO marked by IDE
+console.log("248 : 				function xa(a) {  is calling");//TODO marked by IDE
 console.log("233 : 				function xa(a) {  is calling");//TODO marked by IDE
-console.log("253 : console.log('233 : 				function xa(a) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("250 : console.log('233 : 				function xa(a) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					var c = this;
 					void 0 === a && (a = {});
 					if (this.constructor.$) return this.constructor.$;
@@ -259,18 +256,18 @@ console.log("253 : console.log('233 : 				function xa(a) {  is calling');//TODO 
 					this.id = a.id || b[547] + H();
 					this.I = a.I;
 					t[b[883]] = function() {
-console.log("261 : 					t[b[883]] = function() {  is calling");//TODO marked by IDE
+console.log("258 : 					t[b[883]] = function() {  is calling");//TODO marked by IDE
 console.log("241 : 					t[b[883]] = function() {  is calling");//TODO marked by IDE
-console.log("263 : console.log('241 : 					t[b[883]] = function() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("260 : console.log('241 : 					t[b[883]] = function() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 						w.h(yb, c.id);
 						if (typeof a[b[207]] === b[277]) a[b[207]]()
 					};
 					this.I && this.ac() && this.ec()
 				}
 				function oa() {
-console.log("270 : 				function oa() {  is calling");//TODO marked by IDE
+console.log("267 : 				function oa() {  is calling");//TODO marked by IDE
 console.log("248 : 				function oa() {  is calling");//TODO marked by IDE
-console.log("272 : console.log('248 : 				function oa() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("269 : console.log('248 : 				function oa() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					if (Oa) return Oa;
 					Oa = this;
 					var d = Pa(w[b[350]][b[463]]),
@@ -299,9 +296,9 @@ console.log("272 : console.log('248 : 				function oa() {  is calling');//TODO m
 					this.M = new Q(d)
 				}
 				function Q(b) {
-console.log("301 : 				function Q(b) {  is calling");//TODO marked by IDE
+console.log("298 : 				function Q(b) {  is calling");//TODO marked by IDE
 console.log("277 : 				function Q(b) {  is calling");//TODO marked by IDE
-console.log("303 : console.log('277 : 				function Q(b) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("300 : console.log('277 : 				function Q(b) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					void 0 === b && (b = {});
 					this.ea = Object.keys(ya);
 					this.tb = b;
@@ -310,9 +307,9 @@ console.log("303 : console.log('277 : 				function Q(b) {  is calling');//TODO m
 					this.Q = this.Q.bind(this)
 				}
 				function zb(a) {
-console.log("312 : 				function zb(a) {  is calling");//TODO marked by IDE
+console.log("309 : 				function zb(a) {  is calling");//TODO marked by IDE
 console.log("286 : 				function zb(a) {  is calling");//TODO marked by IDE
-console.log("314 : console.log('286 : 				function zb(a) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("311 : console.log('286 : 				function zb(a) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					a = a ? Ab : Object.assign(Ab, vc);
 					var c = [];
 					try {
@@ -325,9 +322,9 @@ console.log("314 : console.log('286 : 				function zb(a) {  is calling');//TODO 
 					return c
 				}
 				function wc() {
-console.log("327 : 				function wc() {  is calling");//TODO marked by IDE
+console.log("324 : 				function wc() {  is calling");//TODO marked by IDE
 console.log("299 : 				function wc() {  is calling");//TODO marked by IDE
-console.log("329 : console.log('299 : 				function wc() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("326 : console.log('299 : 				function wc() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					if (Bb) return Aa;
 					var a = w[b[350]][b[463]],
 						c = a.fc;
@@ -347,9 +344,9 @@ console.log("329 : console.log('299 : 				function wc() {  is calling');//TODO m
 					return Aa
 				}
 				function Sa() {
-console.log("349 : 				function Sa() {  is calling");//TODO marked by IDE
+console.log("346 : 				function Sa() {  is calling");//TODO marked by IDE
 console.log("319 : 				function Sa() {  is calling");//TODO marked by IDE
-console.log("351 : console.log('319 : 				function Sa() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("348 : console.log('319 : 				function Sa() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					var d = w[b[350]][b[463]],
 						c = T().j(wa),
 						f = la().j(ma),
@@ -385,9 +382,9 @@ console.log("351 : console.log('319 : 				function Sa() {  is calling');//TODO m
 					return f
 				}
 				function za(d, c) {
-console.log("387 : 				function za(d, c) {  is calling");//TODO marked by IDE
+console.log("384 : 				function za(d, c) {  is calling");//TODO marked by IDE
 console.log("355 : 				function za(d, c) {  is calling");//TODO marked by IDE
-console.log("389 : console.log('355 : 				function za(d, c) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("386 : console.log('355 : 				function za(d, c) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					var f = c.a,
 						g = c.e,
 						y = [];
@@ -406,9 +403,9 @@ console.log("389 : console.log('355 : 				function za(d, c) {  is calling');//TO
 					return g.concat(f, y)
 				}
 				function Ac(d, c) {
-console.log("408 : 				function Ac(d, c) {  is calling");//TODO marked by IDE
+console.log("405 : 				function Ac(d, c) {  is calling");//TODO marked by IDE
 console.log("374 : 				function Ac(d, c) {  is calling");//TODO marked by IDE
-console.log("410 : console.log('374 : 				function Ac(d, c) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("407 : console.log('374 : 				function Ac(d, c) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					void 0 === c && (c = {});
 					var f, x, y = c.Z,
 						e = c.G;
@@ -419,26 +416,29 @@ console.log("410 : console.log('374 : 				function Ac(d, c) {  is calling');//TO
 					void 0 === h && (h = R);
 					var k = c.R;
 					void 0 === k && (k = R);
-					e[b[628]] = Hb;
-					l && (x = Ba(function() {
-						x && ba(x);
-						f && typeof f[g[77]] === b[277] && f[g[77]]();
-						k(Error(b[693]))
-					}, l));
-					y === b[480] && (d += (~d.indexOf(b[58]) ? b[22] : b[58]) + Ta(e));
-					Ua ? (f = new Ua, b[506] in f ? (f[g[32]](y, d, !0), f[b[655]](b[686], p[3]), f[g[89]] = c[g[89]], f[g[0]] = function() {
-console.log("429 : 					Ua ? (f = new Ua, b[506] in f ? (f[g[32]](y, d, !0), f[b[655]](b[686], p[3]), f[g[89]] = c[g[89]], f[g[0]] = function() {  is calling");//TODO marked by IDE
-console.log("393 : 					Ua ? (f = new Ua, b[506] in f ? (f[g[32]](y, d, !0), f[b[655]](b[686], p[3]), f[g[89]] = c[g[89]], f[g[0]] = function() {  is calling");//TODO marked by IDE
-console.log("431 : console.log('393 : 					Ua ? (f = new Ua, b[506] in f ? (f[g[32]](y, d, !0), f[b[655]](b[686], p[3]), f[g[89]] = c[g[89]], f[g[0]] = function() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
-						if (f[b[279]] === a[13]) if (x && ba(x), f[b[754]] >= a[299] && f[b[754]] < a[346]) {
-							var d, c = new xb(b[100] + Hb + b[452]);
-							try {
-								d = JSON[b[717]]((f[b[183]] || b[0]).match(c)[1] || b[0])
-							} catch (g) {}
-							d ? h(d) : k(Error(p[4]))
-						} else k(Error(b[386]))
-					}, f[p[19]](Ta(e))) : (x && ba(x), k(Error(g[116])), b[0])) : (x && ba(x), k(Error(g[116])), b[0]);
-					return f && typeof f[g[77]] === b[277] && f[g[77]]
+					e.cb = Hb;
+					//TODO 此处的目的为获取c网址后，格式化输出到 function h(string raw)
+console.log("420 : 					//TODO 此处的目的为获取c网址后，格式化输出到 function h(string raw)  is calling");//TODO marked by IDE
+					var postData=Ta(e);
+					console.alert("即将发送请求 "+y + "  :"+ d + ",  data="+postData);
+					var raw=console.httpRequest(d,y,postData);
+					// l && (x = Ba(function() {
+						// x && ba(x);
+						// f && typeof f[g[77]] === b[277] && f[g[77]]();
+						// k(Error(b[693]))
+					// }, l));
+					// y === b[480] && (d += (~d.indexOf(b[58]) ? b[22] : b[58]) + Ta(e));
+					// Ua ? (f = new Ua, b[506] in f ? (f.open(y, d, !0), f.setRequestHeader(b[686], p[3]), f[g[89]] = c[g[89]], f[g[0]] = function() {
+console.log("431 : 					// Ua ? (f = new Ua, b[506] in f ? (f.open(y, d, !0), f.setRequestHeader(b[686], p[3]), f[g[89]] = c[g[89]], f[g[0]] = function() {  is calling");//TODO marked by IDE
+						// if (f[b[279]] === a[13]) if (x && ba(x), f[b[754]] >= a[299] && f[b[754]] < a[346]) {
+							// var d, c = new xb(b[100] + Hb + b[452]);
+							// try {
+								// d = JSON[b[717]]((f[b[183]] || b[0]).match(c)[1] || b[0])
+							// } catch (g) {}
+							// d ? h(d) : k(Error(p[4]))
+						// } else k(Error(b[386]))
+					// }, f.send(Ta(e))) : (x && ba(x), k(Error(g[116])), b[0])) : (x && ba(x), k(Error(g[116])), b[0]);
+					// return f && typeof f[g[77]] === b[277] && f[g[77]]
 				}
 				function ga(a) {
 console.log("443 : 				function ga(a) {  is calling");//TODO marked by IDE
@@ -553,48 +553,49 @@ console.log("547 : console.log('484 : 					console.log('function sc()');  is cal
 					} catch (d) {}
 					return !1
 				}
-				function Xa() {
-console.log("556 : 				function Xa() {  is calling");//TODO marked by IDE
-console.log("493 : 				function Xa() {  is calling");//TODO marked by IDE
-console.log("558 : console.log('493 : 				function Xa() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
-					var a;
-					try {
-						a = new Ua
-					} catch (c) {}
-					return !!a && b[506] in a
+				function CheckIfEnableHttpRequest() {
+console.log("556 : 				function CheckIfEnableHttpRequest() {  is calling");//TODO marked by IDE
+// console.log("493 : 				function CheckIfEnableHttpRequest() {  is calling");//TODO marked by IDE
+console.log("558 : // console.log('493 : 				function CheckIfEnableHttpRequest() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+					// var a;
+					// try {
+						// a = new Ua
+					// } catch (c) {}
+					// return !!a && "withCredentials" in a
+					return true;
 				}
 				function Ta(a) {
-console.log("566 : 				function Ta(a) {  is calling");//TODO marked by IDE
+console.log("567 : 				function Ta(a) {  is calling");//TODO marked by IDE
 console.log("501 : 				function Ta(a) {  is calling");//TODO marked by IDE
-console.log("568 : console.log('501 : 				function Ta(a) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("569 : console.log('501 : 				function Ta(a) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					return Object.keys(a).map(function(c) {
 						return ca(c) + b[55] + ca(a[c])
 					}).join(b[22])
 				}
 				function Jb(a) {
-console.log("574 : 				function Jb(a) {  is calling");//TODO marked by IDE
+console.log("575 : 				function Jb(a) {  is calling");//TODO marked by IDE
 console.log("507 : 				function Jb(a) {  is calling");//TODO marked by IDE
-console.log("576 : console.log('507 : 				function Jb(a) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("577 : console.log('507 : 				function Jb(a) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					return a.replace(/(^\/)|(\/$)/g, b[0])
 				}
 				function W(a, c, f) {
-console.log("580 : 				function W(a, c, f) {  is calling");//TODO marked by IDE
+console.log("581 : 				function W(a, c, f) {  is calling");//TODO marked by IDE
 console.log("511 : 				function W(a, c, f) {  is calling");//TODO marked by IDE
-console.log("582 : console.log('511 : 				function W(a, c, f) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("583 : console.log('511 : 				function W(a, c, f) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					c = Jb(c.replace(/^https?:\/\//i, b[0]));
 					return (f = f ? Jb(f) : b[0]) ? a + B[10] + c + b[33] + f : a + B[10] + c
 				}
 				function H() {
-console.log("587 : 				function H() {  is calling");//TODO marked by IDE
+console.log("588 : 				function H() {  is calling");//TODO marked by IDE
 console.log("516 : 				function H() {  is calling");//TODO marked by IDE
-console.log("589 : console.log('516 : 				function H() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("590 : console.log('516 : 				function H() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					var result=(new qa).getTime();
 					return result
 				}
 				function T() {
-console.log("594 : 				function T() {  is calling");//TODO marked by IDE
+console.log("595 : 				function T() {  is calling");//TODO marked by IDE
 console.log("520 : 				function T() {  is calling");//TODO marked by IDE
-console.log("596 : console.log('520 : 				function T() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("597 : console.log('520 : 				function T() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					var a = w[b[350]][b[463]].merged ? w[b[350]][b[463]][b[170]] : b[0];
 					if (Ca[a]) return Ca[a];
 					Ca[a] = new sa({
@@ -604,9 +605,9 @@ console.log("596 : console.log('520 : 				function T() {  is calling');//TODO ma
 				}
 
 				function la() {
-console.log("606 : 				function la() {  is calling");//TODO marked by IDE
+console.log("607 : 				function la() {  is calling");//TODO marked by IDE
 console.log("530 : 				function la() {  is calling");//TODO marked by IDE
-console.log("608 : console.log('530 : 				function la() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("609 : console.log('530 : 				function la() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					var a = w.state.options.merged ? w.state.options.productNumber : b[0];
 					if (Da[a]) return Da[a];
 					Da[a] = new ga({
@@ -614,70 +615,61 @@ console.log("608 : console.log('530 : 				function la() {  is calling');//TODO m
 					});
 					return Da[a]
 				}
-				function tb(d, c) {
-console.log("617 : 				function tb(d, c) {  is calling");//TODO marked by IDE
-console.log("539 : 				function tb(d, c) {  is calling");//TODO marked by IDE
-console.log("619 : console.log('539 : 				function tb(d, c) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
-					console.log("tb(d,c) is calling");
-					function f() {
-console.log("622 : 					function f() {  is calling");//TODO marked by IDE
-console.log("542 : 					function f() {  is calling");//TODO marked by IDE
-console.log("624 : console.log('542 : 					function f() {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
-						if (q[b[678]]) q[b[678]][b[339]](q);
-						t[x] = R;
-						u && ba(u)
-					}
-					void 0 === c && (c = {});
-					var x = b[218] + Hc++,
-						e = b[628],
-						l = ca,
-						h = c.S;
-					void 0 === h && (h = R);
-					var k = c.G,
-						m = c.R;
-					void 0 === m && (m = R);
-					var n = c.ta;
-					void 0 === n && (n = a[411]);
-					
-					var r = v[b[627]](b[236])[0] || v.head,
-						q, u;
-					
-					n && (u = Ba(function() {
-						f();
-						m && m(Error(b[693]))
-					}, n));
-					t[x] = function(b) {
-console.log("649 : 					t[x] = function(b) {  is calling");//TODO marked by IDE
-console.log("567 : 					t[x] = function(b) {  is calling");//TODO marked by IDE
-console.log("651 : console.log('567 : 					t[x] = function(b) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
-						f();
-						h && h(b)
-					};
-					d += (~d.indexOf(b[58]) ? b[22] : b[58]) + e + b[55] + l(x) + b[22] + Ta(k);
-					d = d.replace(p[25], b[58]);
-					q = v[b[168]](b[236]);
-					q[b[853]] = d;
-					q[g[89]] = function(b) {
-console.log("660 : 					q[g[89]] = function(b) {  is calling");//TODO marked by IDE
-console.log("576 : 					q[g[89]] = function(b) {  is calling");//TODO marked by IDE
-console.log("662 : console.log('576 : 					q[g[89]] = function(b) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
-						f();
-						m(b)
-					};
-					q[b[194]](b[756], b[817]);
-					r[b[678]][b[161]](q, r);
-					return function() {
-						t[x] && f()
-					}
-				}
+				 function tb(d, c) {
+console.log("618 : 				 function tb(d, c) {  is calling");//TODO marked by IDE
+                    function f() {
+console.log("620 :                     function f() {  is calling");//TODO marked by IDE
+                        if (q[b[678]])
+                            q[b[678]][b[339]](q);
+                        t[x] = R;
+                        u && ba(u)
+                    }
+                    void 0 === c && (c = {});
+                    var x = b[218] + Hc++
+                      , e = b[628]
+                      , l = ca
+                      , h = c.S;
+                    void 0 === h && (h = R);
+                    var k = c.G
+                      , m = c.R;
+                    void 0 === m && (m = R);
+                    var n = c.ta;
+                    void 0 === n && (n = a[411]);
+                    var r = v[b[627]](b[236])[0] || v.head, q, u;
+                    n && (u = Ba(function() {
+                        f();
+                        m && m(Error(b[693]))
+                    }, n));
+                    t[x] = function(b) {
+console.log("643 :                     t[x] = function(b) {  is calling");//TODO marked by IDE
+                        f();
+                        h && h(b)
+                    }
+                    ;
+                    d += (~d.indexOf(b[58]) ? b[22] : b[58]) + e + b[55] + l(x) + b[22] + Ta(k);
+                    d = d.replace(p[25], b[58]);
+                    q = v[b[168]](b[236]);
+                    q[b[853]] = d;
+                    q[g[89]] = function(b) {
+console.log("653 :                     q[g[89]] = function(b) {  is calling");//TODO marked by IDE
+                        f();
+                        m(b)
+                    }
+                    ;
+                    q[b[194]](b[756], b[817]);
+                    r[b[678]][b[161]](q, r);
+                    return function() {
+                        t[x] && f()
+                    }
+                }
 				function Kb() {}
-console.log("673 : 				function Kb() {}  is calling");//TODO marked by IDE
+console.log("665 : 				function Kb() {}  is calling");//TODO marked by IDE
 console.log("587 : 				function Kb() {}  is calling");//TODO marked by IDE
-console.log("675 : console.log('587 : 				function Kb() {}  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("667 : console.log('587 : 				function Kb() {}  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 				function Lb(d, c) {
-console.log("677 : 				function Lb(d, c) {  is calling");//TODO marked by IDE
-console.log("589 : 				function Lb(d, c) {  is calling");//TODO marked by IDE
-console.log("679 : console.log('589 : 				function Lb(d, c) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("669 : 				function Lb(d, c) {  is calling");//TODO marked by IDE
+console.log("589 : 				function Lb(" + d +  ", " + c + ") {  is calling");//TODO marked by IDE
+console.log("671 : console.log('589 : 				function Lb(' + d +  ', ' + c + ') {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					c = Object.assign({
 						Z: b[480],
 						G: {},
@@ -685,7 +677,15 @@ console.log("679 : console.log('589 : 				function Lb(d, c) {  is calling');//TO
 						S: Kb,
 						R: Kb
 					}, c);
-					(Xa() ? Ac : tb)(d, c)
+					var selectResult=CheckIfEnableHttpRequest();
+					
+					if(selectResult){
+						console.alert("Ac is calling");
+						Ac(d, c);
+					}else{
+						console.alert("【警告】即将执行已忽略的方法 :tb");
+						tb(d,c);
+					}
 				}
 				function Mb(d, c, f, g, e) {
 console.log("690 : 				function Mb(d, c, f, g, e) {  is calling");//TODO marked by IDE
@@ -1076,7 +1076,7 @@ console.log("1066 : console.log('935 : 				function Xb(a) {  is calling');//TODO
 					};
 					f && (c = ab(ia(e + g + c + b[446])), a.t = Pb(c));
 					try {
-						return Fa(JSON[b[869]](a))
+						return Fa(JSON.stringify(a))
 					} catch (h) {
 						return Fa(b[348])
 					}
@@ -1693,7 +1693,7 @@ console.log("1669 : console.log('1453 : 				String.prototype.trim || (String.pro
 					r = D(g[39]),
 					ua = D(b[275]),
 					ub = window.location,
-					Ua = D(g[29]),
+					Ua = window.userHttpRequest,
 					Wc = D(b[372]),
 					ja = window.localStorage,
 					Xc = D(b[700]),
@@ -3247,7 +3247,7 @@ console.log("2995 : console.log('2674 : 					La.toString = function() {  is call
 						},
 						Eb: {
 							f: function() {
-								return Xa() ? a[660] : a[6]
+								return CheckIfEnableHttpRequest() ? a[660] : a[6]
 							},
 							a: u
 						},
@@ -3427,7 +3427,7 @@ console.log("3370 : console.log('3033 : 				Q.prototype.Ja = function(d, c) {  i
 						h.length && (b[0], q.push(za(h, pa[c])))
 					}
 				};
-				var Oa, Z = Xa();
+				var Oa, Z = CheckIfEnableHttpRequest();
 				console.log("3127 : is calling");
 				oa.prototype._start = function() {
 console.log("3432 : 				oa.prototype._start = function() {  is calling");//TODO marked by IDE
@@ -3685,14 +3685,10 @@ console.log("3665 : console.log('3286 : 					function h() {  is calling');//TODO
 						console.log("var r=X(this.K.W,a[13],this.K)()");
 						var r = X(this.K.W, a[13], this.K)(),
 							u = zb();
-						b[0];
-						b[0];
-						b[0];
 						d = X(db, a[660], void 0)(d.concat(u, r));
 						var t = this.g.lc = !1;
 						console.log("3340 : var v=Ba(h");
-						var	v = Ba(h, +e >= a[5] ? +e : k);
-						console.alert("233");
+						//TODO 忽略 var	v = setTimeout(h, +e >= a[5] ? +e : k);
 						w.h(kb, d, function(b, c) {
 							if (b) return l(b), h();
 							if (c && c.code === a[299]) return g();
@@ -3706,9 +3702,9 @@ console.log("3665 : console.log('3286 : 					function h() {  is calling');//TODO
 					}
 				};
 				e.prototype._getToken = function(a, b, e) {
-console.log("3708 : 				e.prototype._getToken = function(a, b, e) {  is calling");//TODO marked by IDE
+console.log("3704 : 				e.prototype._getToken = function(a, b, e) {  is calling");//TODO marked by IDE
 console.log("3326 : 				e.prototype._getToken = function(a, b, e) {  is calling");//TODO marked by IDE
-console.log("3710 : console.log('3326 : 				e.prototype._getToken = function(a, b, e) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("3706 : console.log('3326 : 				e.prototype._getToken = function(a, b, e) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					var g = this;
 					void 0 === b && (b = R);
 					this.L() ? this.fa(a, b, e) : this.F(function() {
@@ -3716,9 +3712,9 @@ console.log("3710 : console.log('3326 : 				e.prototype._getToken = function(a, 
 					})
 				};
 				e.prototype._getNdInfo = function(a) {
-console.log("3718 : 				e.prototype._getNdInfo = function(a) {  is calling");//TODO marked by IDE
+console.log("3714 : 				e.prototype._getNdInfo = function(a) {  is calling");//TODO marked by IDE
 console.log("3334 : 				e.prototype._getNdInfo = function(a) {  is calling");//TODO marked by IDE
-console.log("3720 : console.log('3334 : 				e.prototype._getNdInfo = function(a) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
+console.log("3716 : console.log('3334 : 				e.prototype._getNdInfo = function(a) {  is calling');//TODO marked by IDE  is calling");//TODO marked by IDE
 					void 0 === a && (a = R);
 					this.L() ? a(fb()) : this.F(function() {
 						var b = fb();

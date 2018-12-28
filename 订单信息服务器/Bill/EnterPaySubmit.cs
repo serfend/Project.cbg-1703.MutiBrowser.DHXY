@@ -13,8 +13,6 @@ namespace 订单信息服务器.Bill
 	/// </summary>
 	public class EnterPaySubmit
 	{
-		private string authKey;
-
 		private SubmitResult data;
 		private bool success;
 		private BillInfo parent;
@@ -43,7 +41,7 @@ namespace 订单信息服务器.Bill
 					{"proposal",Proposal},
 					{ "securityValid", $"{{}}"},
 					{ "envData","{\"term\":\"wap\"}"},
-					{ "yidunToken",""}
+					{ "yidunToken",ServerJsManager.GetToken()}
 		})
 			};
 			message.Headers.Add("Cookie", $"NTES_SESS={parent.NTES_SESS}");

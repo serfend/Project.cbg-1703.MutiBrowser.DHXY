@@ -36,6 +36,10 @@ var window={
 	},
 	Date:function(){
 		
+	},
+	userHttpRequest:function(){
+		
+		
 	}
 };
 window.Date.prototype.getTime=function(){

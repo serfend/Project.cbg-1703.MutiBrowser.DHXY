@@ -55,6 +55,19 @@ namespace JsHelp
 			return Http.GetAsync(url).Result.Content.ReadAsStringAsync().Result;
 		}
 		/// <summary>
+		/// 通过基本http回调
+		/// </summary>
+		/// <param name="url"></param>
+		/// <param name="method"></param>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		public string httpRequest(string url,string method,string data)
+		{
+			var http =new DotNet4.Utilities.UtilHttp.HttpClient();
+			var result= http.GetHtml(url, method, data).document.response.DataString(Encoding.UTF8);
+			return result;
+		}
+		/// <summary>
 		/// 初始化watchman
 		/// </summary>
 		public void InitWatchMan()

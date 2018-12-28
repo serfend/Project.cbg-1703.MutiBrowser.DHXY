@@ -16,7 +16,7 @@ namespace 订单信息服务器.Bill
 	/// <summary>
 	/// 记录账号全局信息
 	/// </summary>
-	public class BillInfo
+	public class BillInfo:IDisposable
 	{
 		private string _NTES_SESS;
 		private BillInfoJson data;
@@ -68,6 +68,31 @@ namespace 订单信息服务器.Bill
 			var r = t.GetData();
 			Console.WriteLine($"当前第一个订单为{t.FirstBill.orderId},{t.FirstBill.goodName},金额:{t.FirstBill.orderAmount}");
 		}
+
+		#region IDisposable Support
+		private bool disposedValue = false; // 要检测冗余调用
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposedValue)
+			{
+				if (disposing)
+				{
+					if (billHttp != null) billHttp.Dispose();
+				}
+				billHttp = null;
+				disposedValue = true;
+			}
+		}
+
+
+		// 添加此代码以正确实现可处置模式。
+		public void Dispose()
+		{
+			// 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+			Dispose(true);
+		}
+		#endregion
 	}
 
 	[Serializable]
