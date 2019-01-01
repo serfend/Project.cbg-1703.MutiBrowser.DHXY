@@ -67,7 +67,7 @@
     <Compile Include="..\..\..\..\..\util\reg.cs">
       <Link>reg.cs</Link>
     </Compile>
-    <Compile Include="..\订单信息服务器\TcpClient.cs">
+    <Compile Include="..\订单信息服务器\TcpServer\TcpClient.cs">
       <Link>TcpClient.cs</Link>
     </Compile>
     <Compile Include="Form1.cs">
