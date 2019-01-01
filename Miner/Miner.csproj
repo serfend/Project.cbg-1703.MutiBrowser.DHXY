@@ -130,7 +130,7 @@
     <Compile Include="..\..\..\..\..\util\reg.cs">
       <Link>Util\reg.cs</Link>
     </Compile>
-    <Compile Include="..\订单信息服务器\TcpClient.cs">
+    <Compile Include="..\订单信息服务器\TcpServer\TcpClient.cs">
       <Link>TcpClient.cs</Link>
     </Compile>
     <Compile Include="ServerHandle\AppInterface.cs" />

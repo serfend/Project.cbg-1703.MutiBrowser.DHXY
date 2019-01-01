@@ -1,3 +1,4 @@
+﻿
 ﻿using DotNet4.Utilities.UtilCode;
 using System;
 using System.Collections.Generic;
@@ -17,9 +18,9 @@ namespace SfTcp
 		/// <summary>
 		/// tcpServer,title,content
 		/// </summary>
-		public Action<TcpServer, string,string> NormalMessage;
+		public Action<TcpServer, string, string> NormalMessage;
 		public Action<TcpHttpMessage, TcpHttpResponse> HttpRequest;
-		
+
 		public TcpServer this[string ip]
 		{
 			get => list.Find((x) => x.Ip == ip);
@@ -34,15 +35,16 @@ namespace SfTcp
 					CheckConnection();
 				}
 			})
-			{ IsBackground=true};
+			{ IsBackground = true };
 			threadCheckConnection.Start();
 		}
 		private readonly Thread threadCheckConnection;
-		private Action<TcpServer> Connected() {
+		private Action<TcpServer> Connected()
+		{
 			return new Action<TcpServer>((x) =>
 			{
 				ServerConnected?.Invoke(x);
-				Console.WriteLine("新的用户连接"+x.client.Client.RemoteEndPoint.ToString());
+				Console.WriteLine("新的用户连接" + x.client.Client.RemoteEndPoint.ToString());
 				list.Add(x);
 			});
 		}
@@ -56,14 +58,14 @@ namespace SfTcp
 					NewTcp();
 				}
 			})
-			{ IsBackground=true};
+			{ IsBackground = true };
 			threadListenClient.Start();
 		}
-		private TcpServer NewTcp(int port=8009)
+		private TcpServer NewTcp(int port = 8009)
 		{
-			return new TcpServer((x,InnerInfo, s) => {
+			return new TcpServer((x, InnerInfo, s) => {
 				s.lastMessageTime = Environment.TickCount;
-				
+
 				if (x.Contains("BrowserClientReport"))
 				{
 					if (InnerInfo.Contains("heartBeat"))
@@ -75,22 +77,24 @@ namespace SfTcp
 					{
 						if (!p.IsLocal) p.Send("<server.command>" + InnerInfo + "</server.command>");
 					}
-				}else if (x.Contains("ping"))
+				}
+				else if (x.Contains("ping"))
 				{
 					s.Send($"<ping></ping>");
 					return;
 				}
 				NormalMessage?.Invoke(s, x, InnerInfo);
-			}, (x,s) => {
-				HttpRequest.Invoke(x,s);
+			}, (x, s) => {
+				HttpRequest.Invoke(x, s);
 			}
-			
-			,port)
+
+			, port)
 			{
 				Connected = Connected(),
 				Disconnected = (x) => {
 					ServerDisconnected?.Invoke(x);
-					list.Remove(x); }
+					list.Remove(x);
+				}
 			};
 		}
 		public int CheckConnection()
@@ -99,14 +103,14 @@ namespace SfTcp
 			var waitToDisConnect = new List<TcpServer>();
 			foreach (var client in list)
 			{
-				if (tick - client.lastMessageTime > 60000&&  client.ID!="...") waitToDisConnect.Add(client) ;
+				if (tick - client.lastMessageTime > 60000 && client.ID != "...") waitToDisConnect.Add(client);
 			}
-			foreach(var client in waitToDisConnect)
+			foreach (var client in waitToDisConnect)
 			{
 				client.Disconnect();
 			}
 			return waitToDisConnect.Count;
 		}
-	
+
 	}
 }

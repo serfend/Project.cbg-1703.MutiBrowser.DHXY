@@ -55,7 +55,7 @@ namespace Miner
 		private static int connectFailTime = 0;
 
 		public static string TcpMainTubeIp= "2y155s0805.51mypc.cn";
-		public static int TcpMainTubePort= 12895;
+		public static int TcpMainTubePort= 40899;
 		public static string TcpFileTubeIp= "2y155s0805.51mypc.cn";
 		public static int TcpFileTubePort= 15514;
 		[STAThreadAttribute]

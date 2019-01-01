@@ -33,7 +33,7 @@ namespace 订单信息服务器
 			InitServerManager();
 			StartTaskSchedule();
 			InitPaySession();
-			ServerJsManager.Init();
+			//ServerJsManager.Init();
 			LstConnection.AfterLabelEdit += CheckIfUserEditName;
 		}
 		private bool ctlSaveLoaded = false;

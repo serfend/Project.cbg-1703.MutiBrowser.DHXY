@@ -31,17 +31,18 @@ namespace 订单信息服务器.Bill
 		public void Submit()
 		{
 			var url = $"https://epay.163.com/cashier/m/ajaxPay?v=${HttpUtil.TimeStamp}";//1545203890961
-			//proposal: { "orderId":"2018122212JY61311834","balance":{ "payAmount":5} }
-			//securityValid: { }
-			//envData: { "term":"wap"}
-			//yidunToken: 
+																						//proposal: { "orderId":"2018122212JY61311834","balance":{ "payAmount":5} }
+																						//securityValid: { }
+																						//envData: { "term":"wap"}
+																						//yidunToken: 
+			var token = ServerJsManager.GetToken();
 						 var message = new HttpRequestMessage(HttpMethod.Post, url)
 			{
 				Content = new FormUrlEncodedContent(new Dictionary<string, string> {
 					{"proposal",Proposal},
 					{ "securityValid", $"{{}}"},
 					{ "envData","{\"term\":\"wap\"}"},
-					{ "yidunToken",ServerJsManager.GetToken()}
+					{ "yidunToken",token}
 		})
 			};
 			message.Headers.Add("Cookie", $"NTES_SESS={parent.NTES_SESS}");

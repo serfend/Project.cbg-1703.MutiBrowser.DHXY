@@ -8,4 +8,7 @@ window.initWatchman({
         onerror: function (e) {
         }
       })
-	  
+
+//document.getElementsByClassName("password").ekey.value=将军令值
+//document.getElementsByClassName("btn-wrap btn-wrap-1")[0].getElementsByClassName("longBtn")[0].click()
+//提交将军令按钮

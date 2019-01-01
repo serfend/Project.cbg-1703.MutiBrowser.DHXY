@@ -135,9 +135,9 @@
     <Compile Include="Bill\Info.cs" />
     <Compile Include="Bill\PayUser.cs" />
     <Compile Include="Bill\SubmitResult.cs" />
-    <Compile Include="TcpClient.cs" />
-    <Compile Include="TcpServer.cs" />
-    <Compile Include="TcpServerManager.cs" />
+    <Compile Include="TcpServer\TcpClient.cs" />
+    <Compile Include="TcpServer\TcpServer.cs" />
+    <Compile Include="TcpServer\TcpServerManager.cs" />
     <Compile Include="Util\JsConsole.cs" />
     <Compile Include="Util\ServerJsManager.cs" />
     <EmbeddedResource Include="..\..\..\..\..\util\Input\InputBox.resx">
@@ -179,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="PayProtocal\" />
+    <Folder Include="WebSocketServer\" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="WinHttp">

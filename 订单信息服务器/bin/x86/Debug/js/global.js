@@ -34,8 +34,11 @@ var window={
 			return console.getStorage(key);
 		}
 	},
+	screen:{
+		colorDepth:24
+	},
 	Date:function(){
-		
+
 	},
 	userHttpRequest:function(){
 		
@@ -44,6 +47,9 @@ var window={
 };
 window.Date.prototype.getTime=function(){
 			return console.getTime();
+		}
+window.Date.prototype.getTimezoneOffset=function (){
+			return -480;
 		}
 window.localStorage.setItem("WM_DID","ltJVwcXNbmtBEFEFFBdpLq3uXyzDbdP/__1545978594567__1545906594567");
 var instanceTmp={};

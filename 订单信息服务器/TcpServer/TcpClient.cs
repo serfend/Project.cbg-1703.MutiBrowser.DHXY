@@ -1,3 +1,4 @@
+﻿
 ﻿using DotNet4.Utilities.UtilCode;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Windows.Forms;
 
 namespace SfTcp
 {
-	public class SfTcpClient:IDisposable
+	public class SfTcpClient : IDisposable
 	{
 		public TcpClient client;
 		private NetworkStream stream;
@@ -18,11 +19,11 @@ namespace SfTcp
 		private BinaryWriter bw;
 		public Action<SfTcpClient, string> RecieveMessage;
 		public Action<SfTcpClient> Disconnected;
-		
-		
+
+
 		private Thread reporterThread, receiverThread;
 		private int lastLength, reporterCounter;
-		public SfTcpClient(string ip,int port)
+		public SfTcpClient(string ip, int port)
 		{
 			Console.WriteLine("尝试与服务器建立连接.");
 			client = new TcpClient(ip, port);
@@ -30,8 +31,8 @@ namespace SfTcp
 			stream = client.GetStream();
 			bw = new BinaryWriter(stream);
 			br = new BinaryReader(stream);
-			receiverThread = new Thread(Reciving) { IsBackground=true};
-			
+			receiverThread = new Thread(Reciving) { IsBackground = true };
+
 			reporterThread = new Thread(() => {
 				while (true)
 				{
@@ -62,14 +63,14 @@ namespace SfTcp
 			nowCheckIndex = 0;
 			br.BaseStream.Flush();
 		}
-		public virtual bool Send(string key,string info)
+		public virtual bool Send(string key, string info)
 		{
-			var safeMessage = string.Format("<{0}>{1}</{0}>{2}",key, EncryptHelper.AESEncrypt(info), TcpComplete);
-			return Send(Encoding.UTF8.GetBytes(safeMessage ));
+			var safeMessage = string.Format("<{0}>{1}</{0}>{2}", key, EncryptHelper.AESEncrypt(info), TcpComplete);
+			return Send(Encoding.UTF8.GetBytes(safeMessage));
 		}
 		public virtual bool Send(byte[] info)
 		{
-			if (client!=null&&client.Connected)
+			if (client != null && client.Connected)
 			{
 				try
 				{
@@ -91,7 +92,7 @@ namespace SfTcp
 			get => "#$%&'";
 		}
 		StringBuilder cstr = new StringBuilder();
-		private int nowCheckIndex =0;
+		private int nowCheckIndex = 0;
 		private void Reciving()
 		{
 			while (true)
@@ -111,7 +112,7 @@ namespace SfTcp
 								continue;
 							}
 						}
-						
+
 					}
 					catch (Exception ex)
 					{
@@ -139,12 +140,12 @@ namespace SfTcp
 			{
 				if (disposing)
 				{
-					if(receiverThread!=null)receiverThread.Abort();
-					if(reporterThread!=null)reporterThread.Abort();
-					if(bw!=null)bw.Dispose();
-					if(br!=null)br.Dispose();
-					if(stream!=null)stream.Dispose();
-					if(client!=null)client.Close();
+					if (receiverThread != null) receiverThread.Abort();
+					if (reporterThread != null) reporterThread.Abort();
+					if (bw != null) bw.Dispose();
+					if (br != null) br.Dispose();
+					if (stream != null) stream.Dispose();
+					if (client != null) client.Close();
 				}
 				client = null;
 				stream = null;

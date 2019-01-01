@@ -1,3 +1,4 @@
+﻿
 ﻿using DotNet4.Utilities.UtilCode;
 using System;
 using System.Collections.Generic;
@@ -34,12 +35,12 @@ namespace SfTcp
 		{
 			this.server = server;
 		}
-		public void Response(string info,string title="Serfend")
+		public void Response(string info, string title = "Serfend")
 		{
 			var cstr = new StringBuilder();
 			cstr.AppendLine("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
 			cstr.AppendLine("<html lang=\"zh-cn\"><head><meta charset = \"utf-8\" />");
-			cstr.AppendLine(string.Format("<title>{0}</title>",title));
+			cstr.AppendLine(string.Format("<title>{0}</title>", title));
 			cstr.AppendLine("</head><body>");
 			cstr.AppendLine(info);
 			cstr.AppendLine("</body></html>");
@@ -47,7 +48,7 @@ namespace SfTcp
 			server.client.Close();
 		}
 	}
-	public class TcpServer:IDisposable
+	public class TcpServer : IDisposable
 	{
 		#region 属性
 		TcpListener listener;
@@ -59,7 +60,7 @@ namespace SfTcp
 		/// <summary>
 		/// title,content,tcpServer
 		/// </summary>
-		private readonly Action<string,string, TcpServer> Receive;//收到信息回调
+		private readonly Action<string, string, TcpServer> Receive;//收到信息回调
 		public Action<TcpServer> Connected;//连接成功回调
 		public Action<TcpServer> Disconnected;//连接成功回调
 		public Action<TcpHttpMessage, TcpHttpResponse> OnHttpRequest;//当来源为http方式时
@@ -73,9 +74,9 @@ namespace SfTcp
 			Base64,
 			Aes
 		}
-		public ConnectProtocal connectProtocal=ConnectProtocal.Aes;
+		public ConnectProtocal connectProtocal = ConnectProtocal.Aes;
 		#endregion
-		public TcpServer( Action<string,string,TcpServer> ReceiveInfo = null,Action<TcpHttpMessage, TcpHttpResponse> ReceiveHttp=null,int port=8009)
+		public TcpServer(Action<string, string, TcpServer> ReceiveInfo = null, Action<TcpHttpMessage, TcpHttpResponse> ReceiveHttp = null, int port = 8009)
 		{
 			listener = new TcpListener(IPAddress.Any, port);
 			this.Receive = ReceiveInfo;
@@ -87,7 +88,8 @@ namespace SfTcp
 			try
 			{
 				listener.Start();
-				while (!listener.Pending()) {
+				while (!listener.Pending())
+				{
 					Thread.Sleep(10);
 				}
 				client = listener.AcceptTcpClient();
@@ -95,7 +97,7 @@ namespace SfTcp
 				this.Ip = this.client.Client.RemoteEndPoint.ToString();
 				if (this.Ip.Contains("127.0.0.1")) IsLocal = true;
 				var checkPortOnly = Ip.IndexOf(':');
-				if (checkPortOnly > 0) Ip = Ip.Substring(checkPortOnly+1);
+				if (checkPortOnly > 0) Ip = Ip.Substring(checkPortOnly + 1);
 				Connected?.BeginInvoke(this, (x) => { }, null);
 				var stream = client.GetStream();
 				writter = new BinaryWriter(stream);
@@ -124,13 +126,13 @@ namespace SfTcp
 			{
 				MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
 			}
-			
-			
+
+
 		}
-		private void RecieveComplete(bool getEndPoint=false)
+		private void RecieveComplete(bool getEndPoint = false)
 		{
-			if (getEndPoint) cstr.Replace(this.TcpComplete,"");
-;			ReceiveInfo(cstr.ToString());
+			if (getEndPoint) cstr.Replace(this.TcpComplete, "");
+			; ReceiveInfo(cstr.ToString());
 			//Receive.Invoke(cstr.ToString(), this);
 			cstr.Clear();
 			lastLength = 0;
@@ -149,7 +151,7 @@ namespace SfTcp
 				var lineInfo = firstLine.Split(' ');
 				if (lineInfo.Length == 3)
 				{
-					OnHttpRequest?.BeginInvoke(new TcpHttpMessage(lineInfo[0], lineInfo[1].StartsWith("/")?lineInfo[1].Substring(1):lineInfo[1], lineInfo[2]), new TcpHttpResponse(this),(x)=> { },null);
+					OnHttpRequest?.BeginInvoke(new TcpHttpMessage(lineInfo[0], lineInfo[1].StartsWith("/") ? lineInfo[1].Substring(1) : lineInfo[1], lineInfo[2]), new TcpHttpResponse(this), (x) => { }, null);
 					return;
 				}
 			}
@@ -158,7 +160,7 @@ namespace SfTcp
 			var raw = HttpUtil.GetElement(info, ">", "<");
 			if (info.IndexOf("</" + title + ">", 0) < 0) return;
 			var content = GetContent(raw);
-			Receive?.BeginInvoke(title, content, this,(x)=> { },null);
+			Receive?.BeginInvoke(title, content, this, (x) => { }, null);
 		}
 		private bool _protocalEnsure = false;
 		public string GetContent(string raw)
@@ -198,15 +200,16 @@ namespace SfTcp
 		public void Disconnect()
 		{
 			listener.Stop();
-			if(client.Connected) client.Close();
+			if (client.Connected) client.Close();
 
 		}
-		private string TcpComplete {
+		private string TcpComplete
+		{
 			get => "#$%&'";
 		}
 		public bool Send(string info)
 		{
-			return Send(Encoding.UTF8.GetBytes(info+TcpComplete));
+			return Send(Encoding.UTF8.GetBytes(info + TcpComplete));
 		}
 		public bool Send(byte[] info)
 		{
@@ -219,8 +222,8 @@ namespace SfTcp
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine("Tcp.Send()"+ex.Message);
-					Disconnected?.BeginInvoke(this,(x)=> { },null);
+					Console.WriteLine("Tcp.Send()" + ex.Message);
+					Disconnected?.BeginInvoke(this, (x) => { }, null);
 					return false;
 				}
 				return true;
@@ -228,7 +231,7 @@ namespace SfTcp
 			else return false;
 		}
 		StringBuilder cstr = new StringBuilder();
-		private int nowCheckIndex=0;
+		private int nowCheckIndex = 0;
 		private void Reciving()
 		{
 			while (true)
@@ -248,15 +251,15 @@ namespace SfTcp
 								continue;
 							}
 						}
-						
+
 					}
-					catch  (Exception ex)
+					catch (Exception ex)
 					{
 						Disconnected?.BeginInvoke(this, (x) => { }, null);
-						Console.WriteLine("Tcp.Reciving()"+ex.Message);
+						Console.WriteLine("Tcp.Reciving()" + ex.Message);
 						break;
 					}
-					
+
 				}
 				else
 				{
