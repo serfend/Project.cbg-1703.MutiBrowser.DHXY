@@ -140,6 +140,9 @@
     <Compile Include="TcpServer\TcpServerManager.cs" />
     <Compile Include="Util\JsConsole.cs" />
     <Compile Include="Util\ServerJsManager.cs" />
+    <Compile Include="WebSocketServer\Event.cs" />
+    <Compile Include="WebSocketServer\Session.cs" />
+    <Compile Include="WebSocketServer\WebSocketServer.cs" />
     <EmbeddedResource Include="..\..\..\..\..\util\Input\InputBox.resx">
       <Link>Util\Coder\InputBox.resx</Link>
     </EmbeddedResource>
@@ -179,7 +182,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="PayProtocal\" />
-    <Folder Include="WebSocketServer\" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="WinHttp">

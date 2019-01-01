@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
+using 订单信息服务器.WebSocketServer;
 
 namespace 订单信息服务器
 {
@@ -21,6 +23,7 @@ namespace 订单信息服务器
 			Application.SetCompatibleTextRenderingDefault(false);
 			try
 			{
+				
 				Application.Run(new Form1());
 			}
 			catch (Exception ex)
@@ -28,5 +31,6 @@ namespace 订单信息服务器
 				MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
 			}
 		}
+
 	}
 }

@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EquipSettingLoader", "Equip
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "远程连接测试", "远程连接测试\远程连接测试.csproj", "{FD4A7EFB-0BDD-4F1B-B85A-FE3CBEB0AD65}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketServer测试", "WebSocketServer测试\WebSocketServer测试.csproj", "{BFCC82BF-6C6B-48A8-9DBA-DFBCB30A2AD4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{FD4A7EFB-0BDD-4F1B-B85A-FE3CBEB0AD65}.Release|x64.Build.0 = Release|Any CPU
 		{FD4A7EFB-0BDD-4F1B-B85A-FE3CBEB0AD65}.Release|x86.ActiveCfg = Release|x86
 		{FD4A7EFB-0BDD-4F1B-B85A-FE3CBEB0AD65}.Release|x86.Build.0 = Release|x86
+		{BFCC82BF-6C6B-48A8-9DBA-DFBCB30A2AD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFCC82BF-6C6B-48A8-9DBA-DFBCB30A2AD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFCC82BF-6C6B-48A8-9DBA-DFBCB30A2AD4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BFCC82BF-6C6B-48A8-9DBA-DFBCB30A2AD4}.Debug|x64.Build.0 = Debug|Any CPU
+		{BFCC82BF-6C6B-48A8-9DBA-DFBCB30A2AD4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BFCC82BF-6C6B-48A8-9DBA-DFBCB30A2AD4}.Debug|x86.Build.0 = Debug|Any CPU
+		{BFCC82BF-6C6B-48A8-9DBA-DFBCB30A2AD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFCC82BF-6C6B-48A8-9DBA-DFBCB30A2AD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFCC82BF-6C6B-48A8-9DBA-DFBCB30A2AD4}.Release|x64.ActiveCfg = Release|Any CPU
+		{BFCC82BF-6C6B-48A8-9DBA-DFBCB30A2AD4}.Release|x64.Build.0 = Release|Any CPU
+		{BFCC82BF-6C6B-48A8-9DBA-DFBCB30A2AD4}.Release|x86.ActiveCfg = Release|Any CPU
+		{BFCC82BF-6C6B-48A8-9DBA-DFBCB30A2AD4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
