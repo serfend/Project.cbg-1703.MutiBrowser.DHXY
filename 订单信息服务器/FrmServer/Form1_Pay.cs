@@ -1,5 +1,6 @@
 ﻿using DotNet4.Utilities.UtilInput;
 using DotNet4.Utilities.UtilReg;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using 订单信息服务器.Bill;
 using 订单信息服务器.Properties.Bill;
+using 订单信息服务器.WebServerControl;
 
 namespace 订单信息服务器
 {
@@ -156,54 +158,40 @@ namespace 订单信息服务器
 		}
 		private void PayCurrentBill(PayUser user)
 		{
-			PayCurrentBill(user.Session, user.Psw, AuthKey);
+			PayCurrentBill(user.UserName, user.Psw, AuthKey);
 		}
 		/// <summary>
 		/// 提交当前订单付款行为
 		/// 【future】当密码或将军令为空时，将从基类中获取数据
 		/// </summary>
+		/// <param name="name">下单用户名称</param>
 		/// <param name="session">付款凭证</param>
 		/// <param name="psw">预置密码</param>
 		/// <param name="authKey">预置将军令</param>
-		private void PayCurrentBill(string session, string psw = null, string authKey = null)
+		private void PayCurrentBill(string name,string session, string psw = null, string authKey = null)
 		{
+			if (!payClient.ContainsKey(name))
+			{
+				MessageBox.Show($"浏览器终端[{name}]未启动");
+				return;
+			}
+			var root = new BillInfo(session);
 			if (authKey == null) authKey = InputBox.ShowInputBox("输入将军令", "当前将军令为空，请输入");
-			 BillInfo root = null;
-			try
-			{
-				root = new BillInfo(session);
-				var rootData = root.GetData();
-				if (rootData == null) return;
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show("加载订单列表失败:" + ex.Message);
-				return;
-			}
-			var f = new EnterPassword(psw, root);
-			f.Submit();
-			if (!f.Success)
-			{
-				MessageBox.Show("密码提交失败:" + f.Data.errorMsg);
-				return;
-			}
-			var f2 = new EnterAuthKey(root);
-			f2.Submit(authKey);
-			if (!f2.Success)
-			{
-				MessageBox.Show("将军令提交失败:" + f2.Data.errorMsg);
-				return;
-			}
-			var f3 = new EnterPaySubmit(root);
-			f3.Submit();
-			if (f3.Success)
-			{
-				MessageBox.Show($"付款完成:{f3.RawInfo}");
-			}
-			else
-			{
-				MessageBox.Show($"最终步骤失败:{f3.Data.errorMsg}");
-			}
+			root.GetData((data)=> {
+				var client = payClient[name];
+				var item = new NewBillMessage()
+				{
+					BillInfo = new SubmitBillInfo()
+					{
+						Ekey = authKey,
+						Psw = psw
+					},
+
+				};
+				client.Session.Send(JsonConvert.SerializeObject(item));
+			});
+			
+			
 		}
 		/// <summary>
 		/// 检查订单号是否被处理过
@@ -299,5 +287,15 @@ namespace 订单信息服务器
 			}
 			return null;
 		}
+
+	}
+	public class SubmitBillInfo
+	{
+		[JsonProperty("orderId")]
+		public string OrderId;
+		[JsonProperty("eKey")]
+		public string Ekey;
+		[JsonProperty("psw")]
+		public string Psw;
 	}
 }

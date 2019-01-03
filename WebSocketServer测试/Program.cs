@@ -54,7 +54,7 @@ namespace WebSocketServer测试
 
 		private static void Server_OnNewMessage(object sender, ClientNewMessageEventArgs e)	
 		{
-			Console.WriteLine($"来自客户端[{e.Session.IP}]消息:{e.Msg}\n{e.Data}");
+			Console.WriteLine($"来自客户端[{e.Session.IP}]消息:{e.Msg}");
 		}
 
 		private static void Server_OnDisconnect(object sender, ClientDisconnectEventArgs e)

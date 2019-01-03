@@ -16,6 +16,9 @@ namespace 订单信息服务器.WebServerControl
 		[JsonProperty("error")]
 		public string Error;
 	}
+	/// <summary>
+	/// 浏览器终端初始化结果
+	/// </summary>
 	public class ClientInitMessage : BaseMessage
 	{
 		public ClientInitMessage()
@@ -24,5 +27,17 @@ namespace 订单信息服务器.WebServerControl
 		}
 		[JsonProperty("serverVersion")]
 		public string Version;
+	}
+	/// <summary>
+	/// 服务器提交新的订单
+	/// </summary>
+	public class NewBillMessage : BaseMessage
+	{
+		[JsonProperty("billInfo")]
+		public SubmitBillInfo BillInfo;
+		public NewBillMessage()
+		{
+			Title = "newBill";
+		}
 	}
 }
