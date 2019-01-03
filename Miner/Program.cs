@@ -368,12 +368,10 @@ namespace Miner
 		private static int fileWaitToUpdate = 0,fileNowReceive=0;
 
 		public static string InnerTargetUrl { get; internal set; }
-		private static string settingTaskInfo;
 		private static int settingDelayTime;
 		private static double settingAssumePriceRate;
 		private static void InitSetting(string settingInfo)
 		{
-			settingTaskInfo = HttpUtil.GetElementInItem(settingInfo, "task");
 			settingDelayTime = Convert.ToInt32(HttpUtil.GetElementInItem(settingInfo, "interval"));
 			settingAssumePriceRate = Convert.ToDouble(HttpUtil.GetElementInItem(settingInfo, "assumePriceRate"));
 		}
@@ -413,7 +411,7 @@ namespace Miner
 			servers = new ServerList();
 			SummomPriceRule.Init();
 			Goods.Equiment.EquimentPrice.Init();
-			servers.ResetConfig(settingTaskInfo,settingDelayTime,settingAssumePriceRate);
+			servers.ResetConfig(settingDelayTime,settingAssumePriceRate);
 			Tcp.Send("clientConfigComplete", "");
 		}
 		private static void SynSetting(string raw) {

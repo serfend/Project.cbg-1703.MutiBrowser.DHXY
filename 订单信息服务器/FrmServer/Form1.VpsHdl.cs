@@ -60,7 +60,7 @@ namespace 订单信息服务器
 		private Dictionary<string, HdlServerInfo> serverInfoList = new Dictionary<string, HdlServerInfo>();//以区名对应区分配
 		private Dictionary<string, VPS> allocServer = new Dictionary<string, VPS>();//以ip对应终端
 		/// <summary>
-		/// ip对应终端手机号
+		/// ip对应终端浏览器名称
 		/// </summary>
 		private Dictionary<string, string> _clientPayUser=new Dictionary<string, string>();
 		private Reg regSettingVps;
@@ -69,7 +69,7 @@ namespace 订单信息服务器
 		/// //TODO 取消区分配
 		/// </summary>
 		/// <param name="s"></param>
-		private void BuildNewTaskToVps(TcpServer s, out string taskTitle)
+		private void BuildNewTaskToVps(TcpServer s)
 		{
 			int singleHdl = 1;
 			try
@@ -85,9 +85,7 @@ namespace 订单信息服务器
 			{
 				IpPerVPShdl.Text = singleHdl.ToString();
 			}
-			string hdlServer = GetFreeServer(singleHdl, s.Ip, out taskTitle);
-
-			hdlServer = "";
+			
 
 			int interval = 1500, timeout = 100000;
 			double assumePriceRate = 100;
@@ -108,7 +106,7 @@ namespace 订单信息服务器
 			{
 				IpTaskInterval.Text = interval.ToString();
 			}
-			s.Send($"<SynInit><interval>{interval}</interval><task>{hdlServer}</task><timeout>{timeout}</timeout></SynInit><InnerTargetUrl>{ManagerHttpBase.TargetUrl}</InnerTargetUrl><assumePriceRate>{assumePriceRate}</assumePriceRate>");
+			s.Send($"<SynInit><interval>{interval}</interval><timeout>{timeout}</timeout></SynInit><InnerTargetUrl>{ManagerHttpBase.TargetUrl}</InnerTargetUrl><assumePriceRate>{assumePriceRate}</assumePriceRate>");
 		}
 	}
 }

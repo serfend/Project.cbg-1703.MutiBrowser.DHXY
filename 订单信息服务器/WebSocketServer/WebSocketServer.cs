@@ -54,6 +54,7 @@ namespace 订单信息服务器.WebSocketServer
 			{
 				//接收客户端的数据
 				SockeClient.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(Recieve), SockeClient);
+
 				//保存登录的客户端
 				Session session = new Session(buffer, SockeClient);
 				lock (SessionPool)
@@ -102,11 +103,11 @@ namespace 订单信息服务器.WebSocketServer
 					client.HandShake(buffer, length);
 					return;
 				}
-				if (!client.Connected) return;
-				msg = AnalyzeClientData(buffer, length);
+				if (!client.Connected|| length==0) return;
+				var clientMsg = AnalyzeClientData(buffer, length);
 				//byte[] msgBuffer = PackageServerData("服务器收到消息:"+ msg);
 				//client.Send(msgBuffer);
-				OnNewMessage?.Invoke(this, new ClientNewMessageEventArgs(client, msg));
+				OnNewMessage?.Invoke(this, new ClientNewMessageEventArgs(client, clientMsg,msg));
 			}
 			catch(Exception ex)
 			{

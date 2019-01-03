@@ -67,9 +67,8 @@ namespace 订单信息服务器
 								s.clientName = targetItem.SubItems[0].Text;
 								if (flag)
 								{
-									BuildNewTaskToVps(s, out string taskTitle);
-									targetItem.SubItems[5].Text = "采集进程"; //taskTitle;
-									SynLstTask();
+									BuildNewTaskToVps(s);
+									targetItem.SubItems[5].Text = "采集进程";
 								}
 							}
 							else if (x.Contains("InitComplete"))
@@ -222,7 +221,6 @@ namespace 订单信息服务器
 								serverInfoList[server].NowNum++;
 							}
 							allocServer.Remove(x.Ip);
-							SynLstTask();
 						}
 					});
 				},
@@ -331,36 +329,6 @@ namespace 订单信息服务器
 				AvailableVps.Add(ip, true);
 			else
 				AvailableVps[ip] = true;
-		}
-
-		private void InitServerTaskList()
-		{
-			var serverInfo = File.ReadAllLines("ServerInfo.txt", Encoding.Default);
-			foreach (var server in serverInfo)
-			{
-				var info = server.Split(',');
-				var data = new string[5];
-				if (info.Length < 4)
-				{
-					AppendLog("【警告】无效的区信息:" + server);
-					continue;
-				}
-				var hdlNum = info.Length == 5 ? Convert.ToInt32(info[4]) : 1;
-				var s = new HdlServerInfo(info[0], info[1], info[2], info[3], hdlNum);
-				if (serverInfoList.ContainsKey(s.Name))
-				{
-					AppendLog("【警告】重复的区:" + server);
-					continue;
-				}
-				serverInfoList.Add(s.Name, s);
-				data[0] = s.Id;//区号
-				data[1] = s.Name;//名称
-				data[2] = "0";//已分配
-				data[3] = s.HdlNum.ToString();//需分配
-				data[4] = regServerInfo.GetInfo(s.Id, "启用");
-				s.Enable = (data[4] == "启用");
-				LstServerQueue.Items.Add(new ListViewItem(data));
-			}
 		}
 	}
 }

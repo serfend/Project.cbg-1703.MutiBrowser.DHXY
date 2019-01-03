@@ -45,13 +45,8 @@
 			this.GoodShowSociatyAchievement = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.GoodShowFamilyRank = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.GoodShowBuyUrl = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.GoodShowServerNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.OpLogCount = new System.Windows.Forms.Label();
-			this.LstServerQueue = new System.Windows.Forms.ListView();
-			this.serverTask_Index = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.serverTask_Name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.serverTask_Handled = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.serverTask_Num = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.serverTask_Enable = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.IpSender = new System.Windows.Forms.TextBox();
 			this.CmdDisconnect = new System.Windows.Forms.Button();
 			this.CmdServerOn = new System.Windows.Forms.Button();
@@ -85,7 +80,6 @@
 			this.Verify = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.ServerHdl = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.Psw = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.GoodShowServerNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TabMain.SuspendLayout();
 			this.TabMain_VpsManager.SuspendLayout();
 			this.TabMain_Setting.SuspendLayout();
@@ -110,7 +104,6 @@
 			this.TabMain_VpsManager.Controls.Add(this.CmdRedial);
 			this.TabMain_VpsManager.Controls.Add(this.LstGoodShow);
 			this.TabMain_VpsManager.Controls.Add(this.OpLogCount);
-			this.TabMain_VpsManager.Controls.Add(this.LstServerQueue);
 			this.TabMain_VpsManager.Controls.Add(this.IpSender);
 			this.TabMain_VpsManager.Controls.Add(this.CmdDisconnect);
 			this.TabMain_VpsManager.Controls.Add(this.CmdServerOn);
@@ -217,6 +210,10 @@
 			this.GoodShowBuyUrl.Text = "购买链接";
 			this.GoodShowBuyUrl.Width = 333;
 			// 
+			// GoodShowServerNo
+			// 
+			this.GoodShowServerNo.Text = "区号";
+			// 
 			// OpLogCount
 			// 
 			this.OpLogCount.AutoSize = true;
@@ -225,44 +222,6 @@
 			this.OpLogCount.Size = new System.Drawing.Size(53, 12);
 			this.OpLogCount.TabIndex = 22;
 			this.OpLogCount.Text = "数据日志";
-			// 
-			// LstServerQueue
-			// 
-			this.LstServerQueue.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.serverTask_Index,
-            this.serverTask_Name,
-            this.serverTask_Handled,
-            this.serverTask_Num,
-            this.serverTask_Enable});
-			this.LstServerQueue.FullRowSelect = true;
-			this.LstServerQueue.Location = new System.Drawing.Point(539, 583);
-			this.LstServerQueue.Name = "LstServerQueue";
-			this.LstServerQueue.Size = new System.Drawing.Size(366, 141);
-			this.LstServerQueue.TabIndex = 26;
-			this.LstServerQueue.UseCompatibleStateImageBehavior = false;
-			this.LstServerQueue.View = System.Windows.Forms.View.Details;
-			this.LstServerQueue.DoubleClick += new System.EventHandler(this.LstServerQueue_DoubleClick);
-			// 
-			// serverTask_Index
-			// 
-			this.serverTask_Index.Text = "区号";
-			// 
-			// serverTask_Name
-			// 
-			this.serverTask_Name.Text = "名称";
-			this.serverTask_Name.Width = 120;
-			// 
-			// serverTask_Handled
-			// 
-			this.serverTask_Handled.Text = "已分配量";
-			// 
-			// serverTask_Num
-			// 
-			this.serverTask_Num.Text = "需分配量";
-			// 
-			// serverTask_Enable
-			// 
-			this.serverTask_Enable.Text = "状态";
 			// 
 			// IpSender
 			// 
@@ -531,7 +490,7 @@
 			// 
 			// PhoneNum
 			// 
-			this.PhoneNum.Text = "手机号";
+			this.PhoneNum.Text = "浏览器名称";
 			this.PhoneNum.Width = 120;
 			// 
 			// Verify
@@ -548,10 +507,6 @@
 			// 
 			this.Psw.Text = "密码";
 			this.Psw.Width = 150;
-			// 
-			// GoodShowServerNo
-			// 
-			this.GoodShowServerNo.Text = "区号";
 			// 
 			// Form1
 			// 
@@ -587,11 +542,6 @@
 		private System.Windows.Forms.ColumnHeader GoodShowFamilyRank;
 		private System.Windows.Forms.ColumnHeader GoodShowBuyUrl;
 		private System.Windows.Forms.Label OpLogCount;
-		private System.Windows.Forms.ListView LstServerQueue;
-		private System.Windows.Forms.ColumnHeader serverTask_Index;
-		private System.Windows.Forms.ColumnHeader serverTask_Name;
-		private System.Windows.Forms.ColumnHeader serverTask_Handled;
-		private System.Windows.Forms.ColumnHeader serverTask_Num;
 		private System.Windows.Forms.TextBox IpSender;
 		private System.Windows.Forms.Button CmdDisconnect;
 		private System.Windows.Forms.Button CmdServerOn;
@@ -612,7 +562,6 @@
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.TextBox IpTaskInterval;
 		private System.Windows.Forms.Button CmdRedial;
-		private System.Windows.Forms.ColumnHeader serverTask_Enable;
 		private System.Windows.Forms.Label label7;
 		private System.Windows.Forms.Label label8;
 		private System.Windows.Forms.TextBox IpAssumePrice_Rate;

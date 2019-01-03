@@ -34,6 +34,7 @@ namespace 订单信息服务器
 			StartTaskSchedule();
 			InitPaySession();
 			//ServerJsManager.Init();
+			InitWebBrowserControl();
 			LstConnection.AfterLabelEdit += CheckIfUserEditName;
 		}
 		private bool ctlSaveLoaded = false;
@@ -61,18 +62,7 @@ namespace 订单信息服务器
 		
 		
 		
-		private void SynLstTask()
-		{
-			for(int i = 0; i < LstServerQueue.Items.Count; i++)
-			{
-				var item = LstServerQueue.Items[i];
-				var id = item.SubItems[0].Text;
-				if (serverInfoList.ContainsKey(id))
-				{
-					item.SubItems[2].Text = (serverInfoList[id].HdlNum-serverInfoList[id].NowNum).ToString();
-				}
-			}
-		}
+
 
 
 
@@ -192,32 +182,7 @@ namespace 订单信息服务器
 				MessageBox.Show(ex.Message);
 			}
 		}
-		/// <summary>
-		/// 切换启用状态
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		private void LstServerQueue_DoubleClick(object sender, EventArgs e)
-		{
-			var targetServer = LstServerQueue.SelectedItems[0].SubItems[1].Text;
-			if (!serverInfoList.ContainsKey(targetServer)) {
-				var list = new StringBuilder();
-				foreach (var item in serverInfoList) list.AppendLine($"{item.Value.Id}({item.Value.Name}):{item.Value.HdlNum}");
-				MessageBox.Show($"当前区:{targetServer}未进入到列表中:\n{list.ToString()}");
-				return;
-			}
-			if (LstServerQueue.SelectedItems[0].SubItems[4].Text == "启用")
-			{
-				LstServerQueue.SelectedItems[0].SubItems[4].Text = "禁用";
-				serverInfoList[targetServer].Enable = false;
-			}
-			else
-			{
-				serverInfoList[targetServer].Enable = true;
-				LstServerQueue.SelectedItems[0].SubItems[4].Text = "启用";
-			}
-			regServerInfo.SetInfo(LstServerQueue.SelectedItems[0].SubItems[0].Text, LstServerQueue.SelectedItems[0].SubItems[4].Text);
-		}
+
 
 		private void LstGoodShow_DoubleClick_1(object sender, EventArgs e)
 		{
@@ -253,10 +218,10 @@ namespace 订单信息服务器
 
 		private void CmdPayBill_Click(object sender, EventArgs e)
 		{
-			var targetUser = InputBox.ShowInputBox("输入付款手机号", "输入付款手机号", "");
+			var targetUser = InputBox.ShowInputBox("输入付款浏览器名称", "输入付款浏览器名称", "");
 			if (!_paySession.ContainsKey(targetUser))
 			{
-				MessageBox.Show("无效的手机号");
+				MessageBox.Show("无效的浏览器名称");
 				return;
 			}
 			PayCurrentBill(_paySession[targetUser]);

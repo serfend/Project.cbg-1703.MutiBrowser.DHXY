@@ -84,7 +84,15 @@ namespace 订单信息服务器.WebSocketServer
 		public bool Send(string info)
 		{
 			if (!Connected) return false;
-			SockeClient.Send(PackageServerData(info));
+			try
+			{
+				SockeClient.Send(PackageServerData(info));
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("WebSocket.Send()"+ex.Message);
+				return false;
+			}
 			return true;
 		}
 		public Session(byte[] buffer, Socket sockeClient)

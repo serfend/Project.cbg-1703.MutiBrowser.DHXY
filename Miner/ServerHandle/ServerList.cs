@@ -67,7 +67,7 @@ namespace Miner
 			//isUseSelfIp = netIp.Contains(selfIp);
 			//}
 			#endregion
-			public void ResetConfig(string taskInfo, int delayTime,double assumePriceRate)
+			public void ResetConfig( int delayTime,double assumePriceRate)
 			{
 				//TODO 暂时关闭任务分配 ResetTask(taskInfo);
 				Server.DelayTime = delayTime;
