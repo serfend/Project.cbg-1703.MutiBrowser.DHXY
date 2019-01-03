@@ -11,7 +11,7 @@ using SfTcp;
 
 namespace 订单信息服务器
 {
-    public partial class Form1 : Form
+    public partial class Form1
 	{
 		private TransferFileEngine transferFileEngine;
 		private string waittingFileInfo;

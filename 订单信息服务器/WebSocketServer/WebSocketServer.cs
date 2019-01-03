@@ -53,7 +53,7 @@ namespace 订单信息服务器.WebSocketServer
 			try
 			{
 				//接收客户端的数据
-				SockeClient.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(Recieve), SockeClient);
+				SockeClient.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(HandShake), SockeClient);
 
 				//保存登录的客户端
 				Session session = new Session(buffer, SockeClient);
@@ -76,7 +76,12 @@ namespace 订单信息服务器.WebSocketServer
 			}
 		}
 		#endregion
-
+		private void Disconnect(Session client,string IP)
+		{
+			OnDisconnect?.Invoke(this, new ClientDisconnectEventArgs(client));
+			Console.WriteLine("WebSocketServer:client {0} disconnect", IP);
+			SessionPool.Remove(IP);
+		}
 		#region 处理接收的数据
 		/// <summary>
 		/// 处理接受的数据
@@ -94,20 +99,15 @@ namespace 订单信息服务器.WebSocketServer
 			try
 			{
 				int length = SockeClient.EndReceive(socket);
-				byte[] buffer = SessionPool[IP].buffer;
-				SockeClient.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(Recieve), SockeClient);
-				string msg = Encoding.UTF8.GetString(buffer, 0, length);
-				//  websocket建立连接的时候，除了TCP连接的三次握手，websocket协议中客户端与服务器想建立连接需要一次额外的握手动作
-				if (msg.Contains("Sec-WebSocket-Key"))
+				if (length == 0)
 				{
-					client.HandShake(buffer, length);
+					Disconnect(client, IP);
 					return;
 				}
-				if (!client.Connected|| length==0) return;
+				byte[] buffer = SessionPool[IP].buffer;
+				SockeClient.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(Recieve), SockeClient);
 				var clientMsg = AnalyzeClientData(buffer, length);
-				//byte[] msgBuffer = PackageServerData("服务器收到消息:"+ msg);
-				//client.Send(msgBuffer);
-				OnNewMessage?.Invoke(this, new ClientNewMessageEventArgs(client, clientMsg,msg));
+				OnNewMessage?.Invoke(this, new ClientNewMessageEventArgs(client, clientMsg));
 			}
 			catch(Exception ex)
 			{
@@ -117,13 +117,37 @@ namespace 订单信息服务器.WebSocketServer
 					SockeClient.Disconnect(true);
 				}
 				catch { }
-				OnDisconnect?.Invoke(this,new ClientDisconnectEventArgs(client));
-				Console.WriteLine("WebSocketServer:client {0} disconnect", IP);
-				SessionPool.Remove(IP);
+				Disconnect(client, IP);
 			}
 		}
 		#endregion
-
+		private void HandShake(IAsyncResult socket)
+		{
+			Socket SockeClient = (Socket)socket.AsyncState;
+			string IP = SockeClient.RemoteEndPoint.ToString();
+			if (SockeClient == null || !SessionPool.ContainsKey(IP))
+			{
+				return;
+			}
+			var client = SessionPool[IP];
+			try
+			{
+				int length = SockeClient.EndReceive(socket);
+				byte[] buffer = SessionPool[IP].buffer;
+				SockeClient.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(Recieve), SockeClient);
+				client.HandShake(buffer, length);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("连接客户端握手异常:" + ex.Message);
+				try
+				{
+					SockeClient.Disconnect(true);
+				}
+				catch { }
+				Disconnect(client, IP);
+			}
+		}
 		#region 客户端和服务端的响应
 		/*
          * 客户端向服务器发送请求

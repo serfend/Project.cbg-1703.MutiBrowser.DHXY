@@ -13,6 +13,8 @@ namespace 订单信息服务器.WebServerControl
 		public string Title;
 		[JsonProperty("content")]
 		public string Content;
+		[JsonProperty("error")]
+		public string Error;
 	}
 	public class ClientInitMessage : BaseMessage
 	{

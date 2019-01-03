@@ -80,6 +80,9 @@
 			this.Verify = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.ServerHdl = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.Psw = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LstBrowserClient = new System.Windows.Forms.ListView();
+			this.BrowserClient_Name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.BrowserClient_Status = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TabMain.SuspendLayout();
 			this.TabMain_VpsManager.SuspendLayout();
 			this.TabMain_Setting.SuspendLayout();
@@ -99,6 +102,7 @@
 			// 
 			// TabMain_VpsManager
 			// 
+			this.TabMain_VpsManager.Controls.Add(this.LstBrowserClient);
 			this.TabMain_VpsManager.Controls.Add(this.CmdPayBill);
 			this.TabMain_VpsManager.Controls.Add(this.CmdPauseTaskAllocate);
 			this.TabMain_VpsManager.Controls.Add(this.CmdRedial);
@@ -255,7 +259,7 @@
 			this.OpLog.Location = new System.Drawing.Point(539, 26);
 			this.OpLog.Multiline = true;
 			this.OpLog.Name = "OpLog";
-			this.OpLog.Size = new System.Drawing.Size(366, 551);
+			this.OpLog.Size = new System.Drawing.Size(366, 359);
 			this.OpLog.TabIndex = 20;
 			// 
 			// OpConnectionCount
@@ -508,6 +512,29 @@
 			this.Psw.Text = "密码";
 			this.Psw.Width = 150;
 			// 
+			// LstBrowserClient
+			// 
+			this.LstBrowserClient.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.BrowserClient_Name,
+            this.BrowserClient_Status});
+			this.LstBrowserClient.FullRowSelect = true;
+			this.LstBrowserClient.LabelEdit = true;
+			this.LstBrowserClient.Location = new System.Drawing.Point(539, 390);
+			this.LstBrowserClient.Name = "LstBrowserClient";
+			this.LstBrowserClient.Size = new System.Drawing.Size(363, 334);
+			this.LstBrowserClient.TabIndex = 40;
+			this.LstBrowserClient.UseCompatibleStateImageBehavior = false;
+			this.LstBrowserClient.View = System.Windows.Forms.View.Details;
+			// 
+			// BrowserClient_Name
+			// 
+			this.BrowserClient_Name.Text = "ID";
+			// 
+			// BrowserClient_Status
+			// 
+			this.BrowserClient_Status.Text = "状态";
+			this.BrowserClient_Status.Width = 240;
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -579,6 +606,9 @@
 		private System.Windows.Forms.Label OpAuthCodeShow;
 		private System.Windows.Forms.Button CmdPayBill;
 		private System.Windows.Forms.ColumnHeader GoodShowServerNo;
+		private System.Windows.Forms.ListView LstBrowserClient;
+		private System.Windows.Forms.ColumnHeader BrowserClient_Name;
+		private System.Windows.Forms.ColumnHeader BrowserClient_Status;
 	}
 }
 

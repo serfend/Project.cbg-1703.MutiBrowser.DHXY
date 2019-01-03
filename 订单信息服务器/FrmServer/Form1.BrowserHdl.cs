@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace 订单信息服务器
 {
-	public partial class Form1 : Form
+	public partial class Form1 
 	{
 
 		private Dictionary<string, string> BrowserIp = new Dictionary<string, string>();//浏览器进程对应终端ip
