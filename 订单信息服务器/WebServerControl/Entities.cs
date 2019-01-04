@@ -39,5 +39,15 @@ namespace 订单信息服务器.WebServerControl
 		{
 			Title = "newBill";
 		}
+		public class SubmitBillInfo
+		{
+			[JsonProperty("orderId")]
+			public string OrderId;
+			[JsonProperty("eKey")]
+			public string Ekey;
+			[JsonProperty("psw")]
+			public string Psw;
+		}
 	}
+
 }

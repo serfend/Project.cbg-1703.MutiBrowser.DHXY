@@ -73,10 +73,6 @@ namespace SfTcp
 						s.Send("<server.response>heartBeat</server.response>");
 						return;
 					}
-					foreach (var p in list)
-					{
-						if (!p.IsLocal) p.Send("<server.command>" + InnerInfo + "</server.command>");
-					}
 				}
 				else if (x.Contains("ping"))
 				{

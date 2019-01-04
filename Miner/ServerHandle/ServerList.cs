@@ -69,17 +69,9 @@ namespace Miner
 			#endregion
 			public void ResetConfig( int delayTime,double assumePriceRate)
 			{
-				//TODO 暂时关闭任务分配 ResetTask(taskInfo);
 				Server.DelayTime = delayTime;
 				Server.DelayTime = Server.DelayTime <= 100 ? 100 : Server.DelayTime;
 				Server.AssumePriceRate = assumePriceRate;
-				
-				//if (HdlServer.Count == 0)
-				//{
-				//	Program.setting.threadSetting.Status = ("无需处理的服务器");
-				//	Program.vpsStatus = Program.VpsStatus.Idle;
-				//}
-
 				Program.setting.threadSetting.RefreshRunTime(0);
 			}
 			private int lastRunTime = 0;

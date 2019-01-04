@@ -158,7 +158,7 @@ namespace 订单信息服务器
 		}
 		private void PayCurrentBill(PayUser user)
 		{
-			PayCurrentBill(user.UserName, user.Psw, AuthKey);
+			PayCurrentBill(user.UserName,user.Session, user.Psw, AuthKey);
 		}
 		/// <summary>
 		/// 提交当前订单付款行为
@@ -170,28 +170,51 @@ namespace 订单信息服务器
 		/// <param name="authKey">预置将军令</param>
 		private void PayCurrentBill(string name,string session, string psw = null, string authKey = null)
 		{
-			if (!payClient.ContainsKey(name))
+			if (!payClient.ContainsKey(payClientIp[name]))
 			{
 				MessageBox.Show($"浏览器终端[{name}]未启动");
 				return;
 			}
+			bool anyException = false;
 			var root = new BillInfo(session);
-			if (authKey == null) authKey = InputBox.ShowInputBox("输入将军令", "当前将军令为空，请输入");
-			root.GetData((data)=> {
-				var client = payClient[name];
-				var item = new NewBillMessage()
+			Client client = null;
+			NewBillMessage item = null;
+			var getBillInfo = new Task(()=> {
+				try
 				{
-					BillInfo = new SubmitBillInfo()
+					root.GetData();
+				}
+				catch (Exception ex)
+				{
+					anyException = true;
+					MessageBox.Show($"订单失败:{ex.Message}");
+					return;
+				}
+			});
+			var userInput = new Task(()=> {
+				
+				if (authKey == null) authKey = InputBox.ShowInputBox("输入将军令", "当前将军令为空，请输入");
+				client = payClient[payClientIp[name]];
+				item = new NewBillMessage()
+				{
+					BillInfo = new NewBillMessage.SubmitBillInfo()
 					{
 						Ekey = authKey,
-						Psw = psw
-					},
-
+						Psw = psw,
+					}
 				};
-				client.Session.Send(JsonConvert.SerializeObject(item));
 			});
+			userInput.Start();
+			getBillInfo.Start();
+			Task.WaitAll(new Task[] { userInput, getBillInfo });
+			if (anyException)
+			{
+				return;
+			}
+			item.BillInfo.OrderId = root.FirstBill.orderId;
+			client.Session.Send(JsonConvert.SerializeObject(item));
 			
-			
+
 		}
 		/// <summary>
 		/// 检查订单号是否被处理过
@@ -238,10 +261,6 @@ namespace 订单信息服务器
 					//AppendLog(ordersn + "已出现过此订单," + serverName);
 					return;
 				}
-				AppendLog("新的订单:" + BuyUrl);
-				_BillRecord.Add(BuyUrl, true);
-				LstGoodShow.Items.Insert(0, new ListViewItem(tmp));
-				if (LstGoodShow.Items.Count > 10) LstGoodShow.Items[10].Remove();
 
 				var price = priceInfo.Split('/');
 				double priceNum = 0, priceNumAssume = 0;
@@ -249,22 +268,26 @@ namespace 订单信息服务器
 				{
 					priceNum = Convert.ToDouble(price[0]);
 					priceNumAssume = Convert.ToDouble(price[1]);
-					//priceNumAssume *= (Convert.ToDouble(IpAssumePrice_Rate.Text) / 100);
-					if (priceNum < priceNumAssume)
-					{
-						var earnNum = priceNumAssume - priceNum;
-						if (earnNum / priceNum < 5)
-						{
-							ManagerHttpBase.RecordMoneyGet += earnNum;
-							ManagerHttpBase.RecordMoneyGetTime++;
-						}
-						PayCurrentBill(serverNum,InnerInfo);
-					}
-					ManagerHttpBase.FitWebShowTime++;
 				}
-				
-
 				SendCmdToBrowserClient(serverName, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceNum}</price><assumePrice>{priceNumAssume }</assumePrice>");
+
+
+				AppendLog("新的订单:" + BuyUrl);
+				_BillRecord.Add(BuyUrl, true);
+				LstGoodShow.Items.Insert(0, new ListViewItem(tmp));
+				if (LstGoodShow.Items.Count > 10) LstGoodShow.Items[10].Remove();
+
+				if (priceNum < priceNumAssume)
+				{
+					var earnNum = priceNumAssume - priceNum;
+					if (earnNum / priceNum < 5)
+					{
+						ManagerHttpBase.RecordMoneyGet += earnNum;
+						ManagerHttpBase.RecordMoneyGetTime++;
+					}
+					PayCurrentBill(serverNum, InnerInfo);
+				}
+				ManagerHttpBase.FitWebShowTime++;
 			}
 			catch (Exception ex)
 			{
@@ -289,13 +312,5 @@ namespace 订单信息服务器
 		}
 
 	}
-	public class SubmitBillInfo
-	{
-		[JsonProperty("orderId")]
-		public string OrderId;
-		[JsonProperty("eKey")]
-		public string Ekey;
-		[JsonProperty("psw")]
-		public string Psw;
-	}
+
 }

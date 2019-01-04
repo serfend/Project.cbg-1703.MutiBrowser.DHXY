@@ -21,8 +21,8 @@ namespace 订单信息服务器.Bill
 			http = new HttpClient(new HttpClientHandler()
 			{
 				UseProxy = true,
-				Proxy = new WebProxy("127.0.0.1:8888"),
-				UseCookies = false
+				//Proxy = new WebProxy("127.0.0.1:8888"),
+				//UseCookies = false
 			});
 			ServicePointManager.ServerCertificateValidationCallback += RemoteCertificateValidate;
 		}

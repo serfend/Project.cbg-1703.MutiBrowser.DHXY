@@ -66,7 +66,6 @@ namespace 订单信息服务器
 		private Reg regSettingVps;
 		/// <summary>
 		/// 将从任务列表中提取可用任务分配给VPS，VPS断开时撤回
-		/// //TODO 取消区分配
 		/// </summary>
 		/// <param name="s"></param>
 		private void BuildNewTaskToVps(TcpServer s)

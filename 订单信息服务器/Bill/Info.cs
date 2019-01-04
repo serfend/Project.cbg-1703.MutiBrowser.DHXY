@@ -28,38 +28,33 @@ namespace 订单信息服务器.Bill
 			
 		}
 
-		public void GetData(Action<BillInfoJson>callback)
+		public BillInfoJson GetData()
 		{
-			var task = new Thread(() =>
+			var message = new HttpRequestMessage(HttpMethod.Post, "https://epay.163.com/wap/h5/ajax/trade/listView.htm")
 			{
-				var message = new HttpRequestMessage(HttpMethod.Post, "https://epay.163.com/wap/h5/ajax/trade/listView.htm")
-				{
-					Content = new FormUrlEncodedContent(new Dictionary<string, string> {
-					{ "queryCondition","{\"isAjax\":true,\"page\":1}"},
-					{ "envData","{\"term\":\"wap\"}"}
-				})
-				};
-				message.Headers.Add("Cookie", $"NTES_SESS={NTES_SESS}");
-				var result = billHttp.http.SendAsync(message).Result.Content.ReadAsStringAsync().Result;
-				try
-				{
-					data = Json.JsonDeserializeBySingleData<BillInfoJson>(result);
-				}
-				catch (Exception ex)
-				{
-					MessageBox.Show(ex.Message + "\n" + result);
-					callback?.Invoke(null);
-				}
-				var t = data?.result;
-
-				if (t == "error")
-				{
-					throw new BillListLoadException(data.errorMsg);
-				}
-				callback?.Invoke(data);
+				Content = new FormUrlEncodedContent(new Dictionary<string, string> {
+				{ "queryCondition","{\"isAjax\":true,\"page\":1}"},
+				{ "envData","{\"term\":\"wap\"}"}
 			})
-			{ IsBackground=true};
-			task.Start();
+			};
+			message.Headers.Add("Cookie", $"{NTES_SESS}");
+			var result = billHttp.http.SendAsync(message).Result.Content.ReadAsStringAsync().Result;
+			try
+			{
+				data = Json.JsonDeserializeBySingleData<BillInfoJson>(result);
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message + "\n" + result);
+				return null;
+			}
+			var t = data?.result;
+
+			if (t == "error")
+			{
+				throw new BillListLoadException(data.errorMsg);
+			}
+			return data;
 		}
 		public ResultListItem FirstBill { get {
 				var result = data?.result;

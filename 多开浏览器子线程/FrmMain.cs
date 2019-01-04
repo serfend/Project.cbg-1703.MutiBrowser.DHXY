@@ -197,7 +197,7 @@ namespace 多开浏览器子线程
 			//未登录=》登录超时，请重新登录！
 			//返回订单信息
 			var cookiesLogin = $"sid={GetNowLoginCookies()}";
-			Program.Tcp?.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><buildBill></buildBill></client.command>");
+			Program.Tcp?.Send("buildBill", HttpUtil.TimeStamp.ToString());
 			http.Item.Request.Cookies +=  cookiesLogin;
 			http.GetHtml(url,callBack:(x)=> {
 				var info =x.response.DataString(Encoding.Default);
@@ -210,7 +210,7 @@ namespace 多开浏览器子线程
 						if (success)
 						{
 							var t = new Task(() => {
-								Program.Tcp?.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
+								Program.Tcp?.Send("successBill", HttpUtil.TimeStamp.ToString());
 								this.Invoke((EventHandler)delegate {
 									Text = ("下单成功 " + url);
 								});
@@ -222,7 +222,7 @@ namespace 多开浏览器子线程
 						{
 							var t = new Task(() => {
 								this.Invoke((EventHandler)delegate {
-									Program.Tcp?.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>"+ result+"</client.command>");
+									Program.Tcp?.Send("failBill", result);
 									Text = (result + "\n" + url);
 								});
 							}
@@ -313,7 +313,7 @@ namespace 多开浏览器子线程
 					{
 						LbShowStatus.Text += ",用户主动提交";
 						WebShow.Document.GetElementById("equip_info").InvokeMember("submit");
-						Program.Tcp?.Send("BrowserClientReport","<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
+						Program.Tcp?.Send("successBill", HttpUtil.TimeStamp.ToString());
 					}
 					else if (canSubmit)
 					{

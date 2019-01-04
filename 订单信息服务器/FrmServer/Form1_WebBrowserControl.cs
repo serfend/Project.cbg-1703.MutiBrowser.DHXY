@@ -89,6 +89,7 @@ namespace 订单信息服务器
 				var item = client.ViewItem;
 				LstBrowserClient.Items.Remove(item);
 			});
+			if (client.Name == null) return;
 			payClientIp.Remove(client.Name);
 			payClient.Remove(e.Session.IP);
 		}
