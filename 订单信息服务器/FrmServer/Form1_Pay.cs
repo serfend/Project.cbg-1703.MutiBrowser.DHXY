@@ -92,17 +92,22 @@ namespace 订单信息服务器
 				return;
 			}
 			var item = LstPayClient.SelectedItems[0];
-			var session = InputBox.ShowInputBox("输入登录凭证", "凭证可从网页cookies中复制NTES_SESS的值", item.SubItems[1].Text);
+			var session = InputBox.ShowInputBox("输入登录凭证", "凭证可从网页listView.html中复制cookie的值", item.SubItems[1].Text);
 			var hdlServer = InputBox.ShowInputBox("输入管理区", "管理区以区号码记录，\"|\"分割",item.SubItems[2].Text);
 			var psw = InputBox.ShowInputBox("输入密码", "账号的密码", item.SubItems[3].Text);
 			item.SubItems[1].Text = session;
-			item.SubItems[2].Text = hdlServer;
+			var list = hdlServer.Split('|');
+			var sortlist=list.ToList<string>();
+			sortlist.Sort((x,y)=> {
+				return Convert.ToInt32(x) - Convert.ToInt32(y);
+			});
+			item.SubItems[2].Text = string.Join<string>("|", sortlist);
 			item.SubItems[3].Text = psw;
 			var user= new PayUser(item.SubItems[0].Text, session, hdlServer, psw);
 			if (!_paySession.ContainsKey(item.SubItems[0].Text)) _paySession.Add(user.UserName, user);
 			else _paySession[user.UserName] = user;
-			var list = item.SubItems[2].Text.Split('|');
-			foreach(var i in list)
+			
+			foreach (var i in list)
 			{
 				if (!_payServerHdl.ContainsKey(i))
 				{
@@ -170,6 +175,10 @@ namespace 订单信息服务器
 		/// <param name="authKey">预置将军令</param>
 		private void PayCurrentBill(string name,string session, string psw = null, string authKey = null)
 		{
+			if (!payClientIp.ContainsKey(name)) {
+				MessageBox.Show($"用户名{name}所对应的浏览器未开启");
+				return;
+			} ;
 			if (!payClient.ContainsKey(payClientIp[name]))
 			{
 				MessageBox.Show($"浏览器终端[{name}]未启动");
@@ -220,11 +229,13 @@ namespace 订单信息服务器
 		/// 检查订单号是否被处理过
 		/// </summary>
 		private Dictionary<string, bool> _BillRecord = new Dictionary<string, bool>();
-
+		private string lastExceptAuthCode;
 		public string AuthKey { get => _authKey; set {
 				if (value.Length != 6)
 				{
-					AppendLog($"【警告】新的将军令可能有误,其为:{value}");
+					if(lastExceptAuthCode==value)
+						AppendLog($"【警告】新的将军令可能有误,其为:{value}");
+					lastExceptAuthCode = value;
 					return;
 				}
 				OpAuthCodeShow.Text = $"将军令:{value}";
