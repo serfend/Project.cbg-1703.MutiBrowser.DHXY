@@ -55,7 +55,7 @@ namespace Miner
 		private static int connectFailTime = 0;
 
 		public static string TcpMainTubeIp= "2y155s0805.51mypc.cn";
-		public static int TcpMainTubePort= 40899;
+		public static int TcpMainTubePort= 58463;
 		public static string TcpFileTubeIp= "2y155s0805.51mypc.cn";
 		public static int TcpFileTubePort= 15514;
 		[STAThreadAttribute]
@@ -240,23 +240,36 @@ namespace Miner
 					//var result = SystemTimeWin32.SetSystemTime(ref sendStampStruct);
 					var s=new Thread(() =>
 					{
-						var nextRuntimeStamp = Convert.ToInt64(HttpUtil.GetElementInItem(xx, "taskStamp"));
-						//var tickCount = HttpUtil.TimeStamp;
-						//Console.WriteLine(tickCount);
-						var beginTime = Environment.TickCount;
-						if (nextRuntimeStamp > 0)
+						try
 						{
-							while (beginTime - Environment.TickCount + nextRuntimeStamp >= 500)
+
+							var nextRuntimeStamp = Convert.ToInt64(HttpUtil.GetElementInItem(xx, "taskStamp"));
+							//var tickCount = HttpUtil.TimeStamp;
+							//Console.WriteLine(tickCount);
+							var beginTime = Environment.TickCount;
+							if (nextRuntimeStamp > 0)
 							{
-								long interval = beginTime - Environment.TickCount + nextRuntimeStamp;
-								Tcp.Send("clientWait", interval.ToString());
-								Thread.Sleep(500);
+								while (beginTime - Environment.TickCount + nextRuntimeStamp >= 500)
+								{
+									long interval = beginTime - Environment.TickCount + nextRuntimeStamp;
+									Tcp.Send("clientWait", interval.ToString());
+									Thread.Sleep(500);
+								}
+								long leftInterval = beginTime - Environment.TickCount + nextRuntimeStamp;
+								if (leftInterval > 0) Thread.Sleep((int)leftInterval);
 							}
-							long leftInterval = beginTime - Environment.TickCount + nextRuntimeStamp;
-							if (leftInterval > 0) Thread.Sleep((int)leftInterval);
+							Tcp.Send("clientWait", "-101");
+							if (servers == null)
+							{
+								Console.WriteLine("servers未初始化");
+								return;
+							}
+							servers.ServerRun();
 						}
-						Tcp.Send("clientWait", "-101");
-						servers.ServerRun();
+						catch (Exception ex)
+						{
+							Console.WriteLine($"处理日程失败;{ex.Message}");
+						}
 					})
 					{ IsBackground=true};
 					s.Start();
