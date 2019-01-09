@@ -38,7 +38,14 @@ namespace 订单信息服务器.Bill
 			})
 			};
 			message.Headers.Add("Cookie", $"{NTES_SESS}");
-			var result = billHttp.http.SendAsync(message).Result.Content.ReadAsStringAsync().Result;
+			message.Headers.Host = "epay.163.com";
+			var http = new HttpClient(new HttpClientHandler() {
+				UseCookies=false
+			}) {
+						
+			};
+		
+			var result =http.SendAsync(message).Result.Content.ReadAsStringAsync().Result;
 			try
 			{
 				data = Json.JsonDeserializeBySingleData<BillInfoJson>(result);
