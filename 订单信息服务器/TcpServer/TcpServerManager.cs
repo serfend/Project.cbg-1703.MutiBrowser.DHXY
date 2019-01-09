@@ -1,5 +1,6 @@
 ﻿
 ﻿using DotNet4.Utilities.UtilCode;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using 订单信息服务器.WebServerControl;
 
 namespace SfTcp
 {
@@ -39,14 +42,11 @@ namespace SfTcp
 			threadCheckConnection.Start();
 		}
 		private readonly Thread threadCheckConnection;
-		private Action<TcpServer> Connected()
+		private void ConnectedAction(TcpServer x)
 		{
-			return new Action<TcpServer>((x) =>
-			{
 				ServerConnected?.Invoke(x);
-				Console.WriteLine("新的用户连接" + x.client.Client.RemoteEndPoint.ToString());
+				//MessageBox.Show("新的用户连接" + x.client.Client.RemoteEndPoint.ToString());
 				list.Add(x);
-			});
 		}
 		private Thread threadListenClient;
 		public void StartListening()
@@ -63,7 +63,7 @@ namespace SfTcp
 		}
 		private TcpServer NewTcp(int port = 8009)
 		{
-			return new TcpServer((x, InnerInfo, s) => {
+			var result= new TcpServer((x, InnerInfo, s) => {
 				s.lastMessageTime = Environment.TickCount;
 
 				if (x.Contains("BrowserClientReport"))
@@ -76,7 +76,8 @@ namespace SfTcp
 				}
 				else if (x.Contains("ping"))
 				{
-					s.Send($"<ping></ping>");
+					var msg = new BaseMessage() {Title="ping" };
+					s.Send(JsonConvert.SerializeObject(msg));
 					return;
 				}
 				NormalMessage?.Invoke(s, x, InnerInfo);
@@ -86,12 +87,16 @@ namespace SfTcp
 
 			, port)
 			{
-				Connected = Connected(),
+				Connected = (x)=> {
+					ConnectedAction(x);
+				},
 				Disconnected = (x) => {
 					ServerDisconnected?.Invoke(x);
 					list.Remove(x);
 				}
 			};
+			result.Connect();
+			return result;
 		}
 		public int CheckConnection()
 		{

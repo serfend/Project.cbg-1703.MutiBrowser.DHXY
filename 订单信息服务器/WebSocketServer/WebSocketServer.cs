@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace 订单信息服务器.WebSocketServer
 {
@@ -111,7 +112,7 @@ namespace 订单信息服务器.WebSocketServer
 			}
 			catch(Exception ex)
 			{
-				Console.WriteLine("接收客户端数据异常:"+ ex.Message);
+				MessageBox.Show("接收客户端数据异常:"+ ex.Message);
 				try
 				{
 					SockeClient.Disconnect(true);
