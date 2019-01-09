@@ -74,14 +74,13 @@ namespace SfTcp
 			Base64,
 			Aes
 		}
-		public ConnectProtocal connectProtocal = ConnectProtocal.Aes;
+		public ConnectProtocal connectProtocal = ConnectProtocal.Base64;
 		#endregion
 		public TcpServer(Action<string, string, TcpServer> ReceiveInfo = null, Action<TcpHttpMessage, TcpHttpResponse> ReceiveHttp = null, int port = 8009)
 		{
 			listener = new TcpListener(IPAddress.Any, port);
 			this.Receive = ReceiveInfo;
 			this.OnHttpRequest = ReceiveHttp;
-			this.Connect();
 		}
 		public void Connect()
 		{
@@ -98,7 +97,7 @@ namespace SfTcp
 				if (this.Ip.Contains("127.0.0.1")) IsLocal = true;
 				var checkPortOnly = Ip.IndexOf(':');
 				if (checkPortOnly > 0) Ip = Ip.Substring(checkPortOnly + 1);
-				Connected?.BeginInvoke(this, (x) => { }, null);
+				Connected.BeginInvoke(this, (x) => { }, null);
 				var stream = client.GetStream();
 				writter = new BinaryWriter(stream);
 				reader = new BinaryReader(stream);
@@ -132,7 +131,7 @@ namespace SfTcp
 		private void RecieveComplete(bool getEndPoint = false)
 		{
 			if (getEndPoint) cstr.Replace(this.TcpComplete, "");
-			; ReceiveInfo(cstr.ToString());
+			ReceiveInfo(cstr.ToString());
 			//Receive.Invoke(cstr.ToString(), this);
 			cstr.Clear();
 			lastLength = 0;
@@ -160,6 +159,7 @@ namespace SfTcp
 			var raw = HttpUtil.GetElement(info, ">", "<");
 			if (info.IndexOf("</" + title + ">", 0) < 0) return;
 			var content = GetContent(raw);
+
 			Receive?.BeginInvoke(title, content, this, (x) => { }, null);
 		}
 		private bool _protocalEnsure = false;
