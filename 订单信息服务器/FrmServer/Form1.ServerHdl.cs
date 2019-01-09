@@ -311,7 +311,10 @@ namespace 订单信息服务器
 			}
 			else
 			{
-				hdlVpsTaskScheduleQueue.Enqueue(s.Ip);//s.Send("<serverRun>");//无需同步
+				
+				s.Send("<serverRun>");//无需同步
+
+				hdlVpsTaskScheduleQueue.Enqueue(s.Ip);
 				if (!AvailableVps.ContainsKey(s.Ip))
 					AvailableVps.Add(s.Ip, true);
 				else
