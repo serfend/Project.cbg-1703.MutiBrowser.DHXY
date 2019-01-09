@@ -23,7 +23,6 @@ namespace 订单信息服务器
 			Application.SetCompatibleTextRenderingDefault(false);
 			try
 			{
-				
 				Application.Run(new Form1());
 			}
 			catch (Exception ex)

@@ -17,19 +17,10 @@ namespace 远程连接测试
 		private long lastHeartBeatTimeStamp;
 		public Form1()
 		{
-			client = new SfTcpClient("2y155s0805.51mypc.cn", 12895) { 
+			client = new SfTcpClient("106.75.123.187", 31030) { 
 				RecieveMessage = (tcp, msg) => {
 					this.Invoke((EventHandler)delegate {
-						if (msg.Contains("<ping>"))
-						{
-							var interval = HttpUtil.TimeStamp - lastHeartBeatTimeStamp;
-							textBox1.Text = interval + "ms";
-						}
-						else
-						{
-							textBox2.AppendText("\n");
-							textBox2.AppendText(msg);
-						};
+						Console.WriteLine(msg);
 					});
 				},
 				Disconnected = (tcp) => {
@@ -39,19 +30,31 @@ namespace 远程连接测试
 					});
 				}
 			};
-			var threadPing = new Thread(() =>
-			{
-				while (true)
-				{
-					Thread.Sleep(1000);
-					lastHeartBeatTimeStamp = HttpUtil.TimeStamp;
-					client.Send("ping","");
-				}
-			})
-			{ IsBackground=true};
-			threadPing.Start();
+			client.Send(GetBytesRawstring("528f4c7d4e209061aedf0ae308004500003454c8400040061358c0a82bf56a4b7bbbcf66793636e047b4000000008002447090ca0000020405b40103030801010402"));
 			InitializeComponent();
 		}
-		
+
+		private void button1_Click(object sender, EventArgs e)
+		{
+			client.Send(System.Text.Encoding.UTF8.GetBytes(textBox2.Text));
+		}
+		private byte[] GetBytesRawstring(string raw)
+		{
+			//
+			byte[] result = new byte[raw.Length/2];
+			for(int i = 0; i < raw.Length; i += 2)
+			{
+				if (raw[i] > 57)
+				{
+
+				}
+				else
+				{
+
+				}
+				result[i] = (byte)(raw[i]+ raw[i+1]);
+			}
+			return result;
+		}
 	}
 }
