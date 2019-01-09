@@ -57,7 +57,7 @@ namespace 订单信息服务器
 				{
 					_taskSchedule_Interval = 500;
 				}
-				int hdlCount = 1;
+				int hdlCount = 0;
 				int beginTime = Environment.TickCount;
 				if (_taskAllocatePause)
 				{
@@ -79,6 +79,7 @@ namespace 订单信息服务器
 						}
 					}
 				}
+				hdlCount = hdlCount == 0 ? _taskSchedule_Interval : hdlCount;
 				Thread.Sleep(_taskSchedule_Interval*(hdlCount));
 			}
 			_taskSchedule_Start = false;
