@@ -36,7 +36,7 @@ namespace SfTcp
 			reporterThread = new Thread(() => {
 				while (true)
 				{
-					var thisLen = cstr.Length;
+					var thisLen = cstr.Count;
 					if (thisLen == lastLength && thisLen > 0 && reporterCounter++ > 50)
 					{
 						RecieveComplete();
@@ -54,18 +54,16 @@ namespace SfTcp
 		}
 		private void RecieveComplete(bool getEndPoint = false)
 		{
-			if (getEndPoint) cstr.Replace(this.TcpComplete, "");
-			RecieveMessage?.BeginInvoke(this, cstr.ToString(), (x) => { }, null);
+			RecieveMessage?.BeginInvoke(this, Encoding.ASCII.GetString(cstr.ToArray()), (x) => { }, null);
 			//Receive.Invoke(cstr.ToString(), this);
 			cstr.Clear();
 			lastLength = 0;
 			reporterCounter = 0;
-			nowCheckIndex = 0;
 			br.BaseStream.Flush();
 		}
 		public virtual bool Send(string key, string info)
 		{
-			var safeMessage = string.Format("<{0}>{1}</{0}>{2}", key, EncryptHelper.AESEncrypt(info), TcpComplete);
+			var safeMessage = string.Format("<{0}>{1}</{0}>{2}", key, EncryptHelper.Base64Encode(info), TcpComplete);
 			return Send(Encoding.UTF8.GetBytes(safeMessage));
 		}
 		public virtual bool Send(byte[] info)
@@ -91,8 +89,7 @@ namespace SfTcp
 		{
 			get => "#$%&'";
 		}
-		StringBuilder cstr = new StringBuilder();
-		private int nowCheckIndex = 0;
+		List<byte> cstr = new List<byte>();
 		private void Reciving()
 		{
 			while (true)
@@ -101,18 +98,8 @@ namespace SfTcp
 				{
 					try
 					{
-						var c = br.ReadChar();
-						cstr.Append(c);
-						if (c == '#' + nowCheckIndex)
-						{
-							nowCheckIndex++;
-							if (nowCheckIndex == 5)
-							{
-								RecieveComplete(true);
-								continue;
-							}
-						}
-
+						var c = br.ReadByte();
+						cstr.Add(c);
 					}
 					catch (Exception ex)
 					{
