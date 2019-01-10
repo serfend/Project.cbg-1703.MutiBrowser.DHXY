@@ -242,23 +242,19 @@ namespace Miner
 					{
 						try
 						{
-
+							Tcp.Send("clientWait", "101");//开始等待
 							var nextRuntimeStamp = Convert.ToInt64(HttpUtil.GetElementInItem(xx, "taskStamp"));
 							//var tickCount = HttpUtil.TimeStamp;
 							//Console.WriteLine(tickCount);
 							var beginTime = Environment.TickCount;
 							if (nextRuntimeStamp > 0)
 							{
-								while (beginTime - Environment.TickCount + nextRuntimeStamp >= 500)
+								while (beginTime - Environment.TickCount + nextRuntimeStamp > 0)
 								{
-									long interval = beginTime - Environment.TickCount + nextRuntimeStamp;
-									Tcp.Send("clientWait", interval.ToString());
-									Thread.Sleep(500);
+									Thread.Sleep(50);
 								}
-								long leftInterval = beginTime - Environment.TickCount + nextRuntimeStamp;
-								if (leftInterval > 0) Thread.Sleep((int)leftInterval);
 							}
-							Tcp.Send("clientWait", "-101");
+							Tcp.Send("clientWait", "-101");//结束等待
 							if (servers == null)
 							{
 								Console.WriteLine("servers未初始化");

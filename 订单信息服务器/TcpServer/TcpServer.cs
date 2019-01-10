@@ -159,7 +159,7 @@ namespace SfTcp
 			var raw = HttpUtil.GetElement(info, ">", "<");
 			if (info.IndexOf("</" + title + ">", 0) < 0) return;
 			var content = GetContent(raw);
-
+			//MessageBox.Show(content);
 			Receive?.BeginInvoke(title, content, this, (x) => { }, null);
 		}
 		private bool _protocalEnsure = false;

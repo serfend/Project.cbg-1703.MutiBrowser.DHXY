@@ -107,12 +107,20 @@ namespace 订单信息服务器.WebSocketServer
 				}
 				byte[] buffer = SessionPool[IP].buffer;
 				SockeClient.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(Recieve), SockeClient);
-				var clientMsg = AnalyzeClientData(buffer, length);
-				OnNewMessage?.Invoke(this, new ClientNewMessageEventArgs(client, clientMsg));
+				try
+				{
+					var clientMsg = AnalyzeClientData(buffer, length);
+					OnNewMessage?.Invoke(this, new ClientNewMessageEventArgs(client, clientMsg));
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show($"处理客户端数据时发生异常:{ex.Message}");
+					throw;
+				}
 			}
 			catch(Exception ex)
 			{
-				MessageBox.Show("接收客户端数据异常:"+ ex.Message);
+				MessageBox.Show("接收客户端数据时发生异常:" + ex.Message);
 				try
 				{
 					SockeClient.Disconnect(true);

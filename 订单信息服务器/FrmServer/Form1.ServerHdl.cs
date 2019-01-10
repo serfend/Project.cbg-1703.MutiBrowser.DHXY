@@ -268,9 +268,13 @@ namespace 订单信息服务器
 				targetItem.SubItems[3].Text = $"已处理:{-interval},等待下次分配";
 				NewVpsAvailable(s.Ip);
 			}
+			else if(interval==101)
+			{
+				targetItem.SubItems[3].Text = $"即将开始";
+			}
 			else
 			{
-				targetItem.SubItems[3].Text = $"等待{interval}ms";
+				targetItem.SubItems[3].Text = $"终端等待:{InnerInfo}";
 			}
 		}
 
