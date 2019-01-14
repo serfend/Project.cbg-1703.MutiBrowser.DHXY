@@ -11,9 +11,41 @@ using System.Windows.Forms;
 
 namespace 订单信息服务器
 {
+	/// <summary>
+	/// 用于记录间隔时间平均值
+	/// </summary>
+	public class TimeTicker
+	{
+		private int lastTick;
+		private int delaySumCount;
+		private int totalTick;
+		private int maxRecordTime=10;
+		public TimeTicker()
+		{
+			LastTick = Environment.TickCount;
+		}
+		public int LastTick { get => lastTick; set => lastTick = value; }
+		/// <summary>
+		/// 最大记录次数，默认为10
+		/// </summary>
+		public int MaxRecordTime { get => maxRecordTime; set {
+				if (value < 1) return;
+				maxRecordTime = value;
+				delaySumCount = 0;
+			} }
+
+		public int Record()
+		{
+			if (delaySumCount < maxRecordTime) delaySumCount++;
+			int interval = Environment.TickCount - LastTick;
+			LastTick = Environment.TickCount;
+			totalTick += (interval - totalTick) / delaySumCount;
+			return totalTick;
+		}
+	}
 	public partial class Form1 
 	{
-
+		private Dictionary<string, TimeTicker> _dicVpsWorkBeginTime = new Dictionary<string, TimeTicker>();
 		private void InitServerManager()
 		{
 			serverManager = new TcpServerManager()
@@ -30,7 +62,9 @@ namespace 订单信息服务器
 									s.Send("heartBeatResponse");
 									break;
 								case "RHB":
-									targetItem.SubItems[4].Text = InnerInfo;
+									var now = Environment.TickCount;
+									var interval = _dicVpsWorkBeginTime[s.Ip].Record();
+									targetItem.SubItems[4].Text =$"{interval}({InnerInfo})";
 									break;
 								case "clientConnect":
 									ClientConnect(InnerInfo,targetItem,s);
@@ -79,7 +113,7 @@ namespace 订单信息服务器
 									targetItem.SubItems[3].Text = $"下单无效:{InnerInfo}";
 									break;
 								case "successBill":
-									targetItem.SubItems[3].Text = "下单成功";
+									targetItem.SubItems[3].Text = "成功下单,即将付款";
 									PayCurrentBill(_clientPayUser[s.Ip]);
 									break;
 								default:
@@ -102,7 +136,10 @@ namespace 订单信息服务器
 						info[4] = "未开始采集";//延迟
 						info[5] = "暂无";//任务
 						info[6] = "未知";//版本
-						LstConnection.Items.Add(new ListViewItem(info));
+						var item = new ListViewItem(info);
+						_ConnectVpsClientLstViewItem.Add(x.Ip, item);
+						_dicVpsWorkBeginTime.Add(x.Ip,new TimeTicker());
+						LstConnection.Items.Add(item);
 						_clientPayUser.Add(x.Ip, "...");
 						var welcome = new Task(() => {
 							Thread.Sleep(3000);
@@ -114,21 +151,16 @@ namespace 订单信息服务器
 				ServerDisconnected = (x) => {
 					this?.Invoke((EventHandler)delegate {
 						//AppendLog("已断开:" + x.Ip);
-						for (int i = 0; i < LstConnection.Items.Count; i++)
-							if (LstConnection.Items[i].SubItems[2].Text == x.Ip)
-							{
-								LstConnection.Items.RemoveAt(i);
-								AvailableVps[x.Ip] = false;
-								break;
-							}
-						if (allocServer.ContainsKey(x.Ip))
+						LstConnection.Items.Remove(_ConnectVpsClientLstViewItem[x.Ip]);
+						AvailableVps[x.Ip]=false;
+						if (allocVps.ContainsKey(x.Ip))
 						{
-							var vps = allocServer[x.Ip];
+							var vps = allocVps[x.Ip];
 							foreach (var server in vps.HdlServer)
 							{
 								serverInfoList[server].NowNum++;
 							}
-							allocServer.Remove(x.Ip);
+							allocVps.Remove(x.Ip);
 						}
 					});
 				},
@@ -236,7 +268,7 @@ namespace 订单信息服务器
 			{
 				serverInfoList[s.clientName].LoginSession = InnerInfo;
 				bool anyVpsApply = false;
-				foreach (var vps in allocServer)
+				foreach (var vps in allocVps)
 				{
 					if (vps.Value.HdlServer.Contains(s.clientName))
 					{
@@ -306,8 +338,6 @@ namespace 订单信息服务器
 			{
 				tmp.Append("<file><name>").Append(f.Name).Append("</name>").Append("<version>").Append(HttpUtil.GetMD5ByMD5CryptoService(f.FullName)).Append("</version></file>");
 			}
-			//TODO 因映射端口不足，暂时取消文件同步
-			tmp.Clear();
 			if (tmp.Length > 0)
 			{
 				tmp.Append("<versionCheck>");
