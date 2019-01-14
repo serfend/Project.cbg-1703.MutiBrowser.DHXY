@@ -146,7 +146,7 @@ namespace 订单信息服务器
 				{
 					//TODO 获取支付凭证并付款
 					var session = _paySession[phoneTarget];
-					if (MessageBox.Show(this, $"订单:\n{InnerInfo}", "付款确认", MessageBoxButtons.YesNo) == DialogResult.Yes)
+					if (!IpCheckBeforePay.Checked|| MessageBox.Show(this, $"订单:\n{InnerInfo}", "付款确认", MessageBoxButtons.YesNo) == DialogResult.Yes)
 					{
 						PayCurrentBill(session);
 					}
@@ -196,7 +196,7 @@ namespace 订单信息服务器
 				catch (Exception ex)
 				{
 					anyException = true;
-					MessageBox.Show($"订单失败:{ex.Message}");
+					MessageBox.Show($"订单失败:{ex.Message}  z");
 					return;
 				}
 			});

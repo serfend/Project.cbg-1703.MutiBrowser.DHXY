@@ -58,7 +58,7 @@ namespace 订单信息服务器
 		}
 		private Reg regServerInfo;
 		private Dictionary<string, HdlServerInfo> serverInfoList = new Dictionary<string, HdlServerInfo>();//以区名对应区分配
-		private Dictionary<string, VPS> allocServer = new Dictionary<string, VPS>();//以ip对应终端
+		private Dictionary<string, VPS> allocVps = new Dictionary<string, VPS>();//以ip对应终端
 		/// <summary>
 		/// ip对应终端浏览器名称
 		/// </summary>
