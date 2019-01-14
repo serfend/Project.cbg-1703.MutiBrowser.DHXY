@@ -23,6 +23,7 @@ namespace 订单信息服务器
 			Application.SetCompatibleTextRenderingDefault(false);
 			try
 			{
+
 				Application.Run(new Form1());
 			}
 			catch (Exception ex)
@@ -30,6 +31,10 @@ namespace 订单信息服务器
 				MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
 			}
 		}
-
+		
+	}
+	public class RandomInfo
+	{
+		public string name;
 	}
 }

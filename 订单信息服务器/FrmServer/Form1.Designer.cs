@@ -32,6 +32,9 @@
 		{
 			this.TabMain = new System.Windows.Forms.TabControl();
 			this.TabMain_VpsManager = new System.Windows.Forms.TabPage();
+			this.LstBrowserClient = new System.Windows.Forms.ListView();
+			this.BrowserClient_Name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.BrowserClient_Status = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.CmdPayBill = new System.Windows.Forms.Button();
 			this.CmdPauseTaskAllocate = new System.Windows.Forms.Button();
 			this.CmdRedial = new System.Windows.Forms.Button();
@@ -80,9 +83,8 @@
 			this.Verify = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.ServerHdl = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.Psw = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.LstBrowserClient = new System.Windows.Forms.ListView();
-			this.BrowserClient_Name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.BrowserClient_Status = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.label4 = new System.Windows.Forms.Label();
+			this.IpCheckBeforePay = new System.Windows.Forms.CheckBox();
 			this.TabMain.SuspendLayout();
 			this.TabMain_VpsManager.SuspendLayout();
 			this.TabMain_Setting.SuspendLayout();
@@ -121,6 +123,29 @@
 			this.TabMain_VpsManager.TabIndex = 0;
 			this.TabMain_VpsManager.Text = "终端管理";
 			this.TabMain_VpsManager.UseVisualStyleBackColor = true;
+			// 
+			// LstBrowserClient
+			// 
+			this.LstBrowserClient.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.BrowserClient_Name,
+            this.BrowserClient_Status});
+			this.LstBrowserClient.FullRowSelect = true;
+			this.LstBrowserClient.LabelEdit = true;
+			this.LstBrowserClient.Location = new System.Drawing.Point(539, 390);
+			this.LstBrowserClient.Name = "LstBrowserClient";
+			this.LstBrowserClient.Size = new System.Drawing.Size(363, 334);
+			this.LstBrowserClient.TabIndex = 40;
+			this.LstBrowserClient.UseCompatibleStateImageBehavior = false;
+			this.LstBrowserClient.View = System.Windows.Forms.View.Details;
+			// 
+			// BrowserClient_Name
+			// 
+			this.BrowserClient_Name.Text = "ID";
+			// 
+			// BrowserClient_Status
+			// 
+			this.BrowserClient_Status.Text = "状态";
+			this.BrowserClient_Status.Width = 240;
 			// 
 			// CmdPayBill
 			// 
@@ -327,6 +352,8 @@
 			// 
 			// TabMain_Setting
 			// 
+			this.TabMain_Setting.Controls.Add(this.IpCheckBeforePay);
+			this.TabMain_Setting.Controls.Add(this.label4);
 			this.TabMain_Setting.Controls.Add(this.label7);
 			this.TabMain_Setting.Controls.Add(this.label8);
 			this.TabMain_Setting.Controls.Add(this.IpAssumePrice_Rate);
@@ -512,28 +539,23 @@
 			this.Psw.Text = "密码";
 			this.Psw.Width = 150;
 			// 
-			// LstBrowserClient
+			// label4
 			// 
-			this.LstBrowserClient.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.BrowserClient_Name,
-            this.BrowserClient_Status});
-			this.LstBrowserClient.FullRowSelect = true;
-			this.LstBrowserClient.LabelEdit = true;
-			this.LstBrowserClient.Location = new System.Drawing.Point(539, 390);
-			this.LstBrowserClient.Name = "LstBrowserClient";
-			this.LstBrowserClient.Size = new System.Drawing.Size(363, 334);
-			this.LstBrowserClient.TabIndex = 40;
-			this.LstBrowserClient.UseCompatibleStateImageBehavior = false;
-			this.LstBrowserClient.View = System.Windows.Forms.View.Details;
+			this.label4.AutoSize = true;
+			this.label4.Location = new System.Drawing.Point(6, 97);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(53, 12);
+			this.label4.TabIndex = 48;
+			this.label4.Text = "付款确认";
 			// 
-			// BrowserClient_Name
+			// IpCheckBeforePay
 			// 
-			this.BrowserClient_Name.Text = "ID";
-			// 
-			// BrowserClient_Status
-			// 
-			this.BrowserClient_Status.Text = "状态";
-			this.BrowserClient_Status.Width = 240;
+			this.IpCheckBeforePay.AutoSize = true;
+			this.IpCheckBeforePay.Location = new System.Drawing.Point(65, 95);
+			this.IpCheckBeforePay.Name = "IpCheckBeforePay";
+			this.IpCheckBeforePay.Size = new System.Drawing.Size(15, 14);
+			this.IpCheckBeforePay.TabIndex = 49;
+			this.IpCheckBeforePay.UseVisualStyleBackColor = true;
 			// 
 			// Form1
 			// 
@@ -609,6 +631,8 @@
 		private System.Windows.Forms.ListView LstBrowserClient;
 		private System.Windows.Forms.ColumnHeader BrowserClient_Name;
 		private System.Windows.Forms.ColumnHeader BrowserClient_Status;
+		private System.Windows.Forms.CheckBox IpCheckBeforePay;
+		private System.Windows.Forms.Label label4;
 	}
 }
 
