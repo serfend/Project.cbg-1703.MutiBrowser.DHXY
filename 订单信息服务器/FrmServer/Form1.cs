@@ -52,8 +52,19 @@ namespace 订单信息服务器
 							frmSetting.SetInfo(t.Name, t.Text);
 						};
 					}
+				}else if (ctl is CheckBox c){
+					c.Checked = frmSetting.GetInfo(c.Name, c.Checked.ToString())=="true";
+					if (!ctlSaveLoaded)
+					{
+						c.CheckedChanged += (x, xx) =>
+						{
+							frmSetting.SetInfo(c.Name, c.Checked);
+						};
+					}
 				}
+
 			}
+			
 			ctlSaveLoaded = true;
 
 		}
@@ -67,48 +78,6 @@ namespace 订单信息服务器
 
 
 		private bool _taskAllocatePause = false;
-		/// <summary>
-		/// 无需要的任务时则返回"Idle"，终端进入休眠模式，30秒后再次询问
-		/// </summary>
-		/// <param name="singleHdl"></param>
-		/// <param name="ip"></param>
-		/// <param name="taskTitle">输出本次所有任务的标题</param>
-		/// <returns></returns>
-		private string GetFreeServer(int singleHdl, string ip, out string taskTitle)
-		{
-			if (_taskAllocatePause)
-			{
-				taskTitle = "休眠状态";
-				return "Idle";
-			}
-			var vps = new VPS("", ip);
-			var taskInfo = new StringBuilder();
-			var tTitle = new StringBuilder();
-			foreach (var s in serverInfoList)
-			{
-				if (singleHdl <= 0) break;
-				if (s.Value.NowNum > 0 && s.Value.Enable)
-				{
-					var t = s.Value;
-					t.NowNum--;
-					singleHdl--;
-					vps.HdlServer.Add(t.Name);
-					if (taskInfo.Length > 0)
-					{
-						tTitle.Append(",");
-						taskInfo.Append("#");
-					}
-					taskInfo.Append($"<id>{t.Id}</id><serverName>{t.Name}</serverName><aeroId>{t.AeroId}</aeroId><aeroName>{t.AeroName}</aeroName><loginSession>{t.LoginSession}</loginSession>");
-					tTitle.Append(t.Name);
-				}
-			}
-			taskTitle = "Idle";
-			if (taskInfo.Length == 0) return taskTitle;
-			taskTitle = tTitle.ToString();
-			allocServer.Add(vps.Ip, vps);
-			return taskInfo.ToString();
-		}
-		
 		
 		
 
@@ -139,15 +108,13 @@ namespace 订单信息服务器
 		}
 		private ListViewItem GetItem(string ip)
 		{
-			foreach (var item in LstConnection.Items)
-			{
-				if (item is ListViewItem it)
-				{
-					if (it.SubItems[2].Text == ip) return it;
-				}
-			}
+			if (_ConnectVpsClientLstViewItem.ContainsKey(ip)) return _ConnectVpsClientLstViewItem[ip];
 			return null;
 		}
+		/// <summary>
+		/// 页面listview
+		/// </summary>
+		private Dictionary<string, ListViewItem> _ConnectVpsClientLstViewItem = new Dictionary<string, ListViewItem>();
 		#region event
 
 		private void CmdDisconnect_Click(object sender, EventArgs e)
