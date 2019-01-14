@@ -45,7 +45,9 @@ namespace 订单信息服务器
 		private void Server_OnNewMessage(object sender, ClientNewMessageEventArgs e)
 		{
 			var client = payClient[e.Session.IP];
-			Console.WriteLine($"来自客户端[{e.Session.IP}]消息:{e.Msg}");
+			//this.Invoke((EventHandler)delegate {
+			//	AppendLog($"来自客户端[{e.Session.IP}]消息:{e.Msg}");
+			//});
 			if (e.Msg.Contains("<init>")) {
 				var clientName = HttpUtil.GetElementInItem(e.Msg,"init");
 				if (payClientIp.ContainsKey(clientName))
@@ -92,12 +94,18 @@ namespace 订单信息服务器
 			if (client.Name == null) return;
 			payClientIp.Remove(client.Name);
 			payClient.Remove(e.Session.IP);
+			this.Invoke((EventHandler)delegate {
+				AppendLog($"连接断开[{e.Session.IP}]");
+			});
 		}
 
 		private void Server_OnConnect(object sender, ClientConnectEventArgs e)
 		{
 			payClient.Add(e.Session.IP, new Client() {
 				Session = e.Session,
+			});
+			this.Invoke((EventHandler)delegate {
+				AppendLog($"新的连接[{e.Session.IP}]");
 			});
 		}
 	}
