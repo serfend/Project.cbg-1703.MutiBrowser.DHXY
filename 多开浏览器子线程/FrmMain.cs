@@ -157,7 +157,7 @@ namespace 多开浏览器子线程
 							this.Focus();
 							this.TopMost = true;
 							this.WindowState = FormWindowState.Normal;
-							//ReNavigateWeb(targetUrl);//取消浏览器下单，改为vps下单
+							
 							TrySubmitBill(targetUrl);//支持浏览器下单
 						});
 						break;
@@ -206,7 +206,7 @@ namespace 多开浏览器子线程
 				this.Invoke((EventHandler)delegate
 				{
 					billPoster.Submit((result, success) => {
-						Program.reg.In("Bill").In("record").SetInfo(DateTime.Now.ToString("yyyyMMddhhmmss"), result);
+						Program.reg.In("Bill").In("record").In(DateTime.Now.ToString("yyyyMMdd")).SetInfo(DateTime.Now.ToString("hhmmssffff"), result);
 						if (success)
 						{
 							var t = new Task(() => {
@@ -229,14 +229,11 @@ namespace 多开浏览器子线程
 							);
 							t.Start();
 						};
-						this.BeginInvoke((EventHandler)delegate {
-							ReNavigateWeb(url);
-						});
 						Console.WriteLine(result);
 					}, this);
 				});
 			});
-
+			ReNavigateWeb(url);
 
 
 
@@ -313,6 +310,7 @@ namespace 多开浏览器子线程
 					{
 						LbShowStatus.Text += ",用户主动提交";
 						WebShow.Document.GetElementById("equip_info").InvokeMember("submit");
+						Program.reg.In("Bill").In("record").In(DateTime.Now.ToString("yyyyMMdd")).SetInfo(DateTime.Now.ToString("hhmmssffff"), LbShowStatus.Text);
 						Program.Tcp?.Send("successBill", HttpUtil.TimeStamp.ToString());
 					}
 					else if (canSubmit)
@@ -384,6 +382,12 @@ namespace 多开浏览器子线程
 		private void BtnSynLoginSession_Click(object sender, EventArgs e)
 		{
 			SynLoginSession();
+		}
+
+		private void BtnBillPosterTest_Click(object sender, EventArgs e)
+		{
+			this.Text = "测试下单接口";
+			TrySubmitBill(ipWebShowUrl.Text);
 		}
 
 		private void BtnMinimun_Click(object sender, EventArgs e)

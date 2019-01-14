@@ -45,6 +45,7 @@
 			this.BtnMinimun = new System.Windows.Forms.Button();
 			this.BtnShowBuyList = new System.Windows.Forms.Button();
 			this.BtnSynLoginSession = new System.Windows.Forms.Button();
+			this.BtnBillPosterTest = new System.Windows.Forms.Button();
 			this.menuMain.SuspendLayout();
 			this.GPctlInfo.SuspendLayout();
 			this.SuspendLayout();
@@ -198,11 +199,23 @@
 			this.BtnSynLoginSession.UseVisualStyleBackColor = true;
 			this.BtnSynLoginSession.Click += new System.EventHandler(this.BtnSynLoginSession_Click);
 			// 
+			// BtnBillPosterTest
+			// 
+			this.BtnBillPosterTest.Location = new System.Drawing.Point(258, 11);
+			this.BtnBillPosterTest.Margin = new System.Windows.Forms.Padding(2);
+			this.BtnBillPosterTest.Name = "BtnBillPosterTest";
+			this.BtnBillPosterTest.Size = new System.Drawing.Size(112, 22);
+			this.BtnBillPosterTest.TabIndex = 9;
+			this.BtnBillPosterTest.Text = "测试下单接口";
+			this.BtnBillPosterTest.UseVisualStyleBackColor = true;
+			this.BtnBillPosterTest.Click += new System.EventHandler(this.BtnBillPosterTest_Click);
+			// 
 			// FrmMain
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(900, 627);
+			this.Controls.Add(this.BtnBillPosterTest);
 			this.Controls.Add(this.BtnSynLoginSession);
 			this.Controls.Add(this.GPctlInfo);
 			this.Controls.Add(this.LbShowStatus);
@@ -242,6 +255,7 @@
 		private System.Windows.Forms.Button BtnMinimun;
 		private System.Windows.Forms.Button BtnShowBuyList;
 		private System.Windows.Forms.Button BtnSynLoginSession;
+		private System.Windows.Forms.Button BtnBillPosterTest;
 	}
 }
 
