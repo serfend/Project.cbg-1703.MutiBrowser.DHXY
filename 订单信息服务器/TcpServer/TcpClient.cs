@@ -22,7 +22,7 @@ namespace SfTcp
 
 
 		private Thread reporterThread, receiverThread;
-		private int lastLength, reporterCounter;
+		private int lastLength;
 		public SfTcpClient(string ip, int port)
 		{
 			Console.WriteLine("尝试与服务器建立连接.");
@@ -37,7 +37,7 @@ namespace SfTcp
 				while (true)
 				{
 					var thisLen = cstr.Count;
-					if (thisLen == lastLength && thisLen > 0 && reporterCounter++ > 50)
+					if (thisLen == lastLength && thisLen > 0 )
 					{
 						RecieveComplete();
 					}
@@ -54,16 +54,15 @@ namespace SfTcp
 		}
 		private void RecieveComplete(bool getEndPoint = false)
 		{
-			RecieveMessage?.BeginInvoke(this, Encoding.ASCII.GetString(cstr.ToArray()), (x) => { }, null);
+			RecieveMessage?.BeginInvoke(this, Encoding.UTF8.GetString(cstr.ToArray()), (x) => { }, null);
 			//Receive.Invoke(cstr.ToString(), this);
 			cstr.Clear();
 			lastLength = 0;
-			reporterCounter = 0;
 			br.BaseStream.Flush();
 		}
 		public virtual bool Send(string key, string info)
 		{
-			var safeMessage = string.Format("<{0}>{1}</{0}>{2}", key, EncryptHelper.Base64Encode(info), TcpComplete);
+			var safeMessage = string.Format("<{0}>{1}</{0}>", key, EncryptHelper.Base64Encode(info));
 			return Send(Encoding.UTF8.GetBytes(safeMessage));
 		}
 		public virtual bool Send(byte[] info)
@@ -84,10 +83,6 @@ namespace SfTcp
 				return true;
 			}
 			else return false;
-		}
-		private string TcpComplete
-		{
-			get => "#$%&'";
 		}
 		List<byte> cstr = new List<byte>();
 		private void Reciving()

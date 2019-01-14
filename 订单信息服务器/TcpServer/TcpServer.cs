@@ -95,8 +95,8 @@ namespace SfTcp
 				listener.Stop();
 				this.Ip = this.client.Client.RemoteEndPoint.ToString();
 				if (this.Ip.Contains("127.0.0.1")) IsLocal = true;
-				var checkPortOnly = Ip.IndexOf(':');
-				if (checkPortOnly > 0) Ip = Ip.Substring(checkPortOnly + 1);
+				//var checkPortOnly = Ip.IndexOf(':');
+				//if (checkPortOnly > 0) Ip = Ip.Substring(checkPortOnly + 1);
 				Connected.BeginInvoke(this, (x) => { }, null);
 				var stream = client.GetStream();
 				writter = new BinaryWriter(stream);
@@ -107,7 +107,7 @@ namespace SfTcp
 					while (true)
 					{
 						var thisLen = cstr.Length;
-						if (thisLen == lastLength && thisLen > 0 && reporterCounter++ > 50)
+						if (thisLen == lastLength && thisLen > 0)
 						{
 							RecieveComplete();
 						}
@@ -128,18 +128,14 @@ namespace SfTcp
 
 
 		}
-		private void RecieveComplete(bool getEndPoint = false)
+		private void RecieveComplete()
 		{
-			if (getEndPoint) cstr.Replace(this.TcpComplete, "");
 			ReceiveInfo(cstr.ToString());
 			//Receive.Invoke(cstr.ToString(), this);
 			cstr.Clear();
 			lastLength = 0;
-			reporterCounter = 0;
-			nowCheckIndex = 0;
 			reader.BaseStream.Flush();
 		}
-		private int reporterCounter = 0;
 		private int lastLength;
 		private void ReceiveInfo(string info)
 		{
@@ -203,13 +199,10 @@ namespace SfTcp
 			if (client.Connected) client.Close();
 
 		}
-		private string TcpComplete
-		{
-			get => "#$%&'";
-		}
+
 		public bool Send(string info)
 		{
-			return Send(Encoding.UTF8.GetBytes(info + TcpComplete));
+			return Send(Encoding.UTF8.GetBytes(info));
 		}
 		public bool Send(byte[] info)
 		{
@@ -231,7 +224,6 @@ namespace SfTcp
 			else return false;
 		}
 		StringBuilder cstr = new StringBuilder();
-		private int nowCheckIndex = 0;
 		private void Reciving()
 		{
 			while (true)
@@ -242,16 +234,6 @@ namespace SfTcp
 					{
 						var c = reader.ReadChar();
 						cstr.Append(c);
-						if (c == ('#' + nowCheckIndex))
-						{
-							nowCheckIndex++;
-							if (nowCheckIndex == 5)
-							{
-								RecieveComplete(true);
-								continue;
-							}
-						}
-
 					}
 					catch (Exception ex)
 					{
