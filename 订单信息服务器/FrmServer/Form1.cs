@@ -36,6 +36,7 @@ namespace 订单信息服务器
 			//ServerJsManager.Init();
 			InitWebBrowserControl();
 			LstConnection.AfterLabelEdit += CheckIfUserEditName;
+
 		}
 		private bool ctlSaveLoaded = false;
 		private void InitHistorySettingOnFormctl()

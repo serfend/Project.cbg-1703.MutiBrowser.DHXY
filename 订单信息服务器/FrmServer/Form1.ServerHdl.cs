@@ -114,7 +114,9 @@ namespace 订单信息服务器
 									break;
 								case "successBill":
 									targetItem.SubItems[3].Text = "成功下单,即将付款";
-									PayCurrentBill(_clientPayUser[s.Ip]);
+									PayCurrentBill(_clientPayUser[s.Ip],InnerInfo,(msg)=> {
+										MessageBox.Show(msg);
+									});
 									break;
 								default:
 									AppendLog("新消息[" + s.clientName + "] " + x + ":" + InnerInfo);
@@ -192,6 +194,12 @@ namespace 订单信息服务器
 									cst.AppendLine($"<p>authKey:{AuthKey}</p>");
 									cst.AppendLine($"打开网页次数: 手动:{ManagerHttpBase.UserWebShowTime}  自动:{ManagerHttpBase.FitWebShowTime}<br>");
 									cst.AppendLine($"profit:{ManagerHttpBase.RecordMoneyGet}  times:{ManagerHttpBase.RecordMoneyGetTime}");
+									for(int i = 0; i < ManagerHttpBase.RecordMoneyGetTime; i++)
+									{
+										var info = ManagerHttpBase.GetBillInfo(i);
+										if (info.Length == 0) continue;
+										cst.AppendLine($"{i}:{info}<br>");
+									}
 									cst.AppendLine("<table border=\"1\">");
 									cst.AppendLine("<tr>");
 									for (int i = 0; i < columnsNum; i++)
@@ -367,11 +375,10 @@ namespace 订单信息服务器
 				targetItem.SubItems[3].Text = "等待订单";
 				s.clientName = hdlServerName;
 				BrowserIp[hdlServerName] = s.Ip;
+				_clientPayUser[s.Ip] = hdlServerName;
 			}
 			else if (InnerInfo.Contains("<androidAuthInit>"))
 			{
-				var phone = HttpUtil.GetElementInItem(InnerInfo, "phone");
-				_clientPayUser[s.Ip] = phone;
 				targetItem.SubItems[3].Text = "同步将军令";
 				s.clientName = hdlServerName;
 			}

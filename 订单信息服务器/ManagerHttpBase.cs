@@ -38,5 +38,16 @@ namespace 订单信息服务器
 			set => regMain.In(Today).SetInfo("RecordMoneyGetTime", value.ToString());
 		}
 		private static string Today => DateTime.Now.ToString("yyyyMMdd");
+
+		internal static void RecordBill(string goodName, double priceNum, double priceNumAssume)
+		{
+			var nowIndex = RecordMoneyGet;
+			regMain.In(Today).SetInfo(nowIndex.ToString(),$"{goodName}:{priceNum}/{priceNumAssume}");
+		}
+
+		internal static string GetBillInfo(int i)
+		{
+			return regMain.In(Today).GetInfo(i.ToString());
+		}
 	}
 }

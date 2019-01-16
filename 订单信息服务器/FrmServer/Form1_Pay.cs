@@ -56,6 +56,7 @@ namespace 订单信息服务器
 				data[2] = hdlServer;
 				data[3] = psw;
 				_paySession.Add(name, new PayUser(name, session, hdlServer, psw));
+				CmdPaySaveItem(name,session,hdlServer,psw);
 				var tmp = new ListViewItem(data);
 				LstPayClient.Items.Add(tmp);
 			}
@@ -96,28 +97,20 @@ namespace 订单信息服务器
 			var hdlServer = InputBox.ShowInputBox("输入管理区", "管理区以区号码记录，\"|\"分割",item.SubItems[2].Text);
 			var psw = InputBox.ShowInputBox("输入密码", "账号的密码", item.SubItems[3].Text);
 			item.SubItems[1].Text = session;
+
+
 			var list = hdlServer.Split('|');
-			var sortlist=list.ToList<string>();
-			sortlist.Sort((x,y)=> {
+			var sortlist = list.ToList<string>();
+			sortlist.Sort((x, y) => {
 				return Convert.ToInt32(x) - Convert.ToInt32(y);
 			});
 			item.SubItems[2].Text = string.Join<string>("|", sortlist);
 			item.SubItems[3].Text = psw;
-			var user= new PayUser(item.SubItems[0].Text, session, hdlServer, psw);
+			var user = new PayUser(item.SubItems[0].Text, session, hdlServer, psw);
 			if (!_paySession.ContainsKey(item.SubItems[0].Text)) _paySession.Add(user.UserName, user);
 			else _paySession[user.UserName] = user;
-			
-			foreach (var i in list)
-			{
-				if (!_payServerHdl.ContainsKey(i))
-				{
-					_payServerHdl.Add(i, item.SubItems[0].Text);
-				}
-				else
-				{
-					_payServerHdl[i] = item.SubItems[0].Text;
-				}
-			}
+
+
 			CmdPaySaveItem(item.SubItems[0].Text, session, hdlServer,psw);
 		}
 		private void CmdPaySaveItem(string phone,string session,string hdlServer,string psw)
@@ -128,6 +121,19 @@ namespace 订单信息服务器
 				_keyPairPaySession.Add(_keyPairPaySession.Count + 1, phone);
 				regMain.SetInfo(_keyPairPaySession.Count.ToString(), phone);
 			}
+			var list = hdlServer.Split('|');
+			foreach (var i in list)
+			{
+				if (!_payServerHdl.ContainsKey(i))
+				{
+					_payServerHdl.Add(i,phone);
+				}
+				else
+				{
+					_payServerHdl[i] = phone;
+				}
+			}
+
 			item.SetInfo("session", session) ;
 			item.SetInfo("hdlServer",hdlServer);
 			item.SetInfo("psw", psw);
@@ -137,7 +143,8 @@ namespace 订单信息服务器
 		/// </summary>
 		/// <param name="serverNo"></param>
 		/// <param name="InnerInfo"></param>
-		private void PayCurrentBill(string serverNo,string InnerInfo="")
+		/// <param name="callback">完成付款流程回调</param>
+		private void PayCurrentBill(string serverNo,string InnerInfo="",Action<string> callback=null)
 		{
 			if (_payServerHdl.ContainsKey(serverNo))
 			{
@@ -153,15 +160,15 @@ namespace 订单信息服务器
 				}
 				else
 				{
-					AppendLog($"当前区{serverNo}管理的账号{phoneTarget}无支付凭证");
+					callback?.Invoke($"当前区{serverNo}管理的账号{phoneTarget}无支付凭证");
 				}
 			}
 			else
 			{
-				AppendLog($"当前区{serverNo}暂无管理的账号");
+				callback?.Invoke($"当前区{serverNo}暂无管理的账号");
 			};
 		}
-		private void PayCurrentBill(PayUser user)
+		private void PayCurrentBill(PayUser user, Action<string> callback = null)
 		{
 			PayCurrentBill(user.UserName,user.Session, user.Psw, AuthKey);
 		}
@@ -173,15 +180,15 @@ namespace 订单信息服务器
 		/// <param name="session">付款凭证</param>
 		/// <param name="psw">预置密码</param>
 		/// <param name="authKey">预置将军令</param>
-		private void PayCurrentBill(string name,string session, string psw = null, string authKey = null)
+		private void PayCurrentBill(string name,string session, string psw = null, string authKey = null, Action<string> callback = null)
 		{
 			if (!payClientIp.ContainsKey(name)) {
-				MessageBox.Show($"用户名{name}所对应的浏览器未开启");
+				callback?.Invoke($"用户名{name}所对应的浏览器未开启");
 				return;
 			} ;
 			if (!payClient.ContainsKey(payClientIp[name]))
 			{
-				MessageBox.Show($"浏览器终端[{name}]未启动");
+				callback?.Invoke($"浏览器终端[{name}]未启动");
 				return;
 			}
 			bool anyException = false;
@@ -196,7 +203,7 @@ namespace 订单信息服务器
 				catch (Exception ex)
 				{
 					anyException = true;
-					MessageBox.Show($"订单失败:{ex.Message}  z");
+					callback?.Invoke($"订单失败:{ex.Message}  z");
 					return;
 				}
 			});
@@ -222,7 +229,7 @@ namespace 订单信息服务器
 			}
 			item.BillInfo.OrderId = root.FirstBill.orderId;
 			client.Session.Send(JsonConvert.SerializeObject(item));
-			
+			callback?.Invoke("付款信息已提交至浏览器插件");
 
 		}
 		/// <summary>
@@ -295,14 +302,17 @@ namespace 订单信息服务器
 					{
 						ManagerHttpBase.RecordMoneyGet += earnNum;
 						ManagerHttpBase.RecordMoneyGetTime++;
+						ManagerHttpBase.RecordBill(goodName,priceNum,priceNumAssume);
 					}
-					PayCurrentBill(serverNum, InnerInfo);
+					PayCurrentBill(serverNum, InnerInfo,
+						(x)=> { MessageBox.Show(x); }
+					);
 				}
 				ManagerHttpBase.FitWebShowTime++;
 			}
 			catch (Exception ex)
 			{
-				AppendLog("订单处理异常:" + ex.Message);
+				MessageBox.Show("订单处理异常:" + ex.Message);
 			}
 		}
 		/// <summary>
