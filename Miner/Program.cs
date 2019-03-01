@@ -54,9 +54,9 @@ namespace Miner
 		private static int idleTime = 30;
 		private static int connectFailTime = 0;
 
-		public static string TcpMainTubeIp= "111.225.11.130";
+		public static string TcpMainTubeIp= "111.225.9.110";
 		public static int TcpMainTubePort= 16555;
-		public static string TcpFileTubeIp= "111.225.11.130";
+		public static string TcpFileTubeIp= "111.225.9.110";
 		public static int TcpFileTubePort= 16556;
 		[STAThreadAttribute]
 		static void Main(string[] args)
