@@ -1,6 +1,7 @@
 ﻿using DotNet4.Utilities.UtilInput;
 using DotNet4.Utilities.UtilReg;
 using Newtonsoft.Json;
+using SfTcp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -146,6 +147,7 @@ namespace 订单信息服务器
 		/// <param name="callback">完成付款流程回调</param>
 		private void PayCurrentBill(string serverNo,string InnerInfo="",Action<string> callback=null)
 		{
+			AppendLog($"开始对{InnerInfo}进行付款");
 			if (_payServerHdl.ContainsKey(serverNo))
 			{
 				var phoneTarget = _payServerHdl[serverNo];
@@ -153,9 +155,14 @@ namespace 订单信息服务器
 				{
 					//TODO 获取支付凭证并付款
 					var session = _paySession[phoneTarget];
+					var item = payClient[payClientIp[phoneTarget]];
+					item.ViewItem.SubItems[1].Text = $"处理{serverNo}订单";
 					if (!IpCheckBeforePay.Checked|| MessageBox.Show(this, $"订单:\n{InnerInfo}", "付款确认", MessageBoxButtons.YesNo) == DialogResult.Yes)
 					{
-						PayCurrentBill(session);
+						PayCurrentBill(session,(x)=> {
+							callback?.Invoke(x);
+							item.ViewItem.SubItems[1].Text = x;
+						});
 					}
 				}
 				else
@@ -170,7 +177,7 @@ namespace 订单信息服务器
 		}
 		private void PayCurrentBill(PayUser user, Action<string> callback = null)
 		{
-			PayCurrentBill(user.UserName,user.Session, user.Psw, AuthKey);
+			PayCurrentBill(user.UserName,user.Session, user.Psw, AuthKey, callback);
 		}
 		/// <summary>
 		/// 提交当前订单付款行为
@@ -198,7 +205,7 @@ namespace 订单信息服务器
 			var getBillInfo = new Task(()=> {
 				try
 				{
-					root.GetData();
+					root.GetData(10,callback);
 				}
 				catch (Exception ex)
 				{
@@ -227,6 +234,7 @@ namespace 订单信息服务器
 			{
 				return;
 			}
+			
 			item.BillInfo.OrderId = root.FirstBill.orderId;
 			client.Session.Send(JsonConvert.SerializeObject(item));
 			callback?.Invoke("付款信息已提交至浏览器插件");
@@ -253,15 +261,16 @@ namespace 订单信息服务器
 		/// 将新的物品添加到商品列表
 		/// </summary>
 		/// <param name="sender"></param>
+		/// <param name="targetItem"></param>
 		/// <param name="InnerInfo"></param>
-		private void HdlNewCheckBill(string sender, string InnerInfo)
+		private void HdlNewCheckBill(TcpServer sender,ListViewItem targetItem,string InnerInfo)
 		{
 			try
 			{
 				var tmp = InnerInfo.Split(new string[] { "##" }, StringSplitOptions.None);
 				if (tmp.Length < 10)
 				{
-					AppendLog(sender + " 无效的订单信息:" + InnerInfo);
+					AppendLog($"{sender.clientName} 无效的订单信息:{InnerInfo}");
 					return;
 				}
 				var serverName = tmp[0];
@@ -287,7 +296,7 @@ namespace 订单信息服务器
 					priceNum = Convert.ToDouble(price[0]);
 					priceNumAssume = Convert.ToDouble(price[1]);
 				}
-				SendCmdToBrowserClient(serverName, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceNum}</price><assumePrice>{priceNumAssume }</assumePrice>");
+				SendCmdToBrowserClient(serverNum, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceNum}</price><assumePrice>{priceNumAssume }</assumePrice>");
 
 
 				AppendLog("新的订单:" + BuyUrl);
@@ -305,7 +314,7 @@ namespace 订单信息服务器
 						ManagerHttpBase.RecordBill(goodName,priceNum,priceNumAssume);
 					}
 					PayCurrentBill(serverNum, InnerInfo,
-						(x)=> { MessageBox.Show(x); }
+						(x)=> { targetItem.Text = x; }
 					);
 				}
 				ManagerHttpBase.FitWebShowTime++;

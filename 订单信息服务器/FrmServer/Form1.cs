@@ -158,7 +158,7 @@ namespace 订单信息服务器
 			var targetUrl = target.SubItems[8].Text;
 			Clipboard.SetText(targetUrl);
 			ManagerHttpBase.UserWebShowTime++;
-			SendCmdToBrowserClient(target.SubItems[0].Text, $"<showWeb><targetUrl>{targetUrl}</targetUrl></showWeb>");
+			SendCmdToBrowserClient(target.SubItems[9].Text, $"<showWeb><targetUrl>{targetUrl}</targetUrl></showWeb>");
 		}
 
 		private void CmdServerOn_Click(object sender, EventArgs e)
@@ -189,10 +189,18 @@ namespace 订单信息服务器
 			var targetUser = InputBox.ShowInputBox("输入付款浏览器名称", "输入付款浏览器名称", "");
 			if (!_paySession.ContainsKey(targetUser))
 			{
-				MessageBox.Show("无效的浏览器名称");
+				MessageBox.Show($"无效的浏览器名称:{targetUser}");
 				return;
 			}
-			PayCurrentBill(_paySession[targetUser]);
+			var item = payClient[payClientIp[targetUser]];
+			PayCurrentBill(_paySession[targetUser],(x)=> {
+				if (item == null)
+					AppendLog($"{targetUser}用户主动下单状态{x}");
+				else
+					item.ViewItem.SubItems[1].Text = x;
+			});
 		}
+
+		
 	}
 }
