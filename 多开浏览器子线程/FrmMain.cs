@@ -29,7 +29,7 @@ namespace 多开浏览器子线程
 				InitTcp();
 			};
 			Thread.Sleep(500);
-			Program.Tcp?.Send("clientConnect", $"<browserInit><clientName>{CCmd.GetWebInfo("name")}</clientName><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>{Assembly.GetExecutingAssembly().GetName().Version}</version></browserInit>");
+			Program.Tcp?.Send("clientConnect", $"<browserInit><clientName>{CCmd.GetWebInfo("server")}</clientName><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>{Assembly.GetExecutingAssembly().GetName().Version}</version></browserInit>");
 		}
 
 		private bool frmClosing = false;
@@ -311,6 +311,7 @@ namespace 多开浏览器子线程
 						LbShowStatus.Text += ",用户主动提交";
 						WebShow.Document.GetElementById("equip_info").InvokeMember("submit");
 						Program.reg.In("Bill").In("record").In(DateTime.Now.ToString("yyyyMMdd")).SetInfo(DateTime.Now.ToString("hhmmssffff"), LbShowStatus.Text);
+						Thread.Sleep(500);
 						Program.Tcp?.Send("successBill", HttpUtil.TimeStamp.ToString());
 					}
 					else if (canSubmit)
