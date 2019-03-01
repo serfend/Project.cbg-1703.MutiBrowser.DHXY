@@ -41,7 +41,7 @@ namespace 订单信息服务器
 
 		internal static void RecordBill(string goodName, double priceNum, double priceNumAssume)
 		{
-			var nowIndex = RecordMoneyGet;
+			var nowIndex = RecordMoneyGetTime;
 			regMain.In(Today).SetInfo(nowIndex.ToString(),$"{goodName}:{priceNum}/{priceNumAssume}");
 		}
 

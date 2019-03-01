@@ -28,8 +28,12 @@ namespace 订单信息服务器.Bill
 			
 		}
 
-		public BillInfoJson GetData()
+		public BillInfoJson GetData(int tryTime=10,Action<string> callback=null)
 		{
+			if (tryTime <= 0)
+			{
+				throw new BillListLoadException("因尝试次数过多，导致获取订单失败");
+			}
 			var message = new HttpRequestMessage(HttpMethod.Post, "https://epay.163.com/wap/h5/ajax/trade/listView.htm")
 			{
 				Content = new FormUrlEncodedContent(new Dictionary<string, string> {
@@ -61,6 +65,19 @@ namespace 订单信息服务器.Bill
 			{
 				throw new BillListLoadException(data.errorMsg);
 			}
+			if (data.data.resultList.Count==0)
+			{
+				callback?.Invoke($"{tryTime} 当前无数据");
+				Thread.Sleep(200);
+				return GetData(tryTime - 1, callback);
+			}
+			else if (data.data.resultList[0].orderState != "待付款")
+			{
+				callback?.Invoke($"{tryTime} {data.data.resultList[0].orderState}");
+				Thread.Sleep(100);
+				return GetData(tryTime-1,callback);
+			}
+			else
 			return data;
 		}
 		public ResultListItem FirstBill { get {

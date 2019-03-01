@@ -17,7 +17,7 @@ namespace 远程连接测试
 		private long lastHeartBeatTimeStamp;
 		public Form1()
 		{
-			client = new SfTcpClient("111.225.11.130", 16555) { 
+			client = new SfTcpClient("111.225.9.110", 16555) { 
 				RecieveMessage = (tcp, msg) => {
 					this.Invoke((EventHandler)delegate {
 						long now = HttpUtil.TimeStamp- lastHeartBeatTimeStamp;

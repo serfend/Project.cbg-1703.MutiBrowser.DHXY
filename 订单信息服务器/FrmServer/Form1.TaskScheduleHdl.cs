@@ -1,5 +1,6 @@
 ﻿using DotNet4.Utilities.UtilCode;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace 订单信息服务器
 		/// <summary>
 		/// 用于vps空闲等待队列
 		/// </summary>
-		private Queue<string> hdlVpsTaskScheduleQueue=new Queue<string>();
+		private ConcurrentQueue<string> hdlVpsTaskScheduleQueue=new ConcurrentQueue<string>();
 		/// <summary>
 		/// vps是否可用，以ip为键
 		/// </summary>
@@ -66,8 +67,9 @@ namespace 订单信息服务器
 				}
 				for (int index = 1; index <= _taskSchedule_DefaultInQueueCount; index++)
 				{
+					string vps = string.Empty;
 					if (hdlVpsTaskScheduleQueue.Count == 0) break;
-						var vps = hdlVpsTaskScheduleQueue.Dequeue();
+					if (!hdlVpsTaskScheduleQueue.TryDequeue(out vps)) { continue; }; 
 					if (vps != null)
 					{
 						var client = serverManager[vps];
@@ -80,7 +82,7 @@ namespace 订单信息服务器
 					}
 				}
 				hdlCount = hdlCount == 0 ? _taskSchedule_Interval : hdlCount;
-				Thread.Sleep(_taskSchedule_Interval*(hdlCount));
+				//Thread.Sleep(_taskSchedule_Interval*(hdlCount));
 			}
 			_taskSchedule_Start = false;
 		}

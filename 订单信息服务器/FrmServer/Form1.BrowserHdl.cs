@@ -14,24 +14,24 @@ namespace 订单信息服务器
 		/// <summary>
 		/// 将订单信息发送至下单服务器
 		/// </summary>
-		/// <param name="serverName"></param>
+		/// <param name="serverNo"></param>
 		/// <param name="cmdInfo"></param>
-		private void SendCmdToBrowserClient(string serverName, string cmdInfo)
+		private void SendCmdToBrowserClient(string serverNo, string cmdInfo)
 		{
 			try
 			{
-				if (!BrowserIp.ContainsKey(serverName))
+				if (!BrowserIp.ContainsKey(serverNo))
 				{
-					AppendLog(serverName + " 对应的下单浏览器进程未启动");
+					AppendLog(serverNo + " 对应的下单浏览器进程未启动");
 					return;
 				}
 				else
 				{
-					var targetBrowser = BrowserIp[serverName];
+					var targetBrowser = BrowserIp[serverNo];
 					var client = serverManager[targetBrowser];
 					if (client == null)
 					{
-						AppendLog("未找到目标浏览器:"+serverName);
+						AppendLog("未找到目标浏览器:"+serverNo);
 					}else
 					client.Send(cmdInfo);
 				}

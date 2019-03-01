@@ -1,4 +1,5 @@
 ﻿using DotNet4.Utilities.UtilCode;
+using Newtonsoft.Json;
 using SfTcp;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using 订单信息服务器.FrmServer;
 
 namespace 订单信息服务器
 {
@@ -51,81 +53,93 @@ namespace 订单信息服务器
 			serverManager = new TcpServerManager()
 			{
 				NormalMessage = (s, x, InnerInfo) => {
-					this.Invoke((EventHandler)delegate
+					try
 					{
-						var targetItem = GetItem(s.Ip);
-						if (targetItem != null)
+						this.Invoke((EventHandler)delegate
 						{
-							switch (x)
+							var targetItem = GetItem(s.Ip);
+							if (targetItem != null)
 							{
-								case "heartBeat":
-									s.Send("heartBeatResponse");
-									break;
-								case "RHB":
-									var now = Environment.TickCount;
-									var interval = _dicVpsWorkBeginTime[s.Ip].Record();
-									targetItem.SubItems[4].Text =$"{interval}({InnerInfo})";
-									break;
-								case "clientConnect":
-									ClientConnect(InnerInfo,targetItem,s);
-									break;
-								case "nameModefied":
-									NameModefied(InnerInfo,targetItem,s);
-									break;
-								case "InitComplete":
-									InitComplete(InnerInfo,targetItem,s);
-									break;
-								case "RequireFile"://服务器接收到来自客户端请求文件的命令
-									this.Invoke((EventHandler)delegate { AppendLog("vps" + s.clientName + "请求获取文件"); });
-									HdlVpsFileSynRequest(InnerInfo, s);
-									break;
-								case "Status":
-									targetItem.SubItems[3].Text = InnerInfo;
-									if (InnerInfo.Contains(" 失败"))
-									{
-										s.Send("<reRasdial>");
-									}
-									break;
-								case "newCheckBill":
-									HdlNewCheckBill(s.clientName, InnerInfo);
-									break;
-								case "reRasdial":
-									targetItem.SubItems[3].Text = "VPS重拨号中";
-									s.Disconnect();
-									break;
-								case "clientWait":
-									ClientWaiting(InnerInfo,targetItem, s);
-									break;
-								case "clientConfigComplete":
-									targetItem.SubItems[3].Text = "初始化完成";
-									NewVpsAvailable(s.Ip);
-									break;
-								case "loginSession":
-									SynLoginSession(InnerInfo, targetItem, s);
-									break;
-								case "payAuthKey":
-									AuthKey = InnerInfo;
-									break;
-								case "buildBill":
-									targetItem.SubItems[3].Text = "开始下单";
-									break;
-								case "failBill":
-									targetItem.SubItems[3].Text = $"下单无效:{InnerInfo}";
-									break;
-								case "successBill":
-									targetItem.SubItems[3].Text = "成功下单,即将付款";
-									PayCurrentBill(_clientPayUser[s.Ip],InnerInfo,(msg)=> {
-										MessageBox.Show(msg);
-									});
-									break;
-								default:
-									AppendLog("新消息[" + s.clientName + "] " + x + ":" + InnerInfo);
-									targetItem.SubItems[3].Text = InnerInfo;
-									break;
+								switch (x)
+								{
+									case "heartBeat":
+										s.Send("heartBeatResponse");
+										break;
+									case "RHB":
+										var now = Environment.TickCount;
+										var interval = _dicVpsWorkBeginTime[s.Ip].Record();
+										targetItem.SubItems[4].Text = $"{interval}({InnerInfo})";
+										break;
+									case "clientConnect":
+										ClientConnect(InnerInfo, targetItem, s);
+										break;
+									case "nameModefied":
+										NameModefied(InnerInfo, targetItem, s);
+										break;
+									case "InitComplete":
+										InitComplete(InnerInfo, targetItem, s);
+										break;
+									case "RequireFile"://服务器接收到来自客户端请求文件的命令
+										this.Invoke((EventHandler)delegate { AppendLog("vps" + s.clientName + "请求获取文件"); });
+										HdlVpsFileSynRequest(InnerInfo, s);
+										break;
+									case "Status":
+										targetItem.SubItems[3].Text = InnerInfo;
+										if (InnerInfo.Contains(" 失败"))
+										{
+											s.Send("<reRasdial>");
+										}
+										break;
+									case "newCheckBill":
+										HdlNewCheckBill(s, targetItem,InnerInfo);
+										break;
+									case "reRasdial":
+										targetItem.SubItems[3].Text = "VPS重拨号中";
+										s.Disconnect();
+										break;
+									case "clientWait":
+										ClientWaiting(InnerInfo, targetItem, s);
+										break;
+									case "clientConfigComplete":
+										targetItem.SubItems[3].Text = "初始化完成";
+										NewVpsAvailable(s.Ip);
+										break;
+									case "loginSession":
+										SynLoginSession(InnerInfo, targetItem, s);
+										break;
+									case "payAuthKey":
+										AuthKey = InnerInfo;
+										break;
+									case "buildBill":
+										targetItem.SubItems[3].Text = "开始下单";
+										break;
+									case "failBill":
+										targetItem.SubItems[3].Text = $"下单无效:{InnerInfo}";
+										break;
+									case "successBill":
+										targetItem.SubItems[3].Text = "成功下单,即将付款";
+										new Thread(()=> {
+											PayCurrentBill(_clientPayUser[s.Ip], InnerInfo, (msg) => {
+												this.Invoke((EventHandler)delegate {
+													targetItem.SubItems[3].Text = msg;
+												});
+											});
+										}).Start();
+										break;
+									default:
+										AppendLog("新消息[" + s.clientName + "] " + x + ":" + InnerInfo);
+										targetItem.SubItems[3].Text = InnerInfo;
+										break;
+								}
 							}
-						}
 
-					});
+						});
+					}
+					catch (Exception ex)
+					{
+						MessageBox.Show($"在主线程接收发生异常:{ex.Message}\n{ex.StackTrace}");
+						return;
+					}
 				},
 				ServerConnected = (x) => {
 					this.Invoke((EventHandler)delegate {
@@ -262,6 +276,18 @@ namespace 订单信息服务器
 									cst.AppendLine($"已向终端{targetClient.clientName}发送指令{cmdInfo[1]}");
 								}
 								break;
+							}
+						case "ip":
+							{
+								var message = new Dictionary<string, string>(x.Headers)
+								{
+									["user-ip"] = s.Server.Ip,
+									["user-method"]=x.Method,
+									["user-ver"]=x.HttpVersion,
+									["user-payload"]=x.PayLoad
+								};
+								s.ResponseRaw(JsonConvert.SerializeObject(message),200,"text/plain");
+								return;
 							}
 					}
 					s.Response(cst.ToString());

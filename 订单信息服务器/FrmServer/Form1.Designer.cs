@@ -64,6 +64,8 @@
 			this.LstConnection_Server = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LstConnection_version = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TabMain_Setting = new System.Windows.Forms.TabPage();
+			this.IpCheckBeforePay = new System.Windows.Forms.CheckBox();
+			this.label4 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
 			this.label8 = new System.Windows.Forms.Label();
 			this.IpAssumePrice_Rate = new System.Windows.Forms.TextBox();
@@ -83,8 +85,6 @@
 			this.Verify = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.ServerHdl = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.Psw = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.label4 = new System.Windows.Forms.Label();
-			this.IpCheckBeforePay = new System.Windows.Forms.CheckBox();
 			this.TabMain.SuspendLayout();
 			this.TabMain_VpsManager.SuspendLayout();
 			this.TabMain_Setting.SuspendLayout();
@@ -371,6 +371,24 @@
 			this.TabMain_Setting.Text = "设置";
 			this.TabMain_Setting.UseVisualStyleBackColor = true;
 			// 
+			// IpCheckBeforePay
+			// 
+			this.IpCheckBeforePay.AutoSize = true;
+			this.IpCheckBeforePay.Location = new System.Drawing.Point(65, 95);
+			this.IpCheckBeforePay.Name = "IpCheckBeforePay";
+			this.IpCheckBeforePay.Size = new System.Drawing.Size(15, 14);
+			this.IpCheckBeforePay.TabIndex = 49;
+			this.IpCheckBeforePay.UseVisualStyleBackColor = true;
+			// 
+			// label4
+			// 
+			this.label4.AutoSize = true;
+			this.label4.Location = new System.Drawing.Point(6, 97);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(53, 12);
+			this.label4.TabIndex = 48;
+			this.label4.Text = "付款确认";
+			// 
 			// label7
 			// 
 			this.label7.AutoSize = true;
@@ -538,24 +556,6 @@
 			// 
 			this.Psw.Text = "密码";
 			this.Psw.Width = 150;
-			// 
-			// label4
-			// 
-			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(6, 97);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(53, 12);
-			this.label4.TabIndex = 48;
-			this.label4.Text = "付款确认";
-			// 
-			// IpCheckBeforePay
-			// 
-			this.IpCheckBeforePay.AutoSize = true;
-			this.IpCheckBeforePay.Location = new System.Drawing.Point(65, 95);
-			this.IpCheckBeforePay.Name = "IpCheckBeforePay";
-			this.IpCheckBeforePay.Size = new System.Drawing.Size(15, 14);
-			this.IpCheckBeforePay.TabIndex = 49;
-			this.IpCheckBeforePay.UseVisualStyleBackColor = true;
 			// 
 			// Form1
 			// 
