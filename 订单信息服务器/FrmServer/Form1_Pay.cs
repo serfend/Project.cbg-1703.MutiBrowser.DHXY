@@ -9,6 +9,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using 订单信息服务器.Bill;
@@ -227,18 +228,22 @@ namespace 订单信息服务器
 					}
 				};
 			});
-			userInput.Start();
-			getBillInfo.Start();
-			Task.WaitAll(new Task[] { userInput, getBillInfo });
-			if (anyException)
+			var t=new Thread(() =>
 			{
-				return;
-			}
-			
-			item.BillInfo.OrderId = root.FirstBill.orderId;
-			client.Session.Send(JsonConvert.SerializeObject(item));
-			callback?.Invoke("付款信息已提交至浏览器插件");
+				userInput.Start();
+				getBillInfo.Start();
+				Task.WaitAll(new Task[] { userInput, getBillInfo });
+				if (anyException)
+				{
+					return;
+				}
 
+				item.BillInfo.OrderId = root.FirstBill.orderId;
+				client.Session.Send(JsonConvert.SerializeObject(item));
+				callback?.Invoke("付款信息已提交至浏览器插件");
+			})
+			{ IsBackground=true};
+			t.Start();
 		}
 		/// <summary>
 		/// 检查订单号是否被处理过
@@ -314,7 +319,7 @@ namespace 订单信息服务器
 						ManagerHttpBase.RecordBill(goodName,priceNum,priceNumAssume);
 					}
 					PayCurrentBill(serverNum, InnerInfo,
-						(x)=> { targetItem.Text = x; }
+						(x)=> { targetItem.SubItems[3].Text = x; }
 					);
 				}
 				ManagerHttpBase.FitWebShowTime++;
