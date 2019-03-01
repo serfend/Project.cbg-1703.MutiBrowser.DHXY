@@ -1,5 +1,7 @@
 ﻿using DotNet4.Utilities.UtilCode;
+using DotNet4.Utilities.UtilReg;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,42 +47,88 @@ namespace 订单信息服务器
 		private void Server_OnNewMessage(object sender, ClientNewMessageEventArgs e)
 		{
 			var client = payClient[e.Session.IP];
-			//this.Invoke((EventHandler)delegate {
-			//	AppendLog($"来自客户端[{e.Session.IP}]消息:{e.Msg}");
-			//});
-			if (e.Msg.Contains("<init>")) {
-				var clientName = HttpUtil.GetElementInItem(e.Msg,"init");
-				if (payClientIp.ContainsKey(clientName))
-				{
-					var msg = new ClientInitMessage()
+			if (e.Msg.Length == 0) return;
+			Console.WriteLine(e.Msg);
+			JObject raw=null;
+			try
+			{
+				raw = JObject.Parse(e.Msg);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"处理信息异常:{ex.Message}");
+				return;
+			}
+			 
+			
+			var m = raw["m"];
+			var t = raw["t"];
+			switch (t.Value<string>()) {
+				case "init":
 					{
-						Error=$"重复初始化浏览器{clientName}"
-					};
-					e.Session.Send(JsonConvert.SerializeObject(msg));
-					return;
-				}
-				else
-				{
-					var msg = new ClientInitMessage()
+						string clientName =m["name"].Value<string>();
+						if (payClientIp.ContainsKey(clientName))
+						{
+							var msg = new ClientInitMessage()
+							{
+								Error = $"重复初始化浏览器{clientName}"
+							};
+							e.Session.Send(JsonConvert.SerializeObject(msg));
+							return;
+						}
+						else
+						{
+							var msg = new ClientInitMessage()
+							{
+								Content = clientName
+							};
+							e.Session.Send(JsonConvert.SerializeObject(msg));
+							client.Name = clientName;
+						}
+						payClientIp.Add(clientName, e.Session.IP);
+						this.Invoke((EventHandler)delegate {
+							AppendLog($"浏览器端初始化:{clientName}");
+							var data = new string[2];
+							data[0] = clientName;
+							data[1] = "浏览器初始化";
+							var item = new ListViewItem(data);
+							client.ViewItem = item;
+							LstBrowserClient.Items.Add(item);
+						});
+						break;
+					}
+				case "report":{
+						var clientMsg = $"{m["t"].Value<string>()}:{m["m"].Value<string>()}";
+						Logger.SysLog(clientMsg,"log", $"clientReport/{client.Name}");
+						this.Invoke((EventHandler)delegate {
+							if (client.ViewItem != null) client.ViewItem.SubItems[1].Text = clientMsg;
+						});
+						break;
+					}
+				case "ping": {
+						client.Session.Send(JsonConvert.SerializeObject(new BaseMessage() { Title="ping"}));
+						break;
+					}
+				case "RHB":
 					{
-						Content = clientName
-					};
-					e.Session.Send(JsonConvert.SerializeObject(msg));
-					client.Name = clientName;
-				}
-				payClientIp.Add(clientName, e.Session.IP);
-				this.Invoke((EventHandler)delegate {
-					AppendLog($"浏览器端初始化:{clientName}");
-					var data = new string[2];
-					data[0] = clientName;
-					data[1] = "浏览器初始化";
-					var item = new ListViewItem(data);
-					client.ViewItem = item;
-					LstBrowserClient.Items.Add(item);
-				});
-				
+						this.Invoke((EventHandler)delegate {
+							if (client.ViewItem != null)
+							{
+								client.ViewItem.SubItems[1].Text = "连接保持";
+							}
+						});
+						break;
+					}
+				default:
+					{
+						this.Invoke((EventHandler)delegate
+						{
+							AppendLog($"来自客户端[{e.Session.IP}]消息:{e.Msg}");
+						});
+						break;
+					}
 			};
-
+			
 		}
 
 		private void Server_OnDisconnect(object sender, ClientDisconnectEventArgs e)
