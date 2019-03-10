@@ -254,7 +254,7 @@ namespace Miner
 									return;
 								}
 								int lastRunTime = Environment.TickCount;
-								int hdlGoodNum=servers.ServerRun();
+								int hdlGoodNum = 0;// servers.ServerRun();
 								int interval = Environment.TickCount - lastRunTime;
 								var avgInterval = Program.setting.threadSetting.RefreshRunTime(interval);
 								//TODO 此处估价似乎也有延迟
@@ -421,7 +421,7 @@ namespace Miner
 				StringBuilder logInfo = new StringBuilder();
 				requestFileList.ForEach((x) => logInfo.Append('\n').Append(x.Name));
 				Logger.SysLog(logInfo.ToString(), "主记录");
-				Tcp.Send(new MsgSynFileListMessage(requestFileList) { Title= "RequireFile" });
+				Tcp.Send(new MsgSynFileListMessage(requestFileList));
 			}
 			else
 			{

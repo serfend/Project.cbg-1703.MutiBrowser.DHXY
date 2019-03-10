@@ -23,3 +23,6 @@
 *.dll
 *.Cache
 *.txt
+*.force
+*.force
+*.CopyComplete
