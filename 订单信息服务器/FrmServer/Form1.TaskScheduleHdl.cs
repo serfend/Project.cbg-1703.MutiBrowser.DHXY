@@ -1,4 +1,5 @@
 ﻿using DotNet4.Utilities.UtilCode;
+using SfTcp.TcpMessage;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -72,17 +73,19 @@ namespace 订单信息服务器
 					if (!hdlVpsTaskScheduleQueue.TryDequeue(out vps)) { continue; }; 
 					if (vps != null)
 					{
-						var client = serverManager[vps];
+						var client = server[vps];
 						if (client != null)
 						{
 							int timeSpend = Environment.TickCount - beginTime;
-							client.Send($"<newScheduleServerRun><taskStamp>{_taskSchedule_Interval * index-timeSpend}</taskStamp>");
+							int taskDelayTime = _taskSchedule_Interval * index - timeSpend;
+							_dicVpsWorkBeginTime[client.Ip].RecordBegin(taskDelayTime);
+							client.Send(new CmdServerRunScheduleMessage(taskDelayTime));
 							hdlCount++;
 						}
 					}
 				}
-				hdlCount = hdlCount == 0 ? _taskSchedule_Interval : hdlCount;
-				//Thread.Sleep(_taskSchedule_Interval*(hdlCount));
+				hdlCount = hdlCount == 0 ? 1 : hdlCount;
+				Thread.Sleep(_taskSchedule_Interval*(hdlCount));
 			}
 			_taskSchedule_Start = false;
 		}

@@ -2,6 +2,7 @@
 using DotNet4.Utilities.UtilReg;
 using Newtonsoft.Json;
 using SfTcp;
+using SfTcp.TcpServer;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -268,14 +269,14 @@ namespace 订单信息服务器
 		/// <param name="sender"></param>
 		/// <param name="targetItem"></param>
 		/// <param name="InnerInfo"></param>
-		private void HdlNewCheckBill(TcpServer sender,ListViewItem targetItem,string InnerInfo)
+		private void HdlNewCheckBill(TcpConnection sender,ListViewItem targetItem,string InnerInfo)
 		{
 			try
 			{
 				var tmp = InnerInfo.Split(new string[] { "##" }, StringSplitOptions.None);
 				if (tmp.Length < 10)
 				{
-					AppendLog($"{sender.clientName} 无效的订单信息:{InnerInfo}");
+					AppendLog($"{sender.AliasName} 无效的订单信息:{InnerInfo}");
 					return;
 				}
 				var serverName = tmp[0];

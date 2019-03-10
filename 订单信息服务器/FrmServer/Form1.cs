@@ -2,6 +2,8 @@
 using DotNet4.Utilities.UtilInput;
 using DotNet4.Utilities.UtilReg;
 using SfTcp;
+using SfTcp.TcpMessage;
+using SfTcp.TcpServer;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,7 +21,7 @@ namespace 订单信息服务器
 {
 	public partial class Form1 : Form
 	{
-		private TcpServerManager serverManager;
+		private TcpServer server;
 		private Reg regSetting;
 		public Form1()
 		{
@@ -30,7 +32,7 @@ namespace 订单信息服务器
 			InitHistorySettingOnFormctl();
 			InitTransferEngine();
 			//InitServerTaskList();
-			InitServerManager();
+			Initserver();
 			StartTaskSchedule();
 			InitPaySession();
 			//ServerJsManager.Init();
@@ -87,10 +89,11 @@ namespace 订单信息服务器
 			try
 			{
 				var ip = LstConnection.Items[e.Item].SubItems[2].Text;
-				TcpServer target = serverManager[ip];
+				var target = server[ip];
+				
 				var clientName = e.Label;
-				regSettingVps.In(target.ID).SetInfo("clientName", clientName);
-				target.Send(string.Format("<setClientName>{0}</setClientName>", clientName));
+				regSettingVps.In(target.AliasName).SetInfo("clientName", clientName);
+				target.Send(new CmdSetClientNameMessage(clientName));
 			}
 			catch (Exception ex)
 			{
@@ -123,7 +126,7 @@ namespace 订单信息服务器
 			try
 			{
 				var nowSelect = LstConnection.SelectedItems[0].SubItems[2].Text;
-				var tcp = serverManager[nowSelect];
+				var tcp = server[nowSelect];
 				tcp.Disconnect();
 			}
 			catch (Exception ex)
@@ -142,8 +145,8 @@ namespace 订单信息服务器
 					return;
 				}
 				var nowSelect = LstConnection.SelectedItems[0].SubItems[2].Text;
-				var tcp = serverManager[nowSelect];
-				tcp.Send("<reRasdial>");
+				var tcp = server[nowSelect];
+				tcp.Send(new CmdReRasdialMessage());
 			}
 			catch (Exception ex)
 			{
@@ -166,8 +169,8 @@ namespace 订单信息服务器
 			try
 			{
 				var nowSelect = LstConnection.SelectedItems[0].SubItems[2].Text;
-				var tcp = serverManager[nowSelect];
-				tcp.Send(IpSender.Text);
+				var tcp = server[nowSelect];
+				tcp.Send(new NormalMessage(IpSender.Text,""));
 			}
 			catch (Exception ex)
 			{

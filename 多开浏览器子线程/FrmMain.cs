@@ -14,6 +14,8 @@ using DotNet4.Utilities.UtilCode;
 using DotNet4.Utilities.UtilHttp;
 using 多开浏览器子线程.util;
 using System.Reflection;
+using SfTcp.TcpClient;
+using SfTcp.TcpMessage;
 
 namespace 多开浏览器子线程
 {
@@ -23,14 +25,15 @@ namespace 多开浏览器子线程
 		private  void InitTcp()
 		{
 			Program.Tcp = new TcpBrowserClient();
-			Program.Tcp.RecieveMessage += ReceiveMessage;
-			Program.Tcp.Disconnected += (x) => {
+			Program.Tcp.OnMessage += ReceiveMessage; ;
+			Program.Tcp.OnDisconnected += (x,xx) => {
 				Thread.Sleep(500);
 				InitTcp();
 			};
 			Thread.Sleep(500);
-			Program.Tcp?.Send("clientConnect", $"<browserInit><clientName>{CCmd.GetWebInfo("server")}</clientName><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>{Assembly.GetExecutingAssembly().GetName().Version}</version></browserInit>");
+			Program.Tcp?.Send(new RpClientConnectMessage("browser", Assembly.GetExecutingAssembly().GetName().Version.ToString(),Program.reg.In("Setting").GetInfo("deviceId", HttpUtil.UUID), CCmd.GetWebInfo("server")));
 		}
+
 
 		private bool frmClosing = false;
 		Thread ThreadMonitor;
@@ -61,7 +64,7 @@ namespace 多开浏览器子线程
 					heartBeatCount++;
 					if (heartBeatCount > 10)
 					{
-						Program.Tcp?.Send("heartBeat", "");
+						Program.Tcp?.Send(new MsgHeartBeatMessage());
 					}
 				}
 			}) { IsBackground = true };
@@ -81,31 +84,39 @@ namespace 多开浏览器子线程
 
 		#region 逻辑
 		private double price, assumePrice;
-		private void ReceiveMessage(SfTcp.SfTcpClient s,string info){
-			if (info.Contains("<newCheckBill>"))
+		private void ReceiveMessage(object sender, ServerMessageEventArgs e)
+		{
+
+			switch (e.Title)
 			{
-				//<newCheckBill><targetUrl>baidu.com</targetUrl><price>999</price><assumePrice>0</assumePrice></newCheckBill>
-				var targetUrl = HttpUtil.GetElementInItem(info,"targetUrl");
-				price = Convert.ToDouble(HttpUtil.GetElementInItem(info, "price"));
-				assumePrice =Convert.ToDouble( HttpUtil.GetElementInItem(info, "assumePrice"));
-				if (assumePrice > price)
-					CheckNewCmd(CmdInfo.SubmitBill, targetUrl);
-				else CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
-			} else if (info.Contains("<showWeb>"))
-			{
-				var targetUrl = HttpUtil.GetElementInItem(info, "targetUrl");
-				price = 999;
-				assumePrice = 0;
-				CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
-			}else if (info.Contains("<loginSession>"))
-			{
-				SynLoginSession();
+				case "newCheckBill":
+					{
+						//<newCheckBill><targetUrl>baidu.com</targetUrl><price>999</price><assumePrice>0</assumePrice></newCheckBill>
+						var targetUrl = e.Message["targetUrl"].ToString();
+						price = Convert.ToDouble(e.Message["price"]);
+						assumePrice = Convert.ToDouble(e.Message["assumePrice"]);
+						if (assumePrice > price)
+							CheckNewCmd(CmdInfo.SubmitBill, targetUrl);
+						else CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
+						break;
+					}
+				case "showWeb":
+					{
+						var targetUrl = e.Message["targetUrl"].ToString();
+						price = 999;
+						assumePrice = 0;
+						CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
+						break;
+					}
+				case "loginSession":
+					SynLoginSession();
+					break;
 			}
 		}
 
 		private void SynLoginSession()
 		{
-			Program.Tcp?.Send("loginSession",$"sid={GetNowLoginCookies()}");
+			Program.Tcp?.Send(new RpSessionSynMessage($"sid={GetNowLoginCookies()}"));
 			Text = "已同步登录状态到服务器";
 		}
 
@@ -197,7 +208,7 @@ namespace 多开浏览器子线程
 			//未登录=》登录超时，请重新登录！
 			//返回订单信息
 			var cookiesLogin = $"sid={GetNowLoginCookies()}";
-			Program.Tcp?.Send("buildBill", HttpUtil.TimeStamp.ToString());
+			Program.Tcp?.Send(new RpBillSubmitedMessage(RpBillSubmitedMessage.State.New));
 			http.Item.Request.Cookies +=  cookiesLogin;
 			http.GetHtml(url,callBack:(x)=> {
 				var info =x.response.DataString(Encoding.Default);
@@ -210,7 +221,7 @@ namespace 多开浏览器子线程
 						if (success)
 						{
 							var t = new Task(() => {
-								Program.Tcp?.Send("successBill", HttpUtil.TimeStamp.ToString());
+								Program.Tcp?.Send(new RpBillSubmitedMessage(RpBillSubmitedMessage.State.Success));
 								this.Invoke((EventHandler)delegate {
 									Text = ("下单成功 " + url);
 								});
@@ -222,7 +233,7 @@ namespace 多开浏览器子线程
 						{
 							var t = new Task(() => {
 								this.Invoke((EventHandler)delegate {
-									Program.Tcp?.Send("failBill", result);
+									Program.Tcp?.Send(new RpBillSubmitedMessage(RpBillSubmitedMessage.State.Fail, result));
 									Text = (result + "\n" + url);
 								});
 							}
@@ -311,8 +322,8 @@ namespace 多开浏览器子线程
 						LbShowStatus.Text += ",用户主动提交";
 						WebShow.Document.GetElementById("equip_info").InvokeMember("submit");
 						Program.reg.In("Bill").In("record").In(DateTime.Now.ToString("yyyyMMdd")).SetInfo(DateTime.Now.ToString("hhmmssffff"), LbShowStatus.Text);
-						Thread.Sleep(500);
-						Program.Tcp?.Send("successBill", HttpUtil.TimeStamp.ToString());
+						Thread.Sleep(500);//TODO 此处提交订单后 延迟500ms
+						Program.Tcp?.Send(new RpBillSubmitedMessage(RpBillSubmitedMessage.State.Success));
 					}
 					else if (canSubmit)
 					{

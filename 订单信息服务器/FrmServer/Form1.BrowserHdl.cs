@@ -28,12 +28,12 @@ namespace 订单信息服务器
 				else
 				{
 					var targetBrowser = BrowserIp[serverNo];
-					var client = serverManager[targetBrowser];
+					var client = server[targetBrowser];
 					if (client == null)
 					{
 						AppendLog("未找到目标浏览器:"+serverNo);
 					}else
-					client.Send(cmdInfo);
+					client.Send(cmdInfo,0);
 				}
 			}
 			catch (Exception ex)

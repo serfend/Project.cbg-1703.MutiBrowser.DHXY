@@ -1,6 +1,7 @@
 ﻿using DotNet4.Utilities.UtilCode;
 using DotNet4.Utilities.UtilReg;
 using Miner.util;
+using SfTcp.TcpMessage;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -48,9 +49,12 @@ namespace Miner
 			public static void ExitAftert(string info)
 			{
 				Program.setting.threadSetting.Status =info;
+				var logInfo = $"{info}->进程关闭";
+				Console.WriteLine(logInfo);
 				Program.setting.LogInfo(info + "进程关闭","主记录");
-				Program.vpsStatus = Program.VpsStatus.WaitConnect;
+
 				Program.RedialToInternet();
+				Program.vpsStatus = Program.VpsStatus.WaitConnect;
 			}
 			private void HdlResult(string info)
 			{
@@ -110,7 +114,7 @@ namespace Miner
 				var handler = new HttpClientHandler() { UseCookies = false };
 				var client = new HttpClient(handler);
 				client.DefaultRequestHeaders.Add("Cookie", loginSession);
-				Program.Tcp?.Send("newCheckBill", mainInfo);
+				Program.Tcp?.Send(new RpCheckBillMessage(mainInfo));
 				var resultStream=client.GetAsync(url).Result.Content.ReadAsStreamAsync().Result;
 				using (var reader = new StreamReader(resultStream, Encoding.Default))
 				{
@@ -123,7 +127,7 @@ namespace Miner
 						{
 							var t = new Task(() =>
 							{
-								Program.Tcp?.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><newBill></newBill></client.command>");
+								Program.Tcp?.Send(new RpBillSubmitedMessage(RpBillSubmitedMessage.State.Success));
 								Program.setting.LogInfo( $"下单成功 {url}", "下单记录");
 							}
 								);
@@ -133,7 +137,7 @@ namespace Miner
 						{
 							var t = new Task(() =>
 							{
-								Program.Tcp?.Send("BrowserClientReport", "<client.command><stamp>" + HttpUtil.TimeStamp + "</stamp><failBill></failBill>" + result + "</client.command>");
+								Program.Tcp?.Send(new RpBillSubmitedMessage(RpBillSubmitedMessage.State.Fail));
 								Program.setting.LogInfo( $"{result}\n{url}","下单记录");
 							}
 							);

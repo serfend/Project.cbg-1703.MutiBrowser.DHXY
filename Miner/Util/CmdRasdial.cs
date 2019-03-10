@@ -75,8 +75,8 @@ namespace Miner
 			p.WaitForExit();//等待程序执行完退出进程
 			p.Close();
 
-
-			Logger.SysLog(output, "Cmd");
+			Console.WriteLine(output);
+			//Logger.SysLog(output, "Cmd");
 		}
 	}
 }

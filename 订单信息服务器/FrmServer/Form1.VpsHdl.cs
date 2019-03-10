@@ -1,5 +1,6 @@
 ﻿using DotNet4.Utilities.UtilReg;
 using SfTcp;
+using SfTcp.TcpServer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,7 +69,7 @@ namespace 订单信息服务器
 		/// 将从任务列表中提取可用任务分配给VPS，VPS断开时撤回
 		/// </summary>
 		/// <param name="s"></param>
-		private void BuildNewTaskToVps(TcpServer s)
+		private void BuildNewTaskToVps(TcpConnection s)
 		{
 			int singleHdl = 1;
 			try
@@ -84,7 +85,7 @@ namespace 订单信息服务器
 			{
 				IpPerVPShdl.Text = singleHdl.ToString();
 			}
-			
+
 
 			int interval = 1500, timeout = 100000;
 			double assumePriceRate = 100;
@@ -105,7 +106,7 @@ namespace 订单信息服务器
 			{
 				IpTaskInterval.Text = interval.ToString();
 			}
-			s.Send($"<SynInit><interval>{interval}</interval><timeout>{timeout}</timeout></SynInit><InnerTargetUrl>{ManagerHttpBase.TargetUrl}</InnerTargetUrl><assumePriceRate>{assumePriceRate}</assumePriceRate>");
+			s.Send(new SfTcp.TcpMessage.CmdSynInitMessage(interval, timeout, ManagerHttpBase.TargetUrl, assumePriceRate));
 		}
 	}
 }

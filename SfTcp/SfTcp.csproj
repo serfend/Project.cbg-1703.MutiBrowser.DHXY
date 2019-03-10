@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9353A91A-9E77-4DE2-86C4-CAD144665DB4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SfTcp</RootNamespace>
+    <AssemblyName>SfTcp</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Cowboy.Sockets, Version=1.3.14.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Cowboy.Sockets.1.3.14.0\lib\net46\Cowboy.Sockets.dll</HintPath>
+    </Reference>
+    <Reference Include="Logrila.Logging, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Logrila.Logging.1.0.3.0\lib\net46\Logrila.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TcpClient\ServerConnect.EventArgs.cs" />
+    <Compile Include="TcpClient\ServerDisconnectEventArgs.cs" />
+    <Compile Include="TcpClient\ServerMessageEventArgs.cs" />
+    <Compile Include="TcpClient\TcpClient.cs" />
+    <Compile Include="TcpClient\TcpClientConnection.cs" />
+    <Compile Include="TcpHttp.cs" />
+    <Compile Include="TcpMessage\BaseMessage.cs" />
+    <Compile Include="TcpMessage\CmdModefyTargetUrlMessage.cs" />
+    <Compile Include="TcpMessage\CmdTransferFileMessage.cs" />
+    <Compile Include="TcpMessage\MsgHeartBeatMessage.cs" />
+    <Compile Include="TcpMessage\RpBillSubmitedMessage.cs" />
+    <Compile Include="TcpMessage\RpCheckBillMessage.cs" />
+    <Compile Include="TcpMessage\RpClientConnectMessage.cs" />
+    <Compile Include="TcpMessage\CmdServerRunScheduleMessage.cs" />
+    <Compile Include="TcpMessage\CmdSynInitMessage.cs" />
+    <Compile Include="TcpMessage\RpClientRunReadyMessage.cs" />
+    <Compile Include="TcpMessage\RpClientWaitMessage.cs" />
+    <Compile Include="TcpMessage\RpInitCompletedMessage.cs" />
+    <Compile Include="TcpMessage\RpNameModefiedMessage.cs" />
+    <Compile Include="TcpMessage\ReRasdialMessage.cs" />
+    <Compile Include="TcpMessage\CmdServerRunMessage.cs" />
+    <Compile Include="TcpMessage\CmdSetClientNameMessage.cs" />
+    <Compile Include="TcpMessage\CmdStartNewProgramMessage.cs" />
+    <Compile Include="TcpMessage\CmdSubCloseMessage.cs" />
+    <Compile Include="TcpMessage\MsgSynFileListMessage.cs" />
+    <Compile Include="TcpMessage\MsgSynSessionMessage.cs" />
+    <Compile Include="TcpMessage\RpSessionSynMessage.cs" />
+    <Compile Include="TcpMessage\TcpMessageEnum.cs" />
+    <Compile Include="TcpServer\ClientConnectEventArgs.cs" />
+    <Compile Include="TcpServer\ClientDisconnectEventArgs.cs" />
+    <Compile Include="TcpServer\ClientMessageEventArgs.cs" />
+    <Compile Include="TcpServer\ILog.cs" />
+    <Compile Include="TcpSender.cs" />
+    <Compile Include="TcpServer\TcpConnection.cs" />
+    <Compile Include="TcpServer\TcpServer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

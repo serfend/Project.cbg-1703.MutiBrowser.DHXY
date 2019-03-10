@@ -1,6 +1,8 @@
 ﻿using DotNet4.Utilities.UtilCode;
 using Newtonsoft.Json;
 using SfTcp;
+using SfTcp.TcpMessage;
+using SfTcp.TcpServer;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +21,6 @@ namespace 订单信息服务器
 	public class TimeTicker
 	{
 		private int lastTick;
-		private int delaySumCount;
 		private int totalTick;
 		private int maxRecordTime=10;
 		public TimeTicker()
@@ -33,323 +34,202 @@ namespace 订单信息服务器
 		public int MaxRecordTime { get => maxRecordTime; set {
 				if (value < 1) return;
 				maxRecordTime = value;
-				delaySumCount = 0;
 			} }
-
-		public int Record()
+		/// <summary>
+		/// 更新计时开始点并偏移
+		/// </summary>
+		/// <param name="offsetTime">偏移量</param>
+		public void RecordBegin(int offsetTime=0)
 		{
-			if (delaySumCount < maxRecordTime) delaySumCount++;
+			LastTick = Environment.TickCount+offsetTime;
+		}
+		/// <summary>
+		/// 结束本次计时
+		/// </summary>
+		/// <returns></returns>
+		public int RecordEnd()
+		{
 			int interval = Environment.TickCount - LastTick;
-			LastTick = Environment.TickCount;
-			totalTick += (interval - totalTick) / delaySumCount;
-			return totalTick;
+			totalTick += (interval - totalTick) / 10;
+			return interval;
 		}
 	}
 	public partial class Form1 
 	{
 		private Dictionary<string, TimeTicker> _dicVpsWorkBeginTime = new Dictionary<string, TimeTicker>();
-		private void InitServerManager()
+		private void Initserver()
 		{
-			serverManager = new TcpServerManager()
-			{
-				NormalMessage = (s, x, InnerInfo) => {
-					try
-					{
-						this.Invoke((EventHandler)delegate
-						{
-							var targetItem = GetItem(s.Ip);
-							if (targetItem != null)
-							{
-								switch (x)
-								{
-									case "heartBeat":
-										s.Send("heartBeatResponse");
-										break;
-									case "RHB":
-										var now = Environment.TickCount;
-										var interval = _dicVpsWorkBeginTime[s.Ip].Record();
-										targetItem.SubItems[4].Text = $"{interval}({InnerInfo})";
-										break;
-									case "clientConnect":
-										ClientConnect(InnerInfo, targetItem, s);
-										break;
-									case "nameModefied":
-										NameModefied(InnerInfo, targetItem, s);
-										break;
-									case "InitComplete":
-										InitComplete(InnerInfo, targetItem, s);
-										break;
-									case "RequireFile"://服务器接收到来自客户端请求文件的命令
-										this.Invoke((EventHandler)delegate { AppendLog("vps" + s.clientName + "请求获取文件"); });
-										HdlVpsFileSynRequest(InnerInfo, s);
-										break;
-									case "Status":
-										targetItem.SubItems[3].Text = InnerInfo;
-										if (InnerInfo.Contains(" 失败"))
-										{
-											s.Send("<reRasdial>");
-										}
-										break;
-									case "newCheckBill":
-										HdlNewCheckBill(s, targetItem,InnerInfo);
-										break;
-									case "reRasdial":
-										targetItem.SubItems[3].Text = "VPS重拨号中";
-										s.Disconnect();
-										break;
-									case "clientWait":
-										ClientWaiting(InnerInfo, targetItem, s);
-										break;
-									case "clientConfigComplete":
-										targetItem.SubItems[3].Text = "初始化完成";
-										NewVpsAvailable(s.Ip);
-										break;
-									case "loginSession":
-										SynLoginSession(InnerInfo, targetItem, s);
-										break;
-									case "payAuthKey":
-										AuthKey = InnerInfo;
-										break;
-									case "buildBill":
-										targetItem.SubItems[3].Text = "开始下单";
-										break;
-									case "failBill":
-										targetItem.SubItems[3].Text = $"下单无效:{InnerInfo}";
-										break;
-									case "successBill":
-										targetItem.SubItems[3].Text = "成功下单,即将付款";
-										new Thread(()=> {
-											PayCurrentBill(_clientPayUser[s.Ip], InnerInfo, (msg) => {
-												this.Invoke((EventHandler)delegate {
-													targetItem.SubItems[3].Text = msg;
-												});
-											});
-										}).Start();
-										break;
-									default:
-										AppendLog("新消息[" + s.clientName + "] " + x + ":" + InnerInfo);
-										targetItem.SubItems[3].Text = InnerInfo;
-										break;
-								}
-							}
+			server = new TcpServer(8009);
+			server.OnConnect += Server_OnTcpConnect;
+			server.OnDisconnect += Server_OnTcpDisconnect;
+			server.OnMessage += Server_OnTcpMessage;
+		}
 
-						});
-					}
-					catch (Exception ex)
+		private void Server_OnTcpMessage(object sender, ClientMessageEventArgs e)
+		{
+			try
+			{
+				var s = sender as TcpConnection;
+				
+				this.Invoke((EventHandler)delegate
+				{
+					var targetItem = GetItem(s.Ip);
+					if (targetItem != null)
 					{
-						MessageBox.Show($"在主线程接收发生异常:{ex.Message}\n{ex.StackTrace}");
-						return;
-					}
-				},
-				ServerConnected = (x) => {
-					this.Invoke((EventHandler)delegate {
-						//AppendLog("已连接:" + x.Ip);
-						var info = new string[7];
-						info[1] = x.IsLocal ? "主机" : "终端";
-						info[2] = x.Ip;
-						info[0] = x.clientName;
-						info[3] = "新建状态";
-						info[4] = "未开始采集";//延迟
-						info[5] = "暂无";//任务
-						info[6] = "未知";//版本
-						var item = new ListViewItem(info);
-						_ConnectVpsClientLstViewItem.Add(x.Ip, item);
-						_dicVpsWorkBeginTime.Add(x.Ip,new TimeTicker());
-						LstConnection.Items.Add(item);
-						_clientPayUser.Add(x.Ip, "...");
-						var welcome = new Task(() => {
-							Thread.Sleep(3000);
-							x.Send("<welcome>" + DateTime.Now + "</welcome>");
-						});
-						welcome.Start();
-					});
-				},
-				ServerDisconnected = (x) => {
-					this?.Invoke((EventHandler)delegate {
-						//AppendLog("已断开:" + x.Ip);
-						LstConnection.Items.Remove(_ConnectVpsClientLstViewItem[x.Ip]);
-						AvailableVps[x.Ip]=false;
-						if (allocVps.ContainsKey(x.Ip))
+						switch (e.Title)
 						{
-							var vps = allocVps[x.Ip];
-							foreach (var server in vps.HdlServer)
-							{
-								serverInfoList[server].NowNum++;
-							}
-							allocVps.Remove(x.Ip);
+							case TcpMessageEnum.MsgHeartBeat:
+								s.Send(new MsgHeartBeatMessage());
+								break;
+							case TcpMessageEnum.RpClientConnect:
+								ClientConnect(e.Message, targetItem, s);
+								break;
+							case TcpMessageEnum.RpNameModefied:
+								NameModefied(e.Message, targetItem, s);
+								break;
+							case TcpMessageEnum.RpInitCompleted:
+								InitComplete(e.Message, targetItem, s);
+								break;
+							case TcpMessageEnum.MsgSynFileList://服务器接收到来自客户端请求文件的命令
+								this.Invoke((EventHandler)delegate { AppendLog("vps" + s.AliasName + "请求获取文件"); });
+								HdlVpsFileSynRequest((Dictionary<string, string>)e.Message["fileList"], s);
+								break;
+							case TcpMessageEnum.RpStatus:
+								targetItem.SubItems[3].Text = e.Message["Status"].ToString();
+								if (e.Message["Status"].ToString().Contains(" 失败"))
+								{
+									s.Send(new CmdReRasdialMessage());
+								}
+								break;
+							case TcpMessageEnum.RpCheckBill:
+								HdlNewCheckBill(s, targetItem, e.Message["BillInfo"].ToString());
+								break;
+							case TcpMessageEnum.RpReRasdial:
+								targetItem.SubItems[3].Text = "VPS重拨号中";
+								s.Disconnect();
+								break;
+							case TcpMessageEnum.RpClientWait:
+								ClientWaiting(e.Message, targetItem, s);
+								break;
+							case TcpMessageEnum.RpClientRunReady:
+								targetItem.SubItems[3].Text = "初始化完成";
+								NewVpsAvailable(s.Ip);
+								break;
+							case "payAuthKey":
+								AuthKey = e.Message["content"].ToString();
+								break;
+							case "buildBill":
+								targetItem.SubItems[3].Text = "开始下单";
+								break;
+							case "failBill":
+								targetItem.SubItems[3].Text = $"下单无效:{e.Message["content"].ToString()}";
+								break;
+							case "successBill":
+								targetItem.SubItems[3].Text = "成功下单,即将付款";
+								new Thread(() => {
+									PayCurrentBill(_clientPayUser[s.Ip], e.Message["content"].ToString(), (msg) => {
+										this.Invoke((EventHandler)delegate {
+											targetItem.SubItems[3].Text = msg;
+										});
+									});
+								}).Start();
+								break;
+							default:
+								AppendLog($"新消息[{s.AliasName}] {e.Title}:{e.Message["content"]}");
+								targetItem.SubItems[3].Text = e.Title;
+								break;
 						}
-					});
-				},
-				HttpRequest = (x, s) => {
-					var cst = new StringBuilder();
-					cst.AppendLine($"<h1>Hey,测试服务器已开启</h1><br><p>当前连接数:{LstConnection.Items.Count }</p>");
-					cst.AppendLine($"<p>request: {x.Param}</p>");
-					var checkIfHaveValue = x.Param.IndexOf(':');
-					string requestPage, requestParam;
-					if (checkIfHaveValue > 0)
-					{
-						requestPage = x.Param.Substring(0, checkIfHaveValue);
-						requestParam = x.Param.Substring(checkIfHaveValue + 1);
-						requestParam = requestParam.Replace("%3C", "<").Replace("%3E",">");
 					}
-					else
-					{
-						requestPage = x.Param;
-						requestParam = string.Empty;
-					}
-					switch (requestPage)
-					{
-						case "Status":
-							{
-								this.Invoke((EventHandler)delegate {
-									var clientNum = this.LstConnection.Items.Count;
-									var columnsNum = LstConnection.Columns.Count;
-									cst.AppendLine($"<p>当前状态共有{clientNum}个连接</p><br>");
-									cst.AppendLine($"<p>authKey:{AuthKey}</p>");
-									cst.AppendLine($"打开网页次数: 手动:{ManagerHttpBase.UserWebShowTime}  自动:{ManagerHttpBase.FitWebShowTime}<br>");
-									cst.AppendLine($"profit:{ManagerHttpBase.RecordMoneyGet}  times:{ManagerHttpBase.RecordMoneyGetTime}");
-									for(int i = 0; i < ManagerHttpBase.RecordMoneyGetTime; i++)
-									{
-										var info = ManagerHttpBase.GetBillInfo(i);
-										if (info.Length == 0) continue;
-										cst.AppendLine($"{i}:{info}<br>");
-									}
-									cst.AppendLine("<table border=\"1\">");
-									cst.AppendLine("<tr>");
-									for (int i = 0; i < columnsNum; i++)
-										cst.Append($"<th>{LstConnection.Columns[i].Text}</th>");
 
-									cst.AppendLine("</tr>");
-									var clientTypeCounter = new Dictionary<string, int>();
-									for (int i = 0; i < clientNum; i++)
-									{
-										var clientTypeName = LstConnection.Items[i].SubItems[1].Text;
-										if (!clientTypeCounter.ContainsKey(clientTypeName)) clientTypeCounter.Add(clientTypeName, 1);
-										else clientTypeCounter[clientTypeName]++;
-										cst.AppendLine("<tr>");
-										for (int j = 0; j < columnsNum; j++) {
-											cst.Append($"<td>{LstConnection.Items[i].SubItems[j].Text}</td>");
-										}
-										cst.Append($"<td><a href=\"/CmdInfo:{LstConnection.Items[i].SubItems[2].Text}:<SubClose>\">关闭</td>");
-										cst.Append($"<td><a href=\"/CmdInfo:{LstConnection.Items[i].SubItems[2].Text}:<startNew>\">新增</td>");
-										cst.Append($"<td><a href=\"/CmdInfo:{LstConnection.Items[i].SubItems[2].Text}:<reRasdial>\">重连</td>");
-										cst.AppendLine("</tr>");
-									}
-									cst.Append("</table>");
-									cst.AppendLine("<div id=\"clientTypeCount\">");
-									foreach(var item in clientTypeCounter)
-									{
-										cst.AppendLine($"{item.Key}:{item.Value}");
-									}
-									cst.AppendLine("</div>");
-									cst.AppendLine($"<div>{OpLog.Text}</div>");
-								});
-								break;
-							}
-						case "targetUrl":
-							{
-								var nowTargetUrl = ManagerHttpBase.TargetUrl;
-								if (checkIfHaveValue > 0)
-								{
-									ManagerHttpBase.TargetUrl = requestParam;
-								}
-								cst.AppendLine($"targetPrevious: {nowTargetUrl}");
-								cst.AppendLine($"targetNew: {ManagerHttpBase.TargetUrl}");
-								break;
-							}
-						case "CmdInfo":
-							{
-								var cmdInfo = requestParam.Split(':');
-								if (cmdInfo.Length < 2)
-								{
-									cst.AppendLine($"无效的指令{requestParam},指令格式:CmdInfo:target#cmd");
-									break;
-								}
-								var targetClient = serverManager[cmdInfo[0]];
-								if (targetClient == null)
-								{
-									cst.AppendLine("无效的IP");
-								}
-								else
-								{
-									targetClient.Send(cmdInfo[1]);
-									cst.AppendLine($"已向终端{targetClient.clientName}发送指令{cmdInfo[1]}");
-								}
-								break;
-							}
-						case "ip":
-							{
-								var message = new Dictionary<string, string>(x.Headers)
-								{
-									["user-ip"] = s.Server.Ip,
-									["user-method"]=x.Method,
-									["user-ver"]=x.HttpVersion,
-									["user-payload"]=x.PayLoad
-								};
-								s.ResponseRaw(JsonConvert.SerializeObject(message),200,"text/plain");
-								return;
-							}
-					}
-					s.Response(cst.ToString());
-				}
-			};
-			serverManager.StartListening();
+				});
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show($"在主线程接收发生异常:{ex.Message}\n{ex.StackTrace}");
+				return;
+			}
+		
 		}
 
-		private void SynLoginSession(string InnerInfo, ListViewItem targetItem, TcpServer s)
+		private void Server_OnTcpDisconnect(object sender, ClientDisconnectEventArgs e)
 		{
-			if (serverInfoList.ContainsKey(s.clientName))
-			{
-				serverInfoList[s.clientName].LoginSession = InnerInfo;
-				bool anyVpsApply = false;
-				foreach (var vps in allocVps)
+			var x = sender as TcpConnection;
+			this?.Invoke((EventHandler)delegate {
+				//AppendLog("已断开:" + x.Ip);
+				LstConnection.Items.Remove(_ConnectVpsClientLstViewItem[x.Ip]);
+				AvailableVps[x.Ip] = false;
+				if (allocVps.ContainsKey(x.Ip))
 				{
-					if (vps.Value.HdlServer.Contains(s.clientName))
+					var vps = allocVps[x.Ip];
+					foreach (var server in vps.HdlServer)
 					{
-						serverManager[vps.Value.Ip].Send($"<SynServerLoginSession><Server><name>{s.clientName}</name><login>{InnerInfo}</login></Server>");
-						anyVpsApply = true;
+						serverInfoList[server].NowNum++;
 					}
+					allocVps.Remove(x.Ip);
 				}
-				if (!anyVpsApply)
-				{
-					AppendLog($"当前无{s.clientName}所需要应用的vps终端");
-				}
-			}
-			else
-			{
-				AppendLog($"无效的浏览器终端:{s.clientName}");
-			}
+			});
 		}
 
-		private void ClientWaiting(string InnerInfo, ListViewItem targetItem, TcpServer s)
+		private void Server_OnTcpConnect(object sender, ClientConnectEventArgs e)
 		{
-			var interval = Convert.ToInt32(InnerInfo);
-			if (interval == -101)
+			var x = sender as TcpConnection;
+			this.Invoke((EventHandler)delegate {
+				//AppendLog("已连接:" + x.Ip);
+				var info = new string[7];
+				info[1] = x.IsLocal ? "主机" : "终端";
+				info[2] = x.Ip;
+				info[0] = x.AliasName;
+				info[3] = "新建状态";
+				info[4] = "未开始采集";//延迟
+				info[5] = "暂无";//任务
+				info[6] = "未知";//版本
+				var item = new ListViewItem(info);
+				_ConnectVpsClientLstViewItem.Add(x.Ip, item);
+				_dicVpsWorkBeginTime.Add(x.Ip, new TimeTicker());
+				LstConnection.Items.Add(item);
+				_clientPayUser.Add(x.Ip, "...");
+				var welcome = new Task(() => {
+					Thread.Sleep(3000);
+					x.Send("welcome",DateTime.Now.ToString());
+				});
+				welcome.Start();
+			});
+		}
+
+
+		private void ClientWaiting(Dictionary<string,object> InnerInfo, ListViewItem targetItem, TcpConnection s)
+		{
+			int value = Convert.ToInt32(InnerInfo["V"]);
+			if (value==0) {
+				var vpsInterval = Convert.ToInt32(InnerInfo["G"]);
+				var hdlNum = Convert.ToInt32(InnerInfo["H"]);
+				var intervals = _dicVpsWorkBeginTime[s.Ip].RecordEnd();
+				targetItem.SubItems[4].Text = $"{intervals}/{vpsInterval}";
+				targetItem.SubItems[3].Text = $"已处理:{hdlNum},等待下次分配";
+				NewVpsAvailable(s.Ip);
+				return;
+			}
+			if (value == -101)
 			{
 				//已开始作业
 				targetItem.SubItems[3].Text = "采集作业中";
 			}
-			else if (interval <= 0)
-			{
-				targetItem.SubItems[3].Text = $"已处理:{-interval},等待下次分配";
-				NewVpsAvailable(s.Ip);
-			}
-			else if(interval==101)
+			else if(value == 101)
 			{
 				targetItem.SubItems[3].Text = $"即将开始";
 			}
 			else
 			{
-				targetItem.SubItems[3].Text = $"终端等待:{InnerInfo}";
+				targetItem.SubItems[3].Text = $"终端等待:{value}";
 			}
 		}
 
-		private void NameModefied(string InnerInfo, ListViewItem targetItem, TcpServer s)
+		private void NameModefied(Dictionary<string,object> InnerInfo, ListViewItem targetItem, TcpConnection s)
 		{
-			targetItem.SubItems[0].Text = HttpUtil.GetElementInItem(InnerInfo, "clientName");
-			bool flag = (s.clientName == "..." && InnerInfo.Contains("<AskForSynInit>"));//首次初始化时尝试发送vps终端初始化
+			targetItem.SubItems[0].Text = InnerInfo["NewName"].ToString();
+			bool flag = (s.AliasName == "null" && InnerInfo.ContainsKey("AskForSynInit"));//首次初始化时尝试发送vps终端初始化
 
-			s.clientName = targetItem.SubItems[0].Text;
+			s.AliasName = targetItem.SubItems[0].Text;
 			if (flag)
 			{
 				BuildNewTaskToVps(s);
@@ -357,63 +237,63 @@ namespace 订单信息服务器
 			}
 		}
 
-		private void InitComplete(string innerInfo, ListViewItem targetItem, TcpServer s)
+		private void InitComplete(Dictionary<string,object> innerInfo, ListViewItem targetItem, TcpConnection s)
 		{
-			//识别vps终端
 			s.IsLocal = true;
-			targetItem.SubItems[1].Text = "vps";
-
 			//终端已初始化完成
 			//synSetting,synFile
 			//遍历 【同步文件】 下所有文件
 			var dic = new DirectoryInfo(Application.StartupPath + "\\同步设置");
-			var tmp = new StringBuilder();
+			var tmp = new List<SynSingleFile>();
 			foreach (var f in dic.EnumerateFiles())
 			{
-				tmp.Append("<file><name>").Append(f.Name).Append("</name>").Append("<version>").Append(HttpUtil.GetMD5ByMD5CryptoService(f.FullName)).Append("</version></file>");
+				tmp.Add(new SynSingleFile() {
+					Name = f.Name,
+					Version= HttpUtil.GetMD5ByMD5CryptoService(f.FullName)
+				});
 			}
-			if (tmp.Length > 0)
+			if (tmp.Count > 0)
 			{
-				tmp.Append("<versionCheck>");
-				s.Send(tmp.ToString());
+				s.Send(new MsgSynFileListMessage(tmp));//versionCheck
 			}
 			else
 			{
-				
-				s.Send("<serverRun>");//无需同步
-
-				hdlVpsTaskScheduleQueue.Enqueue(s.Ip);
-				if (!AvailableVps.ContainsKey(s.Ip))
-					AvailableVps.Add(s.Ip, true);
-				else
-					AvailableVps[s.Ip] = true;
+				s.Send(new CmdServerRunMessage());//无需同步
 			}
 		}
 
-		private void ClientConnect(string InnerInfo,ListViewItem targetItem,TcpServer s)
+		private void ClientConnect(Dictionary<string,object> InnerInfo,ListViewItem targetItem,TcpConnection s)
 		{
-			var hdlServerName = HttpUtil.GetElementInItem(InnerInfo, "clientName");
-			var version = HttpUtil.GetElementInItem(InnerInfo, "version"); version = version.Length > 0 ? version : "未知";
+			var hdlServerName = InnerInfo["Name"].ToString();
+			var version = InnerInfo["Version"].ToString();
+			var clientType = InnerInfo["Type"].ToString();
+			version = version.Length > 0 ? version : "未知";
 			targetItem.SubItems[6].Text = version;
 			targetItem.SubItems[0].Text = hdlServerName;
-			if (InnerInfo.Contains("<browserInit>"))
+			switch (clientType)
 			{
-				targetItem.SubItems[3].Text = "等待订单";
-				s.clientName = hdlServerName;
-				BrowserIp[hdlServerName] = s.Ip;
-				_clientPayUser[s.Ip] = hdlServerName;
-			}
-			else if (InnerInfo.Contains("<androidAuthInit>"))
-			{
-				targetItem.SubItems[3].Text = "同步将军令";
-				s.clientName = hdlServerName;
-			}
-			else
-			{
-				targetItem.SubItems[3].Text = "初始化";
-				s.ID = HttpUtil.GetElementInItem(InnerInfo, "clientDeviceId");
-				var clientName = regSettingVps.In(s.ID).GetInfo("clientName", targetItem.SubItems[0].Text);
-				s.Send(string.Format("<setClientName>{0}</setClientName>", clientName));//用于确认当前名称并初始化
+				case "browser":
+					{
+						targetItem.SubItems[3].Text = "等待订单";
+						s.AliasName = hdlServerName;
+						BrowserIp[hdlServerName] = s.Ip;
+						_clientPayUser[s.Ip] = hdlServerName;
+						break;
+					}
+				case "androidAuth":
+					{
+						targetItem.SubItems[3].Text = "同步将军令";
+						s.AliasName = hdlServerName;
+						break;
+					}
+				case "vps":
+					{
+						targetItem.SubItems[3].Text = "初始化";
+						s.ID = InnerInfo["DeviceId"].ToString();
+						var clientName = regSettingVps.In(s.ID).GetInfo("Name", targetItem.SubItems[0].Text);
+						s.Send(new CmdSetClientNameMessage(clientName));//用于确认当前名称并初始化
+						break;
+					}
 			}
 
 		}

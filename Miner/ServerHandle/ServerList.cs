@@ -15,6 +15,7 @@ using System.Net.Sockets;
 using System.Windows.Forms;
 using System.Net.Http;
 using Miner.ServerHandle;
+using SfTcp.TcpMessage;
 
 namespace Miner
 {
@@ -72,13 +73,12 @@ namespace Miner
 				Server.DelayTime = delayTime;
 				Server.DelayTime = Server.DelayTime <= 100 ? 100 : Server.DelayTime;
 				Server.AssumePriceRate = assumePriceRate;
-				Program.setting.threadSetting.RefreshRunTime(0);
 			}
-			private int lastRunTime = 0;
 			private AppInterface appInterface = new AppInterface();
-			public void ServerRun()
+
+			private int assumePriceBeginTime = 0;
+			public int ServerRun()
 			{
-				lastRunTime = Environment.TickCount;
 				runTimeRecord++;
 				int hdlGoodNum = 0;
 				try
@@ -90,6 +90,7 @@ namespace Miner
 						var goodDetailRaw =appInterface.GetGoodDetail(goodItem);
 						if (goodDetailRaw != null)
 						{
+							assumePriceBeginTime = Environment.TickCount;
 							var goodDetail = goodDetailRaw.equip;
 							var good = new Goods.Goods(new Server(goodDetail.serverid.ToString(), goodDetail.server_name, goodDetail.areaid.ToString(), goodDetail.area_name, ""), goodDetail.equip_name, goodDetail.game_ordersn, goodDetail.equip_desc, goodDetail.equip_detail_url)
 							{
@@ -99,10 +100,11 @@ namespace Miner
 							};
 							good.CheckAndSubmit();
 							hdlGoodNum++;
+							assumePriceBeginTime = Environment.TickCount - assumePriceBeginTime;
 						}
 					}
-					Thread.Sleep(200);//TODO 后期需要时取消
-					Program.Tcp?.Send("clientWait", $"-{hdlGoodNum}");
+					
+					
 				}
 				//catch (GoodListNoDataException ex)
 				//{
@@ -113,57 +115,31 @@ namespace Miner
 				//}
 				catch (Exception ex)
 				{
-					Program.Tcp?.Send("clientWait", "-1");
 					Server.ExitAftert($"#:{ex.Message}");
 					Program.anyTaskWorking = false;
-					return;
+					return -1;
 				}
 				try
 				{
 
-					var interval = Environment.TickCount - lastRunTime;
-					Program.setting.threadSetting.RefreshRunTime(interval);
-
 					#region 暂时关闭
-					//if (HdlServer.Count == 0) {
-					//	Thread.Sleep(500);
-					//	Program.anyTaskWorking = false;
-					//	return;
-					//}
-					//if (nowIndex == HdlServer.Count) {nowIndex = 0;};
 					if (Program.vpsStatus == Program.VpsStatus.Idle || Program.vpsStatus == Program.VpsStatus.WaitConnect)
 					{
 						Program.anyTaskWorking = false;
-						return;
+						return 0;
 					}
-					if (Program.vpsStatus == Program.VpsStatus.Idle || Program.vpsStatus == Program.VpsStatus.WaitConnect)
-					{
-						Program.anyTaskWorking = false;
-						return;
-					}
-
-
 					//Program.setting.threadSetting.Status = string.Format("{1}次: {0}", "App接口", runTimeRecord);
 					#endregion
-					//if (new Random().Next(1, 100) > 90)
-					//{
-					//	var t = new Task(() => {
-					//		var targetUrl = Program.InnerTargetUrl;
-					//		if (targetUrl == null || targetUrl.Length == 0 || targetUrl == "null") return;
-					//		var targetResult = http.GetAsync(targetUrl);
-					//		var myResponseStream = targetResult.Result.Content.ReadAsStreamAsync().Result;
-					//	});
-					//	t.Start();
-					//}
 
 				}
 				catch (Exception ex)
 				{
-					Program.Tcp?.Send("clientWait", "-1");
+					Program.Tcp?.Send(new RpClientWaitMessage(0,0, -1));
 					Server.ExitAftert($"处理结束后发生异常:{ex.Message}");
 					Program.anyTaskWorking = false;
-					return;
+					return 0;
 				}
+				return hdlGoodNum;
 			}
 
 			public List<Server> HdlServer { get => hdlServer; set => hdlServer = value; }

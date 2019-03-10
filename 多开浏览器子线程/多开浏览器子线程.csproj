@@ -77,6 +77,9 @@
       <HintPath>..\Miner\Interop.MSScriptControl.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -110,9 +113,6 @@
     <Compile Include="..\..\..\..\..\util\reg.cs">
       <Link>util\reg.cs</Link>
     </Compile>
-    <Compile Include="..\订单信息服务器\TcpServer\TcpClient.cs">
-      <Link>TcpClient.cs</Link>
-    </Compile>
     <Compile Include="Bill\BillHttp.cs" />
     <Compile Include="browserVersionEdit.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -140,6 +140,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -165,6 +166,12 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SfTcp\SfTcp.csproj">
+      <Project>{9353a91a-9e77-4de2-86c4-cad144665db4}</Project>
+      <Name>SfTcp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

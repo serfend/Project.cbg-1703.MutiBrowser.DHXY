@@ -24,6 +24,7 @@ namespace WebSocketServer测试
 	{
 		
 		private static Dictionary<string, Session> dic=new Dictionary<string, Session>();
+		[STAThread]
 		static void Main(string[] args)
 		{
 			var server = new WebSocket();

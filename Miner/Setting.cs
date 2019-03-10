@@ -1,5 +1,6 @@
 ﻿using DotNet4.Utilities.UtilCode;
 using DotNet4.Utilities.UtilReg;
+using SfTcp.TcpMessage;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -48,23 +49,23 @@ namespace Miner
 			set {
 				Program.setting.LogInfo("Status:"+value,"主记录");
 				var contentValue = value.Length > 10 ? value.Substring(0, 10) : value;
-				Program.Tcp?.Send("Status", contentValue );
+				Program.Tcp?.Send(new StatusMessage(contentValue));
 			}
 		}
 		private int delaySumCount=0;
 		private int totalDelayTime = 0;
-		public void RefreshRunTime(int interval)
+		public int RefreshRunTime(int interval)
 		{
 			if (interval == 0)
 			{
-				Program.Tcp?.Send("heartBeat", "");
+				Program.Tcp?.Send(new MsgHeartBeatMessage());
+				return 0;
 			}
 			else
 			{
 				if (delaySumCount < 10) delaySumCount++;
 				 totalDelayTime += (interval-totalDelayTime)/ delaySumCount;
-				//记录10次刷新的平均值
-				Program.Tcp?.Send("RHB", (totalDelayTime).ToString());
+				return totalDelayTime;
 				
 			}
 		}

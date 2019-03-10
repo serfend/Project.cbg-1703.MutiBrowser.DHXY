@@ -16,6 +16,9 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Reflection;
 using Miner.ServerHandle;
+using SfTcp.TcpClient;
+using SfTcp.TcpMessage;
+using TcpFiletransfer.TcpTransferEngine.Connections;
 
 namespace Miner
 {
@@ -23,7 +26,7 @@ namespace Miner
 	{
 		public static Setting setting;
 		public static ServerList servers;
-		public static SfTcp.SfTcpClient Tcp;
+		public static SfTcp.TcpClient.TcpClient Tcp;
 		private static void StartNewProgram()
 		{
 			new Thread(() =>
@@ -54,10 +57,10 @@ namespace Miner
 		private static int idleTime = 30;
 		private static int connectFailTime = 0;
 
-		public static string TcpMainTubeIp= "111.225.9.110";
-		public static int TcpMainTubePort= 16555;
-		public static string TcpFileTubeIp= "111.225.9.110";
-		public static int TcpFileTubePort= 16556;
+		public static string TcpMainTubeIp= "127.0.0.1";
+		public static int TcpMainTubePort= 8009;
+		public static string TcpFileTubeIp= "127.0.0.1";
+		public static int TcpFileTubePort= 8010;
 		[STAThreadAttribute]
 		static void Main(string[] args)
 		{
@@ -98,7 +101,7 @@ namespace Miner
 					{
 						case VpsStatus.WaitConnect:
 							{
-								if (disconnectTime++ > 10 && anyTaskWorking == false)
+								if (disconnectTime++ > 5 && anyTaskWorking == false)
 								{
 									if (connectFailTime++ > 2)
 									{
@@ -156,16 +159,16 @@ namespace Miner
 		private static Reg clientId;
 		private static void InitTcp()
 		{
-			
+			Console.WriteLine("重置通信节点");
 			if (Tcp != null)
 			{
-				Tcp.Dispose();
+				Tcp?.Dispose();
 				Tcp = null;
 				Thread.Sleep(1000);//等待资源释放
 			}
 			try
 			{
-				Tcp = new SfTcp.SfTcpClient(TcpMainTubeIp, TcpMainTubePort);
+				Tcp = new TcpClient(TcpMainTubeIp, TcpMainTubePort);
 			}
 			catch (Exception ex)
 			{
@@ -174,147 +177,158 @@ namespace Miner
 				return;
 			}
 			InitCallBackTcp();
-			HelloToServer();
 		}
-		private static void HdlRecieveMessage(SfTcp.SfTcpClient x,string xx)
+		private static void HdlRecieveMessage(TcpClient x, ServerMessageEventArgs e)
 		{
-			try
+			Logger.SysLog(e.RawString, "通讯记录");
+			switch (e.Title)
 			{
-				Logger.SysLog(xx, "通讯记录");
-				if (xx.Contains("<setClientName>"))
-				{
-					var ClientName = HttpUtil.GetElementInItem(xx, "setClientName");
+				case TcpMessageEnum.MsgHeartBeat:
+					Console.WriteLine("服务器保持连接确认");
+					break;
+				case TcpMessageEnum.CmdSetClientName:
+					var ClientName = e.Message["NewName"].ToString();
 					setting = new Setting(ClientName);
 					clientId.SetInfo("VpsClientId", ClientName);
-					Tcp.Send("nameModefied", string.Format("<clientName>{0}</clientName><AskForSynInit>", ClientName));
-				}
-				if (xx.Contains("SynInit"))
-				{
-					InitSetting(xx);
+					Tcp.Send(new RpNameModefiedMessage(ClientName, true));
+					break;
+				case TcpMessageEnum.CmdSynInit:
+					InitSetting(Convert.ToInt32(e.Message["Interval"].ToString()), Convert.ToDouble(e.Message["AssumePriceRate"].ToString()));
 					Program.vpsStatus = VpsStatus.Syning;
-					Tcp.Send("InitComplete", "");
-				}
-				if (xx.Contains("<serverRun>"))
-				{
+					Tcp.Send(new RpInitCompletedMessage());
+					break;
+				case TcpMessageEnum.CmdServerRun:
 					ServerResetConfig();
-				}
-				if (xx.Contains("<setting>"))
-				{
-					SynSetting(xx);
-				}
-				if (xx.Contains("<versionCheck>"))
-				{
-					SynFile(xx);
-				}
-				if (xx.Contains("<ensureFileTransfer>"))
-				{//客户端接收到来自服务器【可以开始传输】的指令
+					break;
+				case TcpMessageEnum.MsgSynFileList:
+					var synFileList = new MsgSynFileListMessage((List<SynSingleFile>)e.Message["List"]);
+					SynFile(synFileList);
+					break;
+				case TcpMessageEnum.CmdTransferFile://客户端接收到来自服务器【可以开始传输】的指令
 					TranslateFileStart();
-				}
-				if (xx.Contains("<InnerTargetUrl>"))
-				{
-					InnerTargetUrl = HttpUtil.GetElementInItem(xx, "InnerTargetUrl");
-				}
-				if (xx.Contains("<reRasdial>"))
-				{
-					Tcp.Send("reRasdial", "");
+					break;
+				case TcpMessageEnum.CmdModefyTargetUrl:
+					InnerTargetUrl = e.Message["NewUrl"].ToString();
+					break;
+				case TcpMessageEnum.CmdReRasdial:
+					Tcp.Send(new RpReRasdialMessage());
 					RedialToInternet();
-				}
-				if (xx.Contains("<startNew>"))
-				{
+					break;
+				case TcpMessageEnum.CmdStartNewProgram:
 					StartNewProgram();
-				}
-				if (xx.Contains("<SubClose>"))
-				{
+					break;
+				case TcpMessageEnum.CmdSubClose:
 					Environment.Exit(0);
-				}
-				if (xx.Contains("<SynServerLoginSession>"))
-				{
-					SynServerLoginSession(xx);
-				}
-				if (xx.Contains("<newScheduleServerRun>"))
-				{
-					vpsStatus = VpsStatus.Running;
-					//TODO 此处实现时统无效，待以后修正
-					//var sendStamp =Convert.ToInt64( HttpUtil.GetElementInItem(xx,"sendStamp"));
-					//var sendStampStruct =SystemTimeWin32.FromStamp(sendStamp);
-					//var result = SystemTimeWin32.SetSystemTime(ref sendStampStruct);
-					var s=new Thread(() =>
+					break;
+				case TcpMessageEnum.MsgSynSession:
+					var synLoginItemList = (List<SynSessionItem>)e.Message["List"];
+					var synLoginSession = new MsgSynSessionMessage(synLoginItemList);
+					SynServerLoginSession(synLoginSession);
+					break;
+				case TcpMessageEnum.CmdServerRunSchedule:
 					{
-						try
+						vpsStatus = VpsStatus.Running;
+						if (vpsIsDigging)
 						{
-							Tcp.Send("clientWait", "101");//开始等待
-							var nextRuntimeStamp = Convert.ToInt64(HttpUtil.GetElementInItem(xx, "taskStamp"));
-							//var tickCount = HttpUtil.TimeStamp;
-							//Console.WriteLine(tickCount);
-							var beginTime = Environment.TickCount;
-							if (nextRuntimeStamp > 0)
+							Console.WriteLine("警告,同时出现多个采集实例");
+							return;
+						}
+						vpsIsDigging = true;
+							//TODO 此处实现时统无效，待以后修正
+							//var sendStamp =Convert.ToInt64( HttpUtil.GetElementInItem(xx,"sendStamp"));
+							//var sendStampStruct =SystemTimeWin32.FromStamp(sendStamp);
+							//var result = SystemTimeWin32.SetSystemTime(ref sendStampStruct);
+							var s = new Thread(() =>
+						{
+							try
 							{
-								while (beginTime - Environment.TickCount + nextRuntimeStamp > 0)
+								Tcp.Send(new RpClientWaitMessage(0,0,101));//开始等待
+								var nextRuntimeStamp = Convert.ToInt32(e.Message["TaskStamp"].ToString());
+								//var tickCount = HttpUtil.TimeStamp;
+								//Console.WriteLine(tickCount);
+								Thread.Sleep(nextRuntimeStamp);
+								Tcp.Send(new RpClientWaitMessage(0,0,-101));//结束等待
+								if (servers == null)
 								{
-									Thread.Sleep(50);
+									Console.WriteLine("servers未初始化");
+									return;
 								}
+								int lastRunTime = Environment.TickCount;
+								int hdlGoodNum=servers.ServerRun();
+								int interval = Environment.TickCount - lastRunTime;
+								var avgInterval = Program.setting.threadSetting.RefreshRunTime(interval);
+								//TODO 此处估价似乎也有延迟
+								Program.Tcp?.Send(new RpClientWaitMessage(avgInterval, hdlGoodNum, 0));
 							}
-							Tcp.Send("clientWait", "-101");//结束等待
-							if (servers == null)
+							catch (Exception ex)
 							{
-								Console.WriteLine("servers未初始化");
-								return;
+								Console.WriteLine($"处理日程失败;{ex.Message}");
 							}
-							servers.ServerRun();
-						}
-						catch (Exception ex)
-						{
-							Console.WriteLine($"处理日程失败;{ex.Message}");
-						}
-					})
-					{ IsBackground=true};
-					s.Start();
-				}
-			}
-			catch (Exception ex)
-			{
-				Logger.SysLog("HdlReceiveMessage()" + ex.Message,"ExceptionLog");
+							finally
+							{
+								vpsIsDigging = false;
+							}
+						})
+						{ IsBackground = true };
+						s.Start();
+						break;
+					}
 			}
 		}
+		private static bool vpsIsDigging = false;
 		private static void InitCallBackTcp()
 		{
 			try
 			{
 				if (Tcp == null) return;
-				Tcp.RecieveMessage = HdlRecieveMessage;
-				Tcp.Disconnected = (x) => {
-					Logger.SysLog("与服务器丢失连接", "主记录");
-					Tcp?.Dispose();
-					Tcp = null;
-					anyTaskWorking = false;
-					Program.vpsStatus = VpsStatus.WaitConnect;
-				};
+				Tcp.OnMessage += Tcp_OnMessage; 
+				Tcp.OnDisconnected += Tcp_OnDisconnected;
+				Tcp.OnConnected += Tcp_OnConnected;
+
+				Tcp.Client.Connect();
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine("InitCallBackTcp()"+ex.Message);
 			}
 		}
-		private static void SynServerLoginSession(string setting)
+
+		private static void Tcp_OnConnected(object sender, ServerConnectEventArgs e)
 		{
-			var modefyServers = HttpUtil.GetAllElements(setting, "<Server>", "</Server>");
-			foreach(var mdServer in modefyServers)
+			HelloToServer();
+		}
+
+		private static void Tcp_OnDisconnected(object sender, ServerDisconnectEventArgs e)
+		{
+			Logger.SysLog("与服务器丢失连接", "主记录");
+			Tcp?.Dispose();
+			Tcp = null;
+			anyTaskWorking = false;
+			Program.vpsStatus = VpsStatus.WaitConnect;
+		}
+
+		private static void Tcp_OnMessage(object sender, ServerMessageEventArgs e)
+		{
+			HdlRecieveMessage(sender as TcpClient, e);
+		}
+
+		private static void SynServerLoginSession(MsgSynSessionMessage setting)
+		{
+			foreach(var mdServer in setting.List)
 			{
-				var name = HttpUtil.GetElementInItem(mdServer, "name");
-				var loginSession = HttpUtil.GetElementInItem(mdServer, "login");
 				foreach(var server in servers.HdlServer)
 				{
-					if (server.ServerName == name)
+					if (server.ServerName == mdServer.AliasName)
 					{
-						server.LoginSession = loginSession;
-						Program.setting.LogInfo($"服务器登录凭证更新:{server.ServerName}->{loginSession}");
+						server.LoginSession = mdServer.LoginSession;
+						Program.setting.LogInfo($"服务器登录凭证更新:{server.ServerName}->{mdServer.LoginSession}");
 					}
 				}
 			}
 		}
 		public static void RedialToInternet()
 		{
-			Program.Tcp?.Dispose();
+			//Program.Tcp?.Dispose();
 			var p = new CmdRasdial();
 			p.DisRasdial();
 			var t = new Task(() => {
@@ -329,11 +343,10 @@ namespace Miner
 		{
 			try
 			{
-
 				var vpsName = clientId.GetInfo("VpsClientId", "null");
 				var clientDeviceId = clientId.GetInfo("clientDeviceId", HttpUtil.UUID);
 				clientId.SetInfo("clientDeviceId", clientDeviceId);
-				Tcp?.Send("clientConnect", $"<clientName>{vpsName}</clientName><clientDeviceId>{clientDeviceId}</clientDeviceId><version>{Assembly.GetExecutingAssembly().GetName().Version}</version>");
+				Tcp?.Send(new RpClientConnectMessage("vps", Assembly.GetExecutingAssembly().GetName().Version.ToString(), clientDeviceId, vpsName));
 			}
 			catch (Exception ex)
 			{
@@ -343,7 +356,7 @@ namespace Miner
 		private static void TranslateFileStart()
 		{
 			Logger.SysLog("准备接收文件", "主记录");
-			var fileEngine = new TransferFileEngine(TcpFiletransfer.TcpTransferEngine.Connections.Connection.EngineModel.AsClient,TcpFileTubeIp, TcpFileTubePort);
+			var fileEngine = new TransferFileEngine(Connection.EngineModel.AsClient,TcpFileTubeIp, TcpFileTubePort);
 			fileEngine.Connection.ConnectedToServer += (xs, xxx) => {
 				if (xxx.Success)
 				{
@@ -356,7 +369,7 @@ namespace Miner
 				}
 			};
 			fileEngine.Receiver.ReceivingCompletedEvent += (xs, xxx) => {
-				if (xxx.Result == File_Transfer.Model.ReceiverFiles.ReceiveResult.Completed)
+				if (xxx.Result == File_Transfer.ReceiverFiles.ReceiveResult.Completed)
 				{
 					setting.LogInfo("成功接收文件:" + xxx.Message + "(" + ++fileNowReceive + "/" + fileWaitToUpdate + ")");
 					if (fileNowReceive >= fileWaitToUpdate)
@@ -377,35 +390,38 @@ namespace Miner
 		private static int fileWaitToUpdate = 0,fileNowReceive=0;
 
 		public static string InnerTargetUrl { get; internal set; }
+		public static object TcpFiletransfer { get; private set; }
+
 		private static int settingDelayTime;
 		private static double settingAssumePriceRate;
-		private static void InitSetting(string settingInfo)
+		private static void InitSetting(int interval,double assumePriceRate)
 		{
-			settingDelayTime = Convert.ToInt32(HttpUtil.GetElementInItem(settingInfo, "interval"));
-			settingAssumePriceRate = Convert.ToDouble(HttpUtil.GetElementInItem(settingInfo, "assumePriceRate"));
+			settingDelayTime = interval;
+			settingAssumePriceRate = assumePriceRate;
 		}
-		private static void SynFile(string xx)
+		private static void SynFile(MsgSynFileListMessage fileList)
 		{
 			Logger.SysLog("尝试同步设置", "主记录");
-			var cstr = new StringBuilder();
-			var verFiles = HttpUtil.GetAllElements(xx, "<file>", "</file>");
+			var requestFileList = new List<SynSingleFile>();
 			fileWaitToUpdate = fileNowReceive = 0;
-			foreach (var f in verFiles)
+			foreach (var f in fileList.List)
 			{
-				var fver = HttpUtil.GetElement(f, "<version>", "</version>");
-				var fname = HttpUtil.GetElement(f, "<name>", "</name>");
-				var localFile = HttpUtil.GetMD5ByMD5CryptoService("setting/"+fname);
-				if (fver!= localFile)
+				var localFile = HttpUtil.GetMD5ByMD5CryptoService("setting/"+f.Name);
+				if (f.Version!= localFile)
 				{
 					fileWaitToUpdate++;
 					//检测到hash不相同则更新
-					cstr.Append("<fileRequest>").Append(fname).AppendLine("</fileRequest>");
+					requestFileList.Add(new SynSingleFile() {
+						Name=f.Name
+					});
 				};
 			}
-			if (cstr.Length > 0)
+			if (requestFileList.Count > 0)
 			{
-				Logger.SysLog(cstr.ToString(), "主记录");
-				Tcp.Send("RequireFile",cstr.ToString());
+				StringBuilder logInfo = new StringBuilder();
+				requestFileList.ForEach((x) => logInfo.Append('\n').Append(x.Name));
+				Logger.SysLog(logInfo.ToString(), "主记录");
+				Tcp.Send(new MsgSynFileListMessage(requestFileList) { Title= "RequireFile" });
 			}
 			else
 			{
@@ -421,22 +437,7 @@ namespace Miner
 			SummomPriceRule.Init();
 			Goods.Equiment.EquimentPrice.Init();
 			servers.ResetConfig(settingDelayTime,settingAssumePriceRate);
-			Tcp.Send("clientConfigComplete", "");
-		}
-		private static void SynSetting(string raw) {
-			var settings = HttpUtil.GetAllElements(raw, "<setting>", "</setting>");
-			foreach (var s in settings)
-			{
-				var key = HttpUtil.GetElement(s, "<key>", "</key>");
-				var value = HttpUtil.GetElement(s, "<value>", "</value>");
-				var keyPath = key.Split('/');
-				var tmpReg = rootReg.In("Main");
-				for (int i = 0; i < keyPath.Length - 1; i++)
-				{
-					tmpReg = tmpReg.In(keyPath[i]);
-				}
-				tmpReg.SetInfo(keyPath[keyPath.Length - 1], value);
-			}
+			Tcp.Send(new RpClientRunReadyMessage());
 		}
 	}
 }

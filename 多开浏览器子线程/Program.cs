@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SfTcp.TcpClient;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -9,7 +10,7 @@ namespace 多开浏览器子线程
 {
 	static class Program
 	{
-		public static SfTcp.SfTcpClient Tcp ;
+		public static TcpClient Tcp ;
 
 		
 		/// <summary>

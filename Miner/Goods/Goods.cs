@@ -85,7 +85,7 @@ namespace Miner
 				//TODO vps下单
 				//Server.Server.NewCheckBill(BuyUrl,MainInfo,server.LoginSession);
 
-				Program.Tcp?.Send("newCheckBill",MainInfo);//服务器下单
+				Program.Tcp?.Send(new SfTcp.TcpMessage.RpCheckBillMessage(MainInfo));//服务器下单
 			}
 			public string MainInfo
 			{
