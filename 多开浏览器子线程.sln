@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketServer测试", "We
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SfTcp", "SfTcp\SfTcp.csproj", "{9353A91A-9E77-4DE2-86C4-CAD144665DB4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpFiletransfer", "..\..\..\Project.Util.TcpFiletransferClient.1811\TcpFiletransfer\TcpFiletransfer.csproj", "{1133366B-47DC-4CC5-A0A4-6792B4FCD634}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +113,18 @@ Global
 		{9353A91A-9E77-4DE2-86C4-CAD144665DB4}.Release|x64.Build.0 = Release|Any CPU
 		{9353A91A-9E77-4DE2-86C4-CAD144665DB4}.Release|x86.ActiveCfg = Release|Any CPU
 		{9353A91A-9E77-4DE2-86C4-CAD144665DB4}.Release|x86.Build.0 = Release|Any CPU
+		{1133366B-47DC-4CC5-A0A4-6792B4FCD634}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1133366B-47DC-4CC5-A0A4-6792B4FCD634}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1133366B-47DC-4CC5-A0A4-6792B4FCD634}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1133366B-47DC-4CC5-A0A4-6792B4FCD634}.Debug|x64.Build.0 = Debug|Any CPU
+		{1133366B-47DC-4CC5-A0A4-6792B4FCD634}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1133366B-47DC-4CC5-A0A4-6792B4FCD634}.Debug|x86.Build.0 = Debug|Any CPU
+		{1133366B-47DC-4CC5-A0A4-6792B4FCD634}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1133366B-47DC-4CC5-A0A4-6792B4FCD634}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1133366B-47DC-4CC5-A0A4-6792B4FCD634}.Release|x64.ActiveCfg = Release|Any CPU
+		{1133366B-47DC-4CC5-A0A4-6792B4FCD634}.Release|x64.Build.0 = Release|Any CPU
+		{1133366B-47DC-4CC5-A0A4-6792B4FCD634}.Release|x86.ActiveCfg = Release|Any CPU
+		{1133366B-47DC-4CC5-A0A4-6792B4FCD634}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

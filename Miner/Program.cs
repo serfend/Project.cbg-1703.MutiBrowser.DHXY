@@ -19,6 +19,7 @@ using Miner.ServerHandle;
 using SfTcp.TcpClient;
 using SfTcp.TcpMessage;
 using TcpFiletransfer.TcpTransferEngine.Connections;
+using Newtonsoft.Json.Linq;
 
 namespace Miner
 {
@@ -189,6 +190,7 @@ namespace Miner
 			catch (Exception ex)
 			{
 				Console.WriteLine("InitCallBackTcp()"+ex.Message);
+				vpsStatus = VpsStatus.WaitConnect;
 			}
 		}
 
@@ -209,7 +211,14 @@ namespace Miner
 		private static void Tcp_OnMessage(object sender, ServerMessageEventArgs e)
 		{
 			//Logger.SysLog(e.RawString, "通讯记录");
-			MinerCallBack.Exec(e);
+			try
+			{
+				MinerCallBack.Exec(e);
+			}
+			catch (ActionNotRegException ex)
+			{
+				Console.WriteLine(e.RawString);
+			}
 		}
 
 		private static void SynServerLoginSession(MsgSynSessionMessage setting)
@@ -261,7 +270,7 @@ namespace Miner
 				if (xxx.Success)
 				{
 					setting.LogInfo("连接到文件服务器,准备开始接收文件", "主记录");
-					fileEngine.ReceiveFile(Environment.CurrentDirectory + "/setting");
+					fileEngine.ReceiveFile(Environment.CurrentDirectory + "\\setting");
 				}
 				else
 				{
@@ -284,6 +293,10 @@ namespace Miner
 				{
 					setting.LogInfo(xxx.Title + ":" + xxx.Message);
 				}
+			};
+			fileEngine.Receiver.ReceivingStartedEvent += (xs, xxx) =>
+			{
+				setting.LogInfo($"开始传输文件:{xxx.FileName}");
 			};
 			fileEngine.Connect();
 		}
@@ -384,7 +397,18 @@ namespace Miner
 		}
 		private static void MinerCallBack_MsgSynFileList(ServerMessageEventArgs e)
 		{
-			var synFileList = new MsgSynFileListMessage((List<SynSingleFile>)e.Message["List"]);
+			var rawList = e.Message["List"];
+			var list = new List<SynSingleFile>();
+
+			foreach (var item in rawList)
+			{
+				list.Add(new SynSingleFile() {
+					Name= item["Name"].ToString(),
+					Version= item["Version"].ToString()
+				});
+			}
+			
+			var synFileList = new MsgSynFileListMessage(list);
 			SynFile(synFileList);
 		}
 		private static void MinerCallBack_CmdTransferFile(ServerMessageEventArgs e)
@@ -410,7 +434,7 @@ namespace Miner
 		}
 		private static void MinerCallBack_MsgSynSession(ServerMessageEventArgs e)
 		{
-			var synLoginItemList = (List<SynSessionItem>)e.Message["List"];
+			var synLoginItemList = new List<SynSessionItem>();
 			var synLoginSession = new MsgSynSessionMessage(synLoginItemList);
 			SynServerLoginSession(synLoginSession);
 		}
@@ -430,18 +454,21 @@ namespace Miner
 			var s = new Thread(() =>
 			{
 				try
-				{
-					Tcp.Send(new RpClientWaitMessage(0, 0, 101));//开始等待
+			{
+					
 					var nextRuntimeStamp = Convert.ToInt32(e.Message["TaskStamp"].ToString());
-					//var tickCount = HttpUtil.TimeStamp;
-					//Console.WriteLine(tickCount);
-					Thread.Sleep(nextRuntimeStamp);
-					Tcp.Send(new RpClientWaitMessage(0, 0, -101));//结束等待
-					if (servers == null)
+					if (nextRuntimeStamp > 0)
 					{
-						Console.WriteLine("servers未初始化");
-						return;
+						Tcp.Send(new RpClientWaitMessage(0, 0, 101));//开始等待
+						Thread.Sleep(nextRuntimeStamp);
+						Tcp.Send(new RpClientWaitMessage(0, 0, -101));//结束等待
+						if (servers == null)
+						{
+							Console.WriteLine("servers未初始化");
+							return;
+						}
 					}
+					
 					var ticker = new Win32.HiperTicker();
 					ticker.Record();
 					int hdlGoodNum = 0;// servers.ServerRun();

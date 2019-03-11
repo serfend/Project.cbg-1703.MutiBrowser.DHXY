@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -26,7 +27,7 @@ namespace SfTcp.TcpServer
 			try
 			{
 				rawString = Encoding.UTF8.GetString(data);
-				dic = JsonConvert.DeserializeObject<Dictionary<string, object>>(rawString);
+				dic = JToken.Parse(rawString);
 				title = dic["Title"].ToString();
 			}
 			catch (Exception ex)
@@ -34,7 +35,7 @@ namespace SfTcp.TcpServer
 				title = ex.Message;
 			}
 		}
-		private Dictionary<string, object> dic;
+		private JToken dic;
 		public string Title
 		{
 			get
@@ -43,7 +44,7 @@ namespace SfTcp.TcpServer
 				return title;
 			}
 		}
-		public Dictionary<string, object> Message
+		public JToken Message
 		{
 			get
 			{

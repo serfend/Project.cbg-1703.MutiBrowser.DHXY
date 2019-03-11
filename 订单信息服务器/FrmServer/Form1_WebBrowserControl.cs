@@ -49,10 +49,10 @@ namespace 订单信息服务器
 			var client = payClient[e.Session.IP];
 			if (e.Msg.Length == 0) return;
 			Console.WriteLine(e.Msg);
-			JObject raw=null;
+			JToken raw=null;
 			try
 			{
-				raw = JObject.Parse(e.Msg);
+				raw = JToken.Parse(e.Msg);
 			}
 			catch (Exception ex)
 			{

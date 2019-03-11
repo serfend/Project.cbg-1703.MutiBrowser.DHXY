@@ -11,11 +11,11 @@ namespace SfTcp.TcpMessage
 		/// <summary>
 		/// 命令终端启动
 		/// </summary>
-		public const string CmdServerRun = "cmdServerRun";
+		public const string CmdServerRun = "cmdStart";
 		/// <summary>
 		/// 命令终端以任务模式开始采集
 		/// </summary>
-		public const string CmdServerRunSchedule = "cmdServerRunSchedule";
+		public const string CmdServerRunSchedule = "cmdRun";
 		/// <summary>
 		/// 设置终端别名
 		/// </summary>

@@ -58,7 +58,6 @@ namespace Miner
 		{
 			if (interval == 0)
 			{
-				Program.Tcp?.Send(new MsgHeartBeatMessage());
 				return 0;
 			}
 			else

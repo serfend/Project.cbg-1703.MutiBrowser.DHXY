@@ -1,5 +1,6 @@
 ﻿using DotNet4.Utilities.UtilCode;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SfTcp;
 using SfTcp.TcpMessage;
 using SfTcp.TcpServer;
@@ -89,7 +90,7 @@ namespace 订单信息服务器
 								break;
 							case TcpMessageEnum.MsgSynFileList://服务器接收到来自客户端请求文件的命令
 								this.Invoke((EventHandler)delegate { AppendLog("vps" + s.AliasName + "请求获取文件"); });
-								HdlVpsFileSynRequest((Dictionary<string, string>)e.Message["fileList"], s);
+								HdlVpsFileSynRequest(e.Message["List"], s);
 								break;
 							case TcpMessageEnum.RpStatus:
 								targetItem.SubItems[3].Text = e.Message["Status"].ToString();
@@ -194,7 +195,7 @@ namespace 订单信息服务器
 		}
 
 
-		private void ClientWaiting(Dictionary<string,object> InnerInfo, ListViewItem targetItem, TcpConnection s)
+		private void ClientWaiting(JToken InnerInfo, ListViewItem targetItem, TcpConnection s)
 		{
 			int value = Convert.ToInt32(InnerInfo["V"]);
 			if (value==0) {
@@ -221,10 +222,10 @@ namespace 订单信息服务器
 			}
 		}
 
-		private void NameModefied(Dictionary<string,object> InnerInfo, ListViewItem targetItem, TcpConnection s)
+		private void NameModefied(JToken InnerInfo, ListViewItem targetItem, TcpConnection s)
 		{
 			targetItem.SubItems[0].Text = InnerInfo["NewName"].ToString();
-			bool flag = (s.AliasName == "null" && InnerInfo.ContainsKey("AskForSynInit"));//首次初始化时尝试发送vps终端初始化
+			bool flag = (s.AliasName == "null" && InnerInfo["AskForSynInit"]!=null);//首次初始化时尝试发送vps终端初始化
 
 			s.AliasName = targetItem.SubItems[0].Text;
 			if (flag)
@@ -234,7 +235,7 @@ namespace 订单信息服务器
 			}
 		}
 
-		private void InitComplete(Dictionary<string,object> innerInfo, ListViewItem targetItem, TcpConnection s)
+		private void InitComplete(JToken innerInfo, ListViewItem targetItem, TcpConnection s)
 		{
 			s.IsLocal = true;
 			//终端已初始化完成
@@ -259,7 +260,7 @@ namespace 订单信息服务器
 			}
 		}
 
-		private void ClientConnect(Dictionary<string,object> InnerInfo,ListViewItem targetItem,TcpConnection s)
+		private void ClientConnect(JToken InnerInfo,ListViewItem targetItem,TcpConnection s)
 		{
 			var hdlServerName = InnerInfo["Name"].ToString();
 			var version = InnerInfo["Version"].ToString();
