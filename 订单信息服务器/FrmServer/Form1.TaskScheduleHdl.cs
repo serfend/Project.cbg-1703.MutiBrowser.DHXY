@@ -87,7 +87,7 @@ namespace 订单信息服务器
 				}
 				hdlCount = hdlCount == 0 ? 1 : hdlCount;
 				Thread.Sleep(_taskSchedule_Interval*(hdlCount));
-				Thread.Sleep(500);
+				//Thread.Sleep(500);
 			}
 			_taskSchedule_Start = false;
 		}

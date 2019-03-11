@@ -33,7 +33,7 @@ namespace SfTcp.TcpServer
 				},
 				OnMessage = (s, d)=>{
 					var connection = this[s];
-					Console.WriteLine($"message {connection.AliasName}->{d.RawString}");
+					//Console.WriteLine($"message {connection.AliasName}->{d.RawString}");
 					OnMessage?.Invoke(connection, d);
 				},
 				OnDisconnect = (s) => {
