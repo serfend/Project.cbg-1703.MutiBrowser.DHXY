@@ -1,6 +1,7 @@
 ﻿using DotNet4.Utilities.UtilCode;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Server;
 using SfTcp;
 using SfTcp.TcpMessage;
 using SfTcp.TcpServer;
@@ -52,7 +53,7 @@ namespace 订单信息服务器
 			return (Duration / 1000 - offsetTime);
 		}
 	}
-	public partial class Form1 
+	public partial class Form1
 	{
 		private Dictionary<string, TimeTicker> _dicVpsWorkBeginTime = new Dictionary<string, TimeTicker>();
 		private void Initserver()
@@ -61,93 +62,24 @@ namespace 订单信息服务器
 			server.OnConnect += Server_OnTcpConnect;
 			server.OnDisconnect += Server_OnTcpDisconnect;
 			server.OnMessage += Server_OnTcpMessage;
+			ServerCallBackStatic.Init(this);
 		}
+
 
 		private void Server_OnTcpMessage(object sender, ClientMessageEventArgs e)
 		{
 			try
 			{
-				var s = sender as TcpConnection;
-				
-				this.Invoke((EventHandler)delegate
-				{
-					var targetItem = GetItem(s.Ip);
-					if (targetItem != null)
-					{
-						switch (e.Title)
-						{
-							case TcpMessageEnum.MsgHeartBeat:
-								s.Send(new MsgHeartBeatMessage());
-								break;
-							case TcpMessageEnum.RpClientConnect:
-								ClientConnect(e.Message, targetItem, s);
-								break;
-							case TcpMessageEnum.RpNameModefied:
-								NameModefied(e.Message, targetItem, s);
-								break;
-							case TcpMessageEnum.RpInitCompleted:
-								InitComplete(e.Message, targetItem, s);
-								break;
-							case TcpMessageEnum.MsgSynFileList://服务器接收到来自客户端请求文件的命令
-								this.Invoke((EventHandler)delegate { AppendLog("vps" + s.AliasName + "请求获取文件"); });
-								HdlVpsFileSynRequest(e.Message["List"], s);
-								break;
-							case TcpMessageEnum.RpStatus:
-								targetItem.SubItems[3].Text = e.Message["Status"].ToString();
-								if (e.Message["Status"].ToString().Contains(" 失败"))
-								{
-									s.Send(new CmdReRasdialMessage());
-								}
-								break;
-							case TcpMessageEnum.RpCheckBill:
-								HdlNewCheckBill(s, targetItem, e.Message["BillInfo"].ToString());
-								break;
-							case TcpMessageEnum.RpReRasdial:
-								targetItem.SubItems[3].Text = "VPS重拨号中";
-								s.Disconnect();
-								break;
-							case TcpMessageEnum.RpClientWait:
-								ClientWaiting(e.Message, targetItem, s);
-								break;
-							case TcpMessageEnum.RpClientRunReady:
-								targetItem.SubItems[3].Text = "初始化完成";
-								NewVpsAvailable(s.Ip);
-								break;
-							case "payAuthKey":
-								AuthKey = e.Message["content"].ToString();
-								break;
-							case "buildBill":
-								targetItem.SubItems[3].Text = "开始下单";
-								break;
-							case "failBill":
-								targetItem.SubItems[3].Text = $"下单无效:{e.Message["content"].ToString()}";
-								break;
-							case "successBill":
-								targetItem.SubItems[3].Text = "成功下单,即将付款";
-								new Thread(() => {
-									PayCurrentBill(_clientPayUser[s.Ip], e.Message["content"].ToString(), (msg) => {
-										this.Invoke((EventHandler)delegate {
-											targetItem.SubItems[3].Text = msg;
-										});
-									});
-								}).Start();
-								break;
-							default:
-								AppendLog($"新消息[{s.AliasName}] {e.Title}:{e.Message["content"]}");
-								targetItem.SubItems[3].Text = e.Title;
-								break;
-						}
-					}
-
-				});
+				ServerCallBack.Exec(sender,e);
 			}
 			catch (Exception ex)
 			{
 				MessageBox.Show($"在主线程接收发生异常:{ex.Message}\n{ex.StackTrace}");
 				return;
 			}
-		
 		}
+		
+		
 
 		private void Server_OnTcpDisconnect(object sender, ClientDisconnectEventArgs e)
 		{
@@ -195,7 +127,7 @@ namespace 订单信息服务器
 		}
 
 
-		private void ClientWaiting(JToken InnerInfo, ListViewItem targetItem, TcpConnection s)
+		public void ClientWaiting(JToken InnerInfo, ListViewItem targetItem, TcpConnection s)
 		{
 			int value = Convert.ToInt32(InnerInfo["V"]);
 			if (value==0) {
@@ -222,7 +154,7 @@ namespace 订单信息服务器
 			}
 		}
 
-		private void NameModefied(JToken InnerInfo, ListViewItem targetItem, TcpConnection s)
+		public void NameModefied(JToken InnerInfo, ListViewItem targetItem, TcpConnection s)
 		{
 			targetItem.SubItems[0].Text = InnerInfo["NewName"].ToString();
 			bool flag = (s.AliasName == "null" && InnerInfo["AskForSynInit"]!=null);//首次初始化时尝试发送vps终端初始化
@@ -235,7 +167,7 @@ namespace 订单信息服务器
 			}
 		}
 
-		private void InitComplete(JToken innerInfo, ListViewItem targetItem, TcpConnection s)
+		public void InitComplete(JToken innerInfo, ListViewItem targetItem, TcpConnection s)
 		{
 			s.IsLocal = true;
 			//终端已初始化完成
@@ -260,7 +192,7 @@ namespace 订单信息服务器
 			}
 		}
 
-		private void ClientConnect(JToken InnerInfo,ListViewItem targetItem,TcpConnection s)
+		public void ClientConnect(JToken InnerInfo,ListViewItem targetItem,TcpConnection s)
 		{
 			var hdlServerName = InnerInfo["Name"].ToString();
 			var version = InnerInfo["Version"].ToString();
@@ -296,7 +228,7 @@ namespace 订单信息服务器
 
 		}
 
-		private void NewVpsAvailable(string ip)
+		public void NewVpsAvailable(string ip)
 		{
 			hdlVpsTaskScheduleQueue.Enqueue(ip);//s.Send("<serverRun>");//无需同步
 			if (!AvailableVps.ContainsKey(ip))

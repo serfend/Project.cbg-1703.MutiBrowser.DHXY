@@ -147,7 +147,7 @@ namespace 订单信息服务器
 		/// <param name="serverNo"></param>
 		/// <param name="InnerInfo"></param>
 		/// <param name="callback">完成付款流程回调</param>
-		private void PayCurrentBill(string serverNo,string InnerInfo="",Action<string> callback=null)
+		public void PayCurrentBill(string serverNo,string InnerInfo="",Action<string> callback=null)
 		{
 			AppendLog($"开始对{InnerInfo}进行付款");
 			if (_payServerHdl.ContainsKey(serverNo))
@@ -269,7 +269,7 @@ namespace 订单信息服务器
 		/// <param name="sender"></param>
 		/// <param name="targetItem"></param>
 		/// <param name="InnerInfo"></param>
-		private void HdlNewCheckBill(TcpConnection sender,ListViewItem targetItem,string InnerInfo)
+		public void HdlNewCheckBill(TcpConnection sender,ListViewItem targetItem,string InnerInfo)
 		{
 			try
 			{

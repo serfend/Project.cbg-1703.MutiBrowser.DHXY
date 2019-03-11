@@ -72,14 +72,6 @@ namespace 订单信息服务器
 
 		}
 
-
-		
-		
-		
-
-
-
-
 		private bool _taskAllocatePause = false;
 		
 		
@@ -110,7 +102,7 @@ namespace 订单信息服务器
 				OpLog.Clear();
 			}
 		}
-		private ListViewItem GetItem(string ip)
+		public ListViewItem GetItem(string ip)
 		{
 			if (_ConnectVpsClientLstViewItem.ContainsKey(ip)) return _ConnectVpsClientLstViewItem[ip];
 			return null;

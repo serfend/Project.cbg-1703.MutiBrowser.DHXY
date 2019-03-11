@@ -32,3 +32,6 @@
 *.xml
 .vs/多开浏览器子线程/v15/.suo
 .vs/多开浏览器子线程/v15/.suo
+*.ide
+*.ide-wal
+*.xml

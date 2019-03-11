@@ -12,7 +12,7 @@
          <Members>
           <Member Name="#Dispose(System.Boolean)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
            <Messages>
-            <Message Id="client" TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213" Status="Active" Created="2019-03-10 10:20:43Z" FixCategory="NonBreaking">
+            <Message Id="client" TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213" Status="Active" Created="2019-03-11 14:08:11Z" FixCategory="NonBreaking">
              <Issue Certainty="75" Level="Warning" Path="D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\远程连接测试" File="Form1.Designer.cs" Line="16">'Form1' 包含 IDisposable 类型的字段 'Form1.client': 'TcpClient'。请更改 'Form1' 的 Dispose 方法，使其针对该字段调用 Dispose 或 Close。</Issue>
             </Message>
            </Messages>
@@ -27,7 +27,7 @@
          <Members>
           <Member Name="#.ctor()" Kind="Method" Static="False" Accessibility="Assembly" ExternallyVisible="False">
            <Messages>
-            <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="ExcludedInSource" Created="2019-03-10 10:20:43Z" FixCategory="NonBreaking" LastSeen="0001-01-01 00:00:00Z" />
+            <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Status="ExcludedInSource" Created="2019-03-11 14:08:11Z" FixCategory="NonBreaking" LastSeen="0001-01-01 00:00:00Z" />
            </Messages>
           </Member>
          </Members>

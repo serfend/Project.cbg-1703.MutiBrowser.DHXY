@@ -208,7 +208,7 @@ namespace Miner
 			Program.vpsStatus = VpsStatus.WaitConnect;
 		}
 
-		private static void Tcp_OnMessage(object sender, ServerMessageEventArgs e)
+		private static void Tcp_OnMessage(object sender, ClientMessageEventArgs e)
 		{
 			//Logger.SysLog(e.RawString, "通讯记录");
 			try
@@ -372,12 +372,12 @@ namespace Miner
 			MinerCallBack.RegCallback(TcpMessageEnum.CmdServerRunSchedule, MinerCallBack_CmdServerRunSchedule);
 
 		}
-		private static void MinerCallBack_MsgHeartBeat(ServerMessageEventArgs e)
+		private static void MinerCallBack_MsgHeartBeat(ClientMessageEventArgs e)
 		{
 			Console.WriteLine("服务器保持连接确认");
 		}
 
-		private static void MinerCallBack_CmdSetClientName(ServerMessageEventArgs e)
+		private static void MinerCallBack_CmdSetClientName(ClientMessageEventArgs e)
 		{
 			var ClientName = e.Message["NewName"].ToString();
 			setting = new Setting(ClientName);
@@ -385,17 +385,17 @@ namespace Miner
 			Tcp.Send(new RpNameModefiedMessage(ClientName, true));
 		}
 
-		private static void MinerCallBack_CmdSynInit(ServerMessageEventArgs e)
+		private static void MinerCallBack_CmdSynInit(ClientMessageEventArgs e)
 		{
 			InitSetting(Convert.ToInt32(e.Message["Interval"].ToString()), Convert.ToDouble(e.Message["AssumePriceRate"].ToString()));
 			Program.vpsStatus = VpsStatus.Syning;
 			Tcp.Send(new RpInitCompletedMessage());
 		}
-		private static void MinerCallBack_CmdServerRun(ServerMessageEventArgs e)
+		private static void MinerCallBack_CmdServerRun(ClientMessageEventArgs e)
 		{
 			ServerResetConfig();
 		}
-		private static void MinerCallBack_MsgSynFileList(ServerMessageEventArgs e)
+		private static void MinerCallBack_MsgSynFileList(ClientMessageEventArgs e)
 		{
 			var rawList = e.Message["List"];
 			var list = new List<SynSingleFile>();
@@ -411,34 +411,34 @@ namespace Miner
 			var synFileList = new MsgSynFileListMessage(list);
 			SynFile(synFileList);
 		}
-		private static void MinerCallBack_CmdTransferFile(ServerMessageEventArgs e)
+		private static void MinerCallBack_CmdTransferFile(ClientMessageEventArgs e)
 		{
 			TranslateFileStart();
 		}
-		private static void MinerCallBack_CmdModefyTargetUrl(ServerMessageEventArgs e)
+		private static void MinerCallBack_CmdModefyTargetUrl(ClientMessageEventArgs e)
 		{
 			InnerTargetUrl = e.Message["NewUrl"].ToString();
 		}
-		private static void MinerCallBack_CmdReRasdial(ServerMessageEventArgs e)
+		private static void MinerCallBack_CmdReRasdial(ClientMessageEventArgs e)
 		{
 			Tcp.Send(new RpReRasdialMessage());
 			RedialToInternet();
 		}
-		private static void MinerCallBack_CmdStartNewProgram(ServerMessageEventArgs e)
+		private static void MinerCallBack_CmdStartNewProgram(ClientMessageEventArgs e)
 		{
 			StartNewProgram();
 		}
-		private static void MinerCallBack_CmdSubClose(ServerMessageEventArgs e)
+		private static void MinerCallBack_CmdSubClose(ClientMessageEventArgs e)
 		{
 			Environment.Exit(0);
 		}
-		private static void MinerCallBack_MsgSynSession(ServerMessageEventArgs e)
+		private static void MinerCallBack_MsgSynSession(ClientMessageEventArgs e)
 		{
 			var synLoginItemList = new List<SynSessionItem>();
 			var synLoginSession = new MsgSynSessionMessage(synLoginItemList);
 			SynServerLoginSession(synLoginSession);
 		}
-		private static void MinerCallBack_CmdServerRunSchedule(ServerMessageEventArgs e)
+		private static void MinerCallBack_CmdServerRunSchedule(ClientMessageEventArgs e)
 		{
 			vpsStatus = VpsStatus.Running;
 			if (vpsIsDigging)
@@ -457,17 +457,16 @@ namespace Miner
 			{
 					
 					var nextRuntimeStamp = Convert.ToInt32(e.Message["TaskStamp"].ToString());
-					if (nextRuntimeStamp > 0)
-					{
-						Tcp.Send(new RpClientWaitMessage(0, 0, 101));//开始等待
+
+					if (nextRuntimeStamp > 499) Tcp.Send(new RpClientWaitMessage(0, 0, 101));//开始等待
 						Thread.Sleep(nextRuntimeStamp);
-						Tcp.Send(new RpClientWaitMessage(0, 0, -101));//结束等待
+					if (nextRuntimeStamp > 499) Tcp.Send(new RpClientWaitMessage(0, 0, -101));//结束等待
 						if (servers == null)
 						{
 							Console.WriteLine("servers未初始化");
 							return;
 						}
-					}
+					
 					
 					var ticker = new Win32.HiperTicker();
 					ticker.Record();

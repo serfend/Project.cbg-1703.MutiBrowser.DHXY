@@ -84,7 +84,7 @@ namespace 多开浏览器子线程
 
 		#region 逻辑
 		private double price, assumePrice;
-		private void ReceiveMessage(object sender, ServerMessageEventArgs e)
+		private void ReceiveMessage(object sender, ClientMessageEventArgs e)
 		{
 
 			switch (e.Title)

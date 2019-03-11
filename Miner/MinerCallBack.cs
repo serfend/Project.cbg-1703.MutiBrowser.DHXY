@@ -7,12 +7,14 @@ using System.Threading.Tasks;
 
 namespace Miner
 {
+
+
 	public static class MinerCallBack
 	{
 
-		private static Dictionary<string, Action<ServerMessageEventArgs>> dic;
-		public static void Exec(ServerMessageEventArgs e) {
-			dic.TryGetValue(e.Title, out Action<ServerMessageEventArgs> action);
+		private static Dictionary<string, Action<ClientMessageEventArgs>> dic;
+		public static void Exec(ClientMessageEventArgs e) {
+			dic.TryGetValue(e.Title, out Action<ClientMessageEventArgs> action);
 			if (action == null)
 			{
 				throw new ActionNotRegException($"命令[{e.Title}]未被注册");
@@ -26,7 +28,7 @@ namespace Miner
 		{
 			Init();
 		}
-		public static void RegCallback(string title,Action<ServerMessageEventArgs> CallBack)
+		public static void RegCallback(string title,Action<ClientMessageEventArgs> CallBack)
 		{
 			if (dic.ContainsKey(title))
 			{
@@ -39,7 +41,7 @@ namespace Miner
 		}
 		public static void Init()
 		{
-			dic = new Dictionary<string, Action<ServerMessageEventArgs>>();
+			dic = new Dictionary<string, Action<ClientMessageEventArgs>>();
 		}
 	}
 

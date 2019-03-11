@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace SfTcp.TcpClient
 {
-	public delegate void ServerMessage(object sender, ServerMessageEventArgs e);
-	public class ServerMessageEventArgs:EventArgs
+	public delegate void ServerMessage(object sender, ClientMessageEventArgs e);
+	public class ClientMessageEventArgs:EventArgs
 	{
 		private byte[] data;
 
-		public ServerMessageEventArgs(byte[] data)
+		public ClientMessageEventArgs(byte[] data)
 		{
 			this.data = data;
 		}

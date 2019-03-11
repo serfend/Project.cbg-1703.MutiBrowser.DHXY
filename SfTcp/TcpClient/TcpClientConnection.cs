@@ -31,7 +31,7 @@ namespace SfTcp.TcpClient
 		{
 			var data = new byte[e.DataLength];
 			Buffer.BlockCopy(e.Data, e.DataOffset, data, 0, e.DataLength);
-			OnMessaged?.Invoke(sender, new ServerMessageEventArgs(data));
+			OnMessaged?.Invoke(sender, new ClientMessageEventArgs(data));
 		}
 
 		private void Client_ServerConnected(object sender, TcpServerConnectedEventArgs e)

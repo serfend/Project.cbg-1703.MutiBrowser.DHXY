@@ -73,7 +73,7 @@ namespace 订单信息服务器
 			};
 		}
 
-		private void HdlVpsFileSynRequest(JToken transferFileList,TcpConnection s)
+		public void HdlVpsFileSynRequest(JToken transferFileList,TcpConnection s)
 		{
 			if (transferFileEngine.Sender.SendingFileQueue.Count > 0 && !transferFileEngine.Sender.IsSending)
 			{

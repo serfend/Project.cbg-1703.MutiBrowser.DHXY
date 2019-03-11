@@ -97,5 +97,21 @@ namespace SfTcp.TcpMessage
 		/// 浏览器进程将自己Session同步到服务器
 		/// </summary>
 		public const string RpSessionSyn = "rpSessionSyn";
+		/// <summary>
+		/// 同步将军令信息到服务器
+		/// </summary>
+		public const string RpPayAuthKey = "rpPayAuthKey";
+		/// <summary>
+		/// 报告下单失败信息
+		/// </summary>
+		public const string RpFailBill = "rpFailBill";
+		/// <summary>
+		/// 报告下单成功信息
+		/// </summary>
+		public const string RpSuccessBill = "rpSuccessBill";
+		/// <summary>
+		/// 报告开始下单的信息
+		/// </summary>
+		public const string RpBuildBill = "rpBuildBill";
 	}
 }

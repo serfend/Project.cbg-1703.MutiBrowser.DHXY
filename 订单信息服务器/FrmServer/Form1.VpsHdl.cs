@@ -63,7 +63,7 @@ namespace 订单信息服务器
 		/// <summary>
 		/// ip对应终端浏览器名称
 		/// </summary>
-		private Dictionary<string, string> _clientPayUser=new Dictionary<string, string>();
+		public Dictionary<string, string> _clientPayUser=new Dictionary<string, string>();
 		private Reg regSettingVps;
 		/// <summary>
 		/// 将从任务列表中提取可用任务分配给VPS，VPS断开时撤回
