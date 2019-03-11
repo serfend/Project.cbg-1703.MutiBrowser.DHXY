@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Win32;
 using 订单信息服务器.FrmServer;
 
 namespace 订单信息服务器
@@ -18,16 +19,12 @@ namespace 订单信息服务器
 	/// <summary>
 	/// 用于记录间隔时间平均值
 	/// </summary>
-	public class TimeTicker
+	public class TimeTicker:HiperTicker
 	{
-		private int lastTick;
-		private int totalTick;
 		private int maxRecordTime=10;
 		public TimeTicker()
 		{
-			LastTick = Environment.TickCount;
 		}
-		public int LastTick { get => lastTick; set => lastTick = value; }
 		/// <summary>
 		/// 最大记录次数，默认为10
 		/// </summary>
@@ -35,13 +32,15 @@ namespace 订单信息服务器
 				if (value < 1) return;
 				maxRecordTime = value;
 			} }
+		private int offsetTime=0;
 		/// <summary>
 		/// 更新计时开始点并偏移
 		/// </summary>
 		/// <param name="offsetTime">偏移量</param>
 		public void RecordBegin(int offsetTime=0)
 		{
-			LastTick = Environment.TickCount+offsetTime;
+			this.offsetTime = offsetTime;
+			Record();
 		}
 		/// <summary>
 		/// 结束本次计时
@@ -49,9 +48,7 @@ namespace 订单信息服务器
 		/// <returns></returns>
 		public int RecordEnd()
 		{
-			int interval = Environment.TickCount - LastTick;
-			totalTick += (interval - totalTick) / 10;
-			return interval;
+			return (Duration / 1000 - offsetTime);
 		}
 	}
 	public partial class Form1 

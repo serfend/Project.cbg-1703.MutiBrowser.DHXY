@@ -145,6 +145,8 @@
     <Compile Include="..\..\..\..\..\util\reg.cs">
       <Link>Util\reg.cs</Link>
     </Compile>
+    <Compile Include="HiperTicker.cs" />
+    <Compile Include="MinerCallBack.cs" />
     <Compile Include="ServerHandle\AppInterface.cs" />
     <Compile Include="ServerHandle\AppInterfaceData.cs" />
     <Compile Include="ServerHandle\BillPoster.cs" />

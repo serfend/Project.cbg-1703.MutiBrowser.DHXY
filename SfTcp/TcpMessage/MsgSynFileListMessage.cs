@@ -14,6 +14,7 @@ namespace SfTcp.TcpMessage
 		public MsgSynFileListMessage(List<SynSingleFile> list)
 		{
 			this.List = list;
+			Console.WriteLine($"文件同步信息:{list.Count}");
 		}
 
 		public string Title { get => title; set => title = value; }

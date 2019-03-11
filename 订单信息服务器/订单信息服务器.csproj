@@ -118,6 +118,9 @@
     <Compile Include="..\..\..\..\..\util\reg.cs">
       <Link>Util\Coder\reg.cs</Link>
     </Compile>
+    <Compile Include="..\Miner\HiperTicker.cs">
+      <Link>HiperTicker.cs</Link>
+    </Compile>
     <Compile Include="Bill\BillInfoJson.cs" />
     <Compile Include="Bill\EnterPaySubmit.cs" />
     <Compile Include="FrmServer\Form1.cs">

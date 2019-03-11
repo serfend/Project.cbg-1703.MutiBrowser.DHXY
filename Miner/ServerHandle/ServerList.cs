@@ -76,7 +76,6 @@ namespace Miner
 			}
 			private AppInterface appInterface = new AppInterface();
 
-			private int assumePriceBeginTime = 0;
 			public int ServerRun()
 			{
 				runTimeRecord++;
@@ -90,7 +89,6 @@ namespace Miner
 						var goodDetailRaw =appInterface.GetGoodDetail(goodItem);
 						if (goodDetailRaw != null)
 						{
-							assumePriceBeginTime = Environment.TickCount;
 							var goodDetail = goodDetailRaw.equip;
 							var good = new Goods.Goods(new Server(goodDetail.serverid.ToString(), goodDetail.server_name, goodDetail.areaid.ToString(), goodDetail.area_name, ""), goodDetail.equip_name, goodDetail.game_ordersn, goodDetail.equip_desc, goodDetail.equip_detail_url)
 							{
@@ -100,7 +98,6 @@ namespace Miner
 							};
 							good.CheckAndSubmit();
 							hdlGoodNum++;
-							assumePriceBeginTime = Environment.TickCount - assumePriceBeginTime;
 						}
 					}
 					

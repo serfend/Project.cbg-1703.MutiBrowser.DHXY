@@ -23,3 +23,11 @@ D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\多开浏览器子线程\obj\x64\Release\多开浏览器子线程.pdb
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\多开浏览器子线程\bin\x64\Release\多开浏览器子线程.exe.CodeAnalysisLog.xml
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\多开浏览器子线程\bin\x64\Release\多开浏览器子线程.exe.lastcodeanalysissucceeded
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\多开浏览器子线程\bin\x64\Release\Newtonsoft.Json.dll
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\多开浏览器子线程\bin\x64\Release\SfTcp.dll
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\多开浏览器子线程\bin\x64\Release\Cowboy.Sockets.dll
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\多开浏览器子线程\bin\x64\Release\Logrila.Logging.dll
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\多开浏览器子线程\bin\x64\Release\SfTcp.pdb
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\多开浏览器子线程\bin\x64\Release\Newtonsoft.Json.pdb
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\多开浏览器子线程\bin\x64\Release\Newtonsoft.Json.xml
+D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\多开浏览器子线程\obj\x64\Release\多开浏览器子线程.csprojAssemblyReference.cache

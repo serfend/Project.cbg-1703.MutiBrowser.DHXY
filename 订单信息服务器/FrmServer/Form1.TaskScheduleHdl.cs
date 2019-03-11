@@ -60,12 +60,14 @@ namespace 订单信息服务器
 					_taskSchedule_Interval = 500;
 				}
 				int hdlCount = 0;
-				int beginTime = Environment.TickCount;
+				
 				if (_taskAllocatePause)
 				{
 					Thread.Sleep(200);
 					continue;
 				}
+				var ticker = new Win32.HiperTicker();
+				ticker.Record();
 				for (int index = 1; index <= _taskSchedule_DefaultInQueueCount; index++)
 				{
 					string vps = string.Empty;
@@ -76,8 +78,7 @@ namespace 订单信息服务器
 						var client = server[vps];
 						if (client != null)
 						{
-							int timeSpend = Environment.TickCount - beginTime;
-							int taskDelayTime = _taskSchedule_Interval * index - timeSpend;
+							int taskDelayTime = _taskSchedule_Interval * index -(int)( ticker.Duration/1000);
 							_dicVpsWorkBeginTime[client.Ip].RecordBegin(taskDelayTime);
 							client.Send(new CmdServerRunScheduleMessage(taskDelayTime));
 							hdlCount++;
@@ -86,6 +87,7 @@ namespace 订单信息服务器
 				}
 				hdlCount = hdlCount == 0 ? 1 : hdlCount;
 				Thread.Sleep(_taskSchedule_Interval*(hdlCount));
+				Thread.Sleep(500);
 			}
 			_taskSchedule_Start = false;
 		}

@@ -26,3 +26,8 @@
 *.force
 *.force
 *.CopyComplete
+*.ide
+*.ide-shm
+*.ide-wal
+*.xml
+.vs/多开浏览器子线程/v15/.suo

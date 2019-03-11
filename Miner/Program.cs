@@ -42,7 +42,8 @@ namespace Miner
 			Thread.Sleep(5000);
 			Environment.Exit(-1); //有此句则不弹异常对话框
 		}
-		private static Reg rootReg;
+		public static Reg rootReg;
+		public static Reg clientId;
 		public  enum VpsStatus
 		{
 			WaitConnect,
@@ -56,7 +57,7 @@ namespace Miner
 		private static int disconnectTime=10;
 		private static int idleTime = 30;
 		private static int connectFailTime = 0;
-
+		
 		public static string TcpMainTubeIp= "127.0.0.1";
 		public static int TcpMainTubePort= 8009;
 		public static string TcpFileTubeIp= "127.0.0.1";
@@ -81,16 +82,11 @@ namespace Miner
 			rootReg = new Reg("sfMinerDigger");
 			clientId = rootReg.In("Main").In("Setting");
 			
-			int systemBegin = Environment.TickCount;
+			
 			Logger.OnLog += (x, xx) => { Console.WriteLine(xx.LogInfo); };
 			if(rootReg.In("Setting").GetInfo("developeModel")=="1")
 				Logger.IsOnDevelopeModel = true;
 			
-			//AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-			//{
-			//	Program.setting = new Setting("test");
-			//	ServerRun();
-			//}
 			try
 			{
 				var mainThreadCounter =  rootReg.In("Main").In("Thread").In("Main");
@@ -156,7 +152,7 @@ namespace Miner
 				Thread.Sleep(5000);
 			}
 		}
-		private static Reg clientId;
+		
 		private static void InitTcp()
 		{
 			Console.WriteLine("重置通信节点");
@@ -178,103 +174,6 @@ namespace Miner
 			}
 			InitCallBackTcp();
 		}
-		private static void HdlRecieveMessage(TcpClient x, ServerMessageEventArgs e)
-		{
-			Logger.SysLog(e.RawString, "通讯记录");
-			switch (e.Title)
-			{
-				case TcpMessageEnum.MsgHeartBeat:
-					Console.WriteLine("服务器保持连接确认");
-					break;
-				case TcpMessageEnum.CmdSetClientName:
-					var ClientName = e.Message["NewName"].ToString();
-					setting = new Setting(ClientName);
-					clientId.SetInfo("VpsClientId", ClientName);
-					Tcp.Send(new RpNameModefiedMessage(ClientName, true));
-					break;
-				case TcpMessageEnum.CmdSynInit:
-					InitSetting(Convert.ToInt32(e.Message["Interval"].ToString()), Convert.ToDouble(e.Message["AssumePriceRate"].ToString()));
-					Program.vpsStatus = VpsStatus.Syning;
-					Tcp.Send(new RpInitCompletedMessage());
-					break;
-				case TcpMessageEnum.CmdServerRun:
-					ServerResetConfig();
-					break;
-				case TcpMessageEnum.MsgSynFileList:
-					var synFileList = new MsgSynFileListMessage((List<SynSingleFile>)e.Message["List"]);
-					SynFile(synFileList);
-					break;
-				case TcpMessageEnum.CmdTransferFile://客户端接收到来自服务器【可以开始传输】的指令
-					TranslateFileStart();
-					break;
-				case TcpMessageEnum.CmdModefyTargetUrl:
-					InnerTargetUrl = e.Message["NewUrl"].ToString();
-					break;
-				case TcpMessageEnum.CmdReRasdial:
-					Tcp.Send(new RpReRasdialMessage());
-					RedialToInternet();
-					break;
-				case TcpMessageEnum.CmdStartNewProgram:
-					StartNewProgram();
-					break;
-				case TcpMessageEnum.CmdSubClose:
-					Environment.Exit(0);
-					break;
-				case TcpMessageEnum.MsgSynSession:
-					var synLoginItemList = (List<SynSessionItem>)e.Message["List"];
-					var synLoginSession = new MsgSynSessionMessage(synLoginItemList);
-					SynServerLoginSession(synLoginSession);
-					break;
-				case TcpMessageEnum.CmdServerRunSchedule:
-					{
-						vpsStatus = VpsStatus.Running;
-						if (vpsIsDigging)
-						{
-							Console.WriteLine("警告,同时出现多个采集实例");
-							return;
-						}
-						vpsIsDigging = true;
-							//TODO 此处实现时统无效，待以后修正
-							//var sendStamp =Convert.ToInt64( HttpUtil.GetElementInItem(xx,"sendStamp"));
-							//var sendStampStruct =SystemTimeWin32.FromStamp(sendStamp);
-							//var result = SystemTimeWin32.SetSystemTime(ref sendStampStruct);
-							var s = new Thread(() =>
-						{
-							try
-							{
-								Tcp.Send(new RpClientWaitMessage(0,0,101));//开始等待
-								var nextRuntimeStamp = Convert.ToInt32(e.Message["TaskStamp"].ToString());
-								//var tickCount = HttpUtil.TimeStamp;
-								//Console.WriteLine(tickCount);
-								Thread.Sleep(nextRuntimeStamp);
-								Tcp.Send(new RpClientWaitMessage(0,0,-101));//结束等待
-								if (servers == null)
-								{
-									Console.WriteLine("servers未初始化");
-									return;
-								}
-								int lastRunTime = Environment.TickCount;
-								int hdlGoodNum = 0;// servers.ServerRun();
-								int interval = Environment.TickCount - lastRunTime;
-								var avgInterval = Program.setting.threadSetting.RefreshRunTime(interval);
-								//TODO 此处估价似乎也有延迟
-								Program.Tcp?.Send(new RpClientWaitMessage(avgInterval, hdlGoodNum, 0));
-							}
-							catch (Exception ex)
-							{
-								Console.WriteLine($"处理日程失败;{ex.Message}");
-							}
-							finally
-							{
-								vpsIsDigging = false;
-							}
-						})
-						{ IsBackground = true };
-						s.Start();
-						break;
-					}
-			}
-		}
 		private static bool vpsIsDigging = false;
 		private static void InitCallBackTcp()
 		{
@@ -284,7 +183,7 @@ namespace Miner
 				Tcp.OnMessage += Tcp_OnMessage; 
 				Tcp.OnDisconnected += Tcp_OnDisconnected;
 				Tcp.OnConnected += Tcp_OnConnected;
-
+				MinerCallBackInit();
 				Tcp.Client.Connect();
 			}
 			catch (Exception ex)
@@ -309,7 +208,8 @@ namespace Miner
 
 		private static void Tcp_OnMessage(object sender, ServerMessageEventArgs e)
 		{
-			HdlRecieveMessage(sender as TcpClient, e);
+			//Logger.SysLog(e.RawString, "通讯记录");
+			MinerCallBack.Exec(e);
 		}
 
 		private static void SynServerLoginSession(MsgSynSessionMessage setting)
@@ -439,6 +339,130 @@ namespace Miner
 			servers.ResetConfig(settingDelayTime,settingAssumePriceRate);
 			Tcp.Send(new RpClientRunReadyMessage());
 		}
+
+		
+		#region MinerCallBack	
+		private static void MinerCallBackInit()
+		{
+			MinerCallBack.Init();
+			MinerCallBack.RegCallback(TcpMessageEnum.MsgHeartBeat,MinerCallBack_MsgHeartBeat);
+			MinerCallBack.RegCallback(TcpMessageEnum.CmdSetClientName, MinerCallBack_CmdSetClientName);
+			MinerCallBack.RegCallback(TcpMessageEnum.CmdSynInit, MinerCallBack_CmdSynInit);
+			MinerCallBack.RegCallback(TcpMessageEnum.CmdServerRun, MinerCallBack_CmdServerRun);
+			MinerCallBack.RegCallback(TcpMessageEnum.MsgSynFileList, MinerCallBack_MsgSynFileList);
+			MinerCallBack.RegCallback(TcpMessageEnum.CmdTransferFile, MinerCallBack_CmdTransferFile);
+			MinerCallBack.RegCallback(TcpMessageEnum.CmdModefyTargetUrl, MinerCallBack_CmdModefyTargetUrl);
+			MinerCallBack.RegCallback(TcpMessageEnum.CmdReRasdial, MinerCallBack_CmdReRasdial);
+			MinerCallBack.RegCallback(TcpMessageEnum.CmdStartNewProgram, MinerCallBack_CmdStartNewProgram);
+			MinerCallBack.RegCallback(TcpMessageEnum.CmdSubClose, MinerCallBack_CmdSubClose);
+			MinerCallBack.RegCallback(TcpMessageEnum.MsgSynSession, MinerCallBack_MsgSynSession);
+			MinerCallBack.RegCallback(TcpMessageEnum.CmdServerRunSchedule, MinerCallBack_CmdServerRunSchedule);
+
+		}
+		private static void MinerCallBack_MsgHeartBeat(ServerMessageEventArgs e)
+		{
+			Console.WriteLine("服务器保持连接确认");
+		}
+
+		private static void MinerCallBack_CmdSetClientName(ServerMessageEventArgs e)
+		{
+			var ClientName = e.Message["NewName"].ToString();
+			setting = new Setting(ClientName);
+			clientId.SetInfo("VpsClientId", ClientName);
+			Tcp.Send(new RpNameModefiedMessage(ClientName, true));
+		}
+
+		private static void MinerCallBack_CmdSynInit(ServerMessageEventArgs e)
+		{
+			InitSetting(Convert.ToInt32(e.Message["Interval"].ToString()), Convert.ToDouble(e.Message["AssumePriceRate"].ToString()));
+			Program.vpsStatus = VpsStatus.Syning;
+			Tcp.Send(new RpInitCompletedMessage());
+		}
+		private static void MinerCallBack_CmdServerRun(ServerMessageEventArgs e)
+		{
+			ServerResetConfig();
+		}
+		private static void MinerCallBack_MsgSynFileList(ServerMessageEventArgs e)
+		{
+			var synFileList = new MsgSynFileListMessage((List<SynSingleFile>)e.Message["List"]);
+			SynFile(synFileList);
+		}
+		private static void MinerCallBack_CmdTransferFile(ServerMessageEventArgs e)
+		{
+			TranslateFileStart();
+		}
+		private static void MinerCallBack_CmdModefyTargetUrl(ServerMessageEventArgs e)
+		{
+			InnerTargetUrl = e.Message["NewUrl"].ToString();
+		}
+		private static void MinerCallBack_CmdReRasdial(ServerMessageEventArgs e)
+		{
+			Tcp.Send(new RpReRasdialMessage());
+			RedialToInternet();
+		}
+		private static void MinerCallBack_CmdStartNewProgram(ServerMessageEventArgs e)
+		{
+			StartNewProgram();
+		}
+		private static void MinerCallBack_CmdSubClose(ServerMessageEventArgs e)
+		{
+			Environment.Exit(0);
+		}
+		private static void MinerCallBack_MsgSynSession(ServerMessageEventArgs e)
+		{
+			var synLoginItemList = (List<SynSessionItem>)e.Message["List"];
+			var synLoginSession = new MsgSynSessionMessage(synLoginItemList);
+			SynServerLoginSession(synLoginSession);
+		}
+		private static void MinerCallBack_CmdServerRunSchedule(ServerMessageEventArgs e)
+		{
+			vpsStatus = VpsStatus.Running;
+			if (vpsIsDigging)
+			{
+				Console.WriteLine("警告,同时出现多个采集实例");
+				return;
+			}
+			vpsIsDigging = true;
+			//TODO 此处实现时统无效，待以后修正
+			//var sendStamp =Convert.ToInt64( HttpUtil.GetElementInItem(xx,"sendStamp"));
+			//var sendStampStruct =SystemTimeWin32.FromStamp(sendStamp);
+			//var result = SystemTimeWin32.SetSystemTime(ref sendStampStruct);
+			var s = new Thread(() =>
+			{
+				try
+				{
+					Tcp.Send(new RpClientWaitMessage(0, 0, 101));//开始等待
+					var nextRuntimeStamp = Convert.ToInt32(e.Message["TaskStamp"].ToString());
+					//var tickCount = HttpUtil.TimeStamp;
+					//Console.WriteLine(tickCount);
+					Thread.Sleep(nextRuntimeStamp);
+					Tcp.Send(new RpClientWaitMessage(0, 0, -101));//结束等待
+					if (servers == null)
+					{
+						Console.WriteLine("servers未初始化");
+						return;
+					}
+					var ticker = new Win32.HiperTicker();
+					ticker.Record();
+					int hdlGoodNum = 0;// servers.ServerRun();
+					var avgInterval = Program.setting.threadSetting.RefreshRunTime((int)(ticker.Duration / 1000));
+					//TODO 此处估价似乎也有延迟
+					Program.Tcp?.Send(new RpClientWaitMessage(avgInterval, hdlGoodNum, 0));
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"处理日程失败;{ex.Message}");
+				}
+				finally
+				{
+					vpsIsDigging = false;
+				}
+			})
+			{ IsBackground = true };
+			s.Start();
+		}
+
+		#endregion
 	}
 }
 
