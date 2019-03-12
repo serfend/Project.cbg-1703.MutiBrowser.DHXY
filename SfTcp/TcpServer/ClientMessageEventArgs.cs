@@ -53,8 +53,10 @@ namespace SfTcp.TcpServer
 		{
 			try
 			{
-
-				dic = JToken.Parse(rawString);
+				if (rawString.StartsWith("{"))
+					dic = JToken.Parse(rawString);
+				else
+					dic = JToken.Parse(rawString.Substring(1));
 				title = dic["Title"].ToString();
 			}
 			catch (Exception)
