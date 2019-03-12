@@ -72,6 +72,7 @@
     <Compile Include="TcpMessage\RpClientRunReadyMessage.cs" />
     <Compile Include="TcpMessage\RpClientWaitMessage.cs" />
     <Compile Include="TcpMessage\RpFailBillMessage.cs" />
+    <Compile Include="TcpMessage\RpGoodDetailFailMessage.cs" />
     <Compile Include="TcpMessage\RpInitCompletedMessage.cs" />
     <Compile Include="TcpMessage\RpNameModefiedMessage.cs" />
     <Compile Include="TcpMessage\ReRasdialMessage.cs" />
