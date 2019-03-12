@@ -75,12 +75,13 @@ namespace Miner
 				}
 				else
 				{
-					var cstr = new StringBuilder("新物品召唤兽种类:\n");
-					foreach (var summon in summons)
-					{
-						cstr.AppendLine(summon.ID);
-					}
-					Program.setting.LogInfo(cstr.ToString(), server.ServerName);
+					//TODO 关闭内部估价日志
+					//var cstr = new StringBuilder("新物品召唤兽种类:\n");
+					//foreach (var summon in summons)
+					//{
+					//	cstr.AppendLine(summon.ID);
+					//}
+					//Program.setting.LogInfo(cstr.ToString(), server.ServerName);
 				}
 				//TODO vps下单
 				//Server.Server.NewCheckBill(BuyUrl,MainInfo,server.LoginSession);
@@ -172,7 +173,7 @@ namespace Miner
 				var sumPrice = goodsPrice + summonPrice + equimentPrice;
 				//var priceRate = Convert.ToDouble(Program.setting.MainReg.In("Setting").In("Price").GetInfo("rate", "100"));
 				var priceRate =Miner.Server.Server.AssumePriceRate;
-				Program.setting.LogInfo($"总估价:({goodsPrice}+{summonPrice}+{equimentPrice})*{priceRate}={summonPrice}*{priceRate}%={summonPrice*priceRate/100}),TimeStamp={HttpUtil.TimeStamp}",server.ServerName);
+				//Program.setting.LogInfo($"总估价:({goodsPrice}+{summonPrice}+{equimentPrice})*{priceRate}={summonPrice}*{priceRate}%={summonPrice*priceRate/100}),TimeStamp={HttpUtil.TimeStamp}",server.ServerName);
 				return sumPrice*priceRate/100;
 			}
 			private double GetGoodsPrice()
@@ -201,7 +202,7 @@ namespace Miner
 				assert = Math.Round(assert, 0);
 				var 帮派成就价 =Math.Round( Convert.ToDouble(IChengjiu)/2000,0);
 				var 家具回灵价 = Convert.ToDouble(iSingleEnergyRate) >= 500 ? 60 : 0;
-				Program.setting.LogInfo(string.Format("人物估价: Max(等级({0}),{6}等级=> 天赋({1})+成就({2}))+财产({3})+帮派成就({4})+家具回灵({5})", IRankPrice, ITalentPrice, IAchievementPrice, assert, 帮派成就价, 家具回灵价, IFlyupFlag == "1" ? "飞升" : "3转"),server.ServerName);
+				//Program.setting.LogInfo(string.Format("人物估价: Max(等级({0}),{6}等级=> 天赋({1})+成就({2}))+财产({3})+帮派成就({4})+家具回灵({5})", IRankPrice, ITalentPrice, IAchievementPrice, assert, 帮派成就价, 家具回灵价, IFlyupFlag == "1" ? "飞升" : "3转"),server.ServerName);
 				return Math.Max( IRankPrice, this.IFlyupFlag == "1"?ITalentPrice + IAchievementPrice:0)+ assert+ 帮派成就价+ 家具回灵价;
 			} 
 			private double GetSummonsPrice()
@@ -216,7 +217,7 @@ namespace Miner
 			private double GetEquimentPrice()
 			{
 				double sumPrice = 0;
-				Program.setting.LogInfo(string.Format("共有{0}件装备", equipments.Count),server.ServerName);
+				//Program.setting.LogInfo(string.Format("共有{0}件装备", equipments.Count),server.ServerName);
 				foreach(var equipment in equipments)
 				{
 					sumPrice += equipment.Price;

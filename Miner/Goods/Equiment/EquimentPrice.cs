@@ -263,23 +263,23 @@ namespace Miner.Goods.Equiment
 		/// <returns></returns>
 		public static int GetPrice(Equipment e)
 		{
-			Program.setting.LogInfo($"装备=>{e.DesByWeb}", e.Server.ServerName);
+			//Program.setting.LogInfo($"装备=>{e.DesByWeb}", e.Server.ServerName);
 			if (e.DesByWeb.Contains("禁止交易")) {
-				Program.setting.LogInfo("不可交易的装备", e.Server.ServerName);
+				//Program.setting.LogInfo("不可交易的装备", e.Server.ServerName);
 				return 0;
 			} ;
 			int result = 0;
 			if (EquimentPrice.EquimentPrivityPrices.ContainsKey(e.Rank))
 			{
 				result += EquimentPrice.EquimentPrivityPrices[e.Rank].GetPrice(e.NowPrivity);
-				if (result > 0) Program.setting.LogInfo($"{e.Rank}级默契:{e.NowPrivity}/{e.MaxPrivity },价值:{result}", e.Server.ServerName);
+				//if (result > 0) Program.setting.LogInfo($"{e.Rank}级默契:{e.NowPrivity}/{e.MaxPrivity },价值:{result}", e.Server.ServerName);
 			}
 			else
 			{
-				Program.setting.LogInfo("不存在的等级规则:" + e.Rank, e.Server.ServerName);
+				//Program.setting.LogInfo("不存在的等级规则:" + e.Rank, e.Server.ServerName);
 			}
 			var immotalsPrice = EquimentDescriptionPrice.GetPrice($"{e.DesByType}#r{e.PreviousNameDescription}",out string descriptionPrice);
-			/*if(immotalsPrice>0)*/Program.setting.LogInfo(descriptionPrice, e.Server.ServerName, true);//仙器估价
+			///*if(immotalsPrice>0)*/Program.setting.LogInfo(descriptionPrice, e.Server.ServerName, true);//仙器估价
 			result += immotalsPrice;
 			//星符、普通属性估价
 			if (EquimentTypePrice.priceRuleByType.ContainsKey(e.Name))
@@ -299,18 +299,18 @@ namespace Miner.Goods.Equiment
 				}
 				if (!anyOutput)
 				{
-					Program.setting.LogInfo(string.Format("不存在的规则：{0}  '{1}", e.Name,e.DesInYellow), e.Server.ServerName, true);
+					//Program.setting.LogInfo(string.Format("不存在的规则：{0}  '{1}", e.Name,e.DesInYellow), e.Server.ServerName, true);
 				}
 			}
 			else
 			{
-				Program.setting.LogInfo(string.Format("不存在的名称{0}", e.Name), e.Server.ServerName, true);
+				//Program.setting.LogInfo(string.Format("不存在的名称{0}", e.Name), e.Server.ServerName, true);
 			}
 
 			//符石估价
 
 			var magicStonePrice = EquimentDescriptionOnMagicStoneRankPrice.GetPrice(e.DesByWeb, out string stoneDes);
-			/*if(magicStonePrice>0) */Program.setting.LogInfo(stoneDes, e.Server.ServerName, true);
+			///*if(magicStonePrice>0) */Program.setting.LogInfo(stoneDes, e.Server.ServerName, true);
 			result += magicStonePrice;
 			return result;
 		}

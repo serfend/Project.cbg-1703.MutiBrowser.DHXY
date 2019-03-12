@@ -195,7 +195,7 @@ namespace Goods.Summon
 					}
 
 				}
-				Program.setting.LogInfo(string.Format("召唤兽估价max((等级{7}({0})+技能{8}({1})+技能数量{9}({2})+基础{10}({3})+修炼{11}({4})),(觉醒技能{12}({5})+饰品{13}({6})))", RankPrice, SkillPrice, SkillNumPrice, BasePrice, 技能修炼price, summon.HaveSpecialSkill ? SpecialSkillPrice : 0, 饰品price, summon.Rank, baseSkill + "." + summon.GetAllSkill(), SkillNum, summon.ID, summon.修炼 ? summon.修炼参数2 : "无修炼", summon.HaveSpecialSkill ? "已觉醒" : "未觉醒", 饰品品质), summon.server.ServerName);
+				//Program.setting.LogInfo(string.Format("召唤兽估价max((等级{7}({0})+技能{8}({1})+技能数量{9}({2})+基础{10}({3})+修炼{11}({4})),(觉醒技能{12}({5})+饰品{13}({6})))", RankPrice, SkillPrice, SkillNumPrice, BasePrice, 技能修炼price, summon.HaveSpecialSkill ? SpecialSkillPrice : 0, 饰品price, summon.Rank, baseSkill + "." + summon.GetAllSkill(), SkillNum, summon.ID, summon.修炼 ? summon.修炼参数2 : "无修炼", summon.HaveSpecialSkill ? "已觉醒" : "未觉醒", 饰品品质), summon.server.ServerName);
 				return Math.Max(RankPrice, Math.Max(SkillPrice, Math.Max(SkillNumPrice, Math.Max(BasePrice, 技能修炼price))) + (summon.HaveSpecialSkill ? SpecialSkillPrice : 0) + 饰品price);
 			}
 
