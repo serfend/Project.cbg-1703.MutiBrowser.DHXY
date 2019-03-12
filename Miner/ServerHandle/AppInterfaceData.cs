@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -272,10 +273,6 @@ namespace Miner.ServerHandle
 		/// 
 		/// </summary>
 		public int collect_num { get; set; }
-		/// <summary>
-		/// 
-		/// </summary>
-		public string appointed_data { get; set; }
 		/// <summary>
 		/// ￥465.00 大话西游Ⅱ 地界-天山雪
 		/// </summary>

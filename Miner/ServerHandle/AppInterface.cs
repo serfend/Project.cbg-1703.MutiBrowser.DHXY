@@ -1,4 +1,5 @@
 ﻿using DotNet4.Utilities.UtilCode;
+using SfTcp.TcpMessage;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -83,6 +84,7 @@ namespace Miner.ServerHandle
 			catch (Exception ex)
 			{
 				var exceptionInfo = "处理AppInterface.GetGoodDetail()失败\n" + ex.Message + "\n" + info;
+				Program.Tcp?.Send(new RpGoodDetailFailMessage(ex.Message));
 				File.WriteAllText("exception.txt",exceptionInfo);
 			}
 			return null;
