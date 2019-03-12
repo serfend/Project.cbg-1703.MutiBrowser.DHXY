@@ -75,9 +75,11 @@ namespace 订单信息服务器
 			catch (Exception ex)
 			{
 				new Thread(()=> {
-					var info = $"在主线程接收发生异常:{ex.Message}\n{e.RawString}";
+					var info = $"接收发生异常:{ex.Message}\n{e.RawString}";
 					Console.WriteLine(info);
-					MessageBox.Show(info);
+					this.Invoke((EventHandler)delegate {
+						AppendLog(info);
+					});
 				}).Start();
 				return;
 			}
@@ -89,8 +91,11 @@ namespace 订单信息服务器
 		{
 			var x = sender as TcpConnection;
 			this?.Invoke((EventHandler)delegate {
-				//AppendLog("已断开:" + x.Ip);
+				AppendLog("已断开:" + x.Ip);
 				LstConnection.Items.Remove(_ConnectVpsClientLstViewItem[x.Ip]);
+				_ConnectVpsClientLstViewItem.Remove(x.Ip);
+				_dicVpsWorkBeginTime.Remove(x.Ip);
+				_clientPayUser.Remove(x.Ip);
 				AvailableVps[x.Ip] = false;
 				if (allocVps.ContainsKey(x.Ip))
 				{
@@ -106,28 +111,35 @@ namespace 订单信息服务器
 
 		private void Server_OnTcpConnect(object sender, ClientConnectEventArgs e)
 		{
-			var x = sender as TcpConnection;
-			this.Invoke((EventHandler)delegate {
-				//AppendLog("已连接:" + x.Ip);
-				var info = new string[7];
-				info[1] = x.IsLocal ? "主机" : "终端";
-				info[2] = x.Ip;
-				info[0] = x.AliasName;
-				info[3] = "新建状态";
-				info[4] = "未开始采集";//延迟
-				info[5] = "暂无";//任务
-				info[6] = "未知";//版本
-				var item = new ListViewItem(info);
-				_ConnectVpsClientLstViewItem.Add(x.Ip, item);
-				_dicVpsWorkBeginTime.Add(x.Ip, new TimeTicker());
-				LstConnection.Items.Add(item);
-				_clientPayUser.Add(x.Ip, "...");
-				var welcome = new Task(() => {
-					Thread.Sleep(3000);
-					x.Send("welcome",DateTime.Now.ToString());
+			try
+			{
+				var x = sender as TcpConnection;
+				this.Invoke((EventHandler)delegate {
+					//AppendLog("已连接:" + x.Ip);
+					var info = new string[7];
+					info[1] = x.IsLocal ? "主机" : "终端";
+					info[2] = x.Ip;
+					info[0] = x.AliasName;
+					info[3] = "新建状态";
+					info[4] = "未开始采集";//延迟
+					info[5] = "暂无";//任务
+					info[6] = "未知";//版本
+					var item = new ListViewItem(info);
+					_ConnectVpsClientLstViewItem.Add(x.Ip, item);
+					_dicVpsWorkBeginTime.Add(x.Ip, new TimeTicker());
+					LstConnection.Items.Add(item);
+					_clientPayUser.Add(x.Ip, "...");
+					var welcome = new Task(() => {
+						Thread.Sleep(3000);
+						x.Send("welcome", DateTime.Now.ToString());
+					});
+					welcome.Start();
 				});
-				welcome.Start();
-			});
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show($"连接终端发生异常{ex.Message}");
+			}
 		}
 
 
@@ -204,6 +216,7 @@ namespace 订单信息服务器
 			version = version.Length > 0 ? version : "未知";
 			targetItem.SubItems[6].Text = version;
 			targetItem.SubItems[0].Text = hdlServerName;
+			targetItem.SubItems[1].Text = clientType;
 			switch (clientType)
 			{
 				case "browser":
@@ -222,6 +235,7 @@ namespace 订单信息服务器
 					}
 				case "vps":
 					{
+						
 						targetItem.SubItems[3].Text = "初始化";
 						s.ID = InnerInfo["DeviceId"].ToString();
 						var clientName = regSettingVps.In(s.ID).GetInfo("Name", targetItem.SubItems[0].Text);

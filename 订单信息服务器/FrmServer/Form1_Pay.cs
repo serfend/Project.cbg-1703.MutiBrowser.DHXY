@@ -302,7 +302,8 @@ namespace 订单信息服务器
 					priceNum = Convert.ToDouble(price[0]);
 					priceNumAssume = Convert.ToDouble(price[1]);
 				}
-				SendCmdToBrowserClient(serverNum, $"<newCheckBill><targetUrl>{BuyUrl}</targetUrl><price>{priceNum}</price><assumePrice>{priceNumAssume }</assumePrice>");
+				SendCmdToBrowserClient(serverNum,new SfTcp.TcpMessage.CmdCheckBillMessage(SfTcp.TcpMessage.CmdCheckBillMessage.Action.submit,BuyUrl,priceNumAssume,priceNum));
+				
 
 
 				AppendLog("新的订单:" + BuyUrl);
@@ -327,7 +328,7 @@ namespace 订单信息服务器
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show("订单处理异常:" + ex.Message);
+				MessageBox.Show($"订单处理异常:{ex.Message}\n\n{ex.StackTrace}");
 			}
 		}
 		/// <summary>

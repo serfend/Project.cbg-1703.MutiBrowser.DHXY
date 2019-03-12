@@ -52,10 +52,23 @@ namespace Server
 			ServerCallBack.RegCallback(TcpMessageEnum.RpClientWait, ServerCallBack_RpClientWait);
 			ServerCallBack.RegCallback(TcpMessageEnum.RpClientRunReady, ServerCallBack_RpClientRunReady);
 			ServerCallBack.RegCallback(TcpMessageEnum.RpPayAuthKey, ServerCallBack_RpPayAuthKey);
-			ServerCallBack.RegCallback(TcpMessageEnum.RpBuildBill, ServerCallBack_RpBuildBill);
-			ServerCallBack.RegCallback(TcpMessageEnum.RpFailBill, ServerCallBack_RpFailBill);
-			ServerCallBack.RegCallback(TcpMessageEnum.RpSuccessBill, ServerCallBack_RpSuccessBill);
+			ServerCallBack.RegCallback(TcpMessageEnum.RpBillSubmited, ServerCallBack_RpBillSubmited);
 			ServerCallBack.RegCallback(ServerCallBack.DefaultCallBack, ServerCallBack_Default);
+		}
+		private static void ServerCallBack_RpBillSubmited(ClientMessageEventArgs e)
+		{
+			switch (e.Message["Status"].ToString())
+			{
+				case "New":
+					ServerCallBack_RpBuildBill(e);
+					break;
+				case "Fail":
+					ServerCallBack_RpFailBill(e);
+					break;
+				case "Success":
+					ServerCallBack_RpSuccessBill(e);
+					break;
+			}
 		}
 		private static void ServerCallBack_MsgHeartBeat(ClientMessageEventArgs e)
 		{

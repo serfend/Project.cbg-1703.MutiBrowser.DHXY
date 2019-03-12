@@ -23,7 +23,8 @@ namespace 订单信息服务器
 			Application.SetCompatibleTextRenderingDefault(false);
 			try
 			{
-
+				AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException; ;
+				Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
 				Application.Run(new Form1());
 			}
 			catch (Exception ex)
@@ -31,7 +32,16 @@ namespace 订单信息服务器
 				MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
 			}
 		}
-		
+
+		private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+		{
+			MessageBox.Show(e.Exception.Message, "线程错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+		}
+
+		private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+		{
+			MessageBox.Show(e.ExceptionObject.ToString(), "系统错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+		}
 	}
 	public class RandomInfo
 	{

@@ -153,7 +153,7 @@ namespace 订单信息服务器
 			var targetUrl = target.SubItems[8].Text;
 			Clipboard.SetText(targetUrl);
 			ManagerHttpBase.UserWebShowTime++;
-			SendCmdToBrowserClient(target.SubItems[9].Text, $"<showWeb><targetUrl>{targetUrl}</targetUrl></showWeb>");
+			SendCmdToBrowserClient(target.SubItems[9].Text, new CmdCheckBillMessage(CmdCheckBillMessage.Action.show,targetUrl));
 		}
 
 		private void CmdServerOn_Click(object sender, EventArgs e)

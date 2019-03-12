@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SfTcp.TcpMessage;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +17,7 @@ namespace 订单信息服务器
 		/// </summary>
 		/// <param name="serverNo"></param>
 		/// <param name="cmdInfo"></param>
-		private void SendCmdToBrowserClient(string serverNo, string cmdInfo)
+		private void SendCmdToBrowserClient(string serverNo, CmdCheckBillMessage cmdInfo)
 		{
 			try
 			{
@@ -33,7 +34,7 @@ namespace 订单信息服务器
 					{
 						AppendLog("未找到目标浏览器:"+serverNo);
 					}else
-					client.Send(cmdInfo,0);
+					client.Send(cmdInfo);
 				}
 			}
 			catch (Exception ex)
