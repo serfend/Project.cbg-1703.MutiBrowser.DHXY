@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SfTcp.TcpServer
@@ -21,29 +22,61 @@ namespace SfTcp.TcpServer
 		public event ClientDisconnect OnDisconnect;
 		public event ClientMessage OnMessage;
 		private Dictionary<string, TcpConnection> list=new Dictionary<string, TcpConnection>();
+		private Dictionary<string, int> lastMessageStamp=new Dictionary<string, int>();
 		private bool isListening;
-
+		/// <summary>
+		/// 用于定时检查终端，并释放长时间无通讯的终端
+		/// </summary>
+		private Thread checkClientAlive;
 		public TcpServer(int port)
 		{
 			server = new Cowboy.Sockets.AsyncTcpSocketServer(port, new SimpleMessageDispatcher() {
 				OnConnect = (s) => {
 					var connection = new TcpConnection(s, s.RemoteEndPoint.ToString(), "null");
-					list.Add(connection.Ip,connection);
+					list.Add(connection.Ip, connection);
+					lastMessageStamp.Add(connection.Ip, Environment.TickCount);
 					OnConnect?.Invoke(connection, new ClientConnectEventArgs());
 				},
-				OnMessage = (s, d)=>{
-					var connection = this[s];
-					//Console.WriteLine($"message {connection.AliasName}->{d.RawString}");
-					OnMessage?.Invoke(connection, d);
-				},
-				OnDisconnect = (s) => {
-					var connection = this[s];
-					OnDisconnect?.Invoke(connection, new ClientDisconnectEventArgs());
-				}
+				OnMessage = RaiseOnMessage,
+				OnDisconnect = RaiseOnDisconnect
 			});
+			checkClientAlive = new Thread(CheckClientAlive) { IsBackground=true};
+			checkClientAlive.Start();
 			server.Listen();
 		}
-
+		private void RaiseOnDisconnect(string s)
+		{
+			var connection = this[s];
+			lastMessageStamp.Remove(s);
+			OnDisconnect?.Invoke(connection, new ClientDisconnectEventArgs());
+		}
+		private void RaiseOnMessage(string s,ClientMessageEventArgs e)
+		{
+			var connection = this[s];
+			//Console.WriteLine($"message {connection.AliasName}->{d.RawString}");
+			lastMessageStamp[s] = Environment.TickCount;
+			OnMessage?.Invoke(connection, e);
+		}
+		private void CheckClientAlive()
+		{
+			int count = 0;
+			while (true)
+			{
+				Thread.Sleep(1000);
+				if (count++ > 20)
+				{
+					int nowTime = Environment.TickCount;
+					foreach(var c in list)
+					{
+						if (nowTime - lastMessageStamp[c.Key] > 20)
+						{
+							c.Value.Disconnect();
+							RaiseOnDisconnect(c.Key);
+						}
+					}
+				}
+			}
+		}
 		private void Disconnect(TcpConnection client)
 		{
 			client.Disconnect();
