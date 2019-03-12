@@ -94,6 +94,8 @@ namespace Miner
 				while (true)
 				{
 					Thread.Sleep(1000);
+					if(VpsStatus.Running!=vpsStatus)
+						Console.WriteLine(vpsStatus);
 					switch (vpsStatus)
 					{
 						case VpsStatus.WaitConnect:

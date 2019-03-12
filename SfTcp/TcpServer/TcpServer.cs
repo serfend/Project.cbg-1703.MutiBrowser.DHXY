@@ -46,7 +46,9 @@ namespace SfTcp.TcpServer
 		}
 		private void RaiseOnDisconnect(string s)
 		{
+			if (!list.ContainsKey(s)) return;
 			var connection = this[s];
+			list.Remove(s);
 			lastMessageStamp.Remove(s);
 			OnDisconnect?.Invoke(connection, new ClientDisconnectEventArgs());
 		}
@@ -68,12 +70,13 @@ namespace SfTcp.TcpServer
 					int nowTime = Environment.TickCount;
 					foreach(var c in list)
 					{
-						if (nowTime - lastMessageStamp[c.Key] > 20)
+						if (nowTime - lastMessageStamp[c.Key] > 20000)
 						{
 							c.Value.Disconnect();
 							RaiseOnDisconnect(c.Key);
 						}
 					}
+					count = 0;
 				}
 			}
 		}

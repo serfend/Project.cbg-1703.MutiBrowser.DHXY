@@ -89,26 +89,33 @@ namespace 多开浏览器子线程
 
 			switch (e.Title)
 			{
-				case "newCheckBill":
+				case TcpMessageEnum.CmdCheckBillUrl:
 					{
+
 						//<newCheckBill><targetUrl>baidu.com</targetUrl><price>999</price><assumePrice>0</assumePrice></newCheckBill>
-						var targetUrl = e.Message["targetUrl"].ToString();
-						price = Convert.ToDouble(e.Message["price"]);
-						assumePrice = Convert.ToDouble(e.Message["assumePrice"]);
-						if (assumePrice > price)
-							CheckNewCmd(CmdInfo.SubmitBill, targetUrl);
-						else CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
+						var targetUrl = e.Message["Url"].ToString();
+						price = Convert.ToDouble(e.Message["Price"]);
+						assumePrice = Convert.ToDouble(e.Message["AssumePrice"]);
+						switch (e.Message["Act"].ToString())
+						{
+							case "submit":
+								{ 
+									CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
+									break;
+								}
+							case "show":
+								{
+									if (assumePrice > price)
+										CheckNewCmd(CmdInfo.SubmitBill, targetUrl);
+									else CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
+									break;
+								}
+						}
+						
+						
 						break;
 					}
-				case "showWeb":
-					{
-						var targetUrl = e.Message["targetUrl"].ToString();
-						price = 999;
-						assumePrice = 0;
-						CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
-						break;
-					}
-				case "loginSession":
+				case TcpMessageEnum.MsgSynSession:
 					SynLoginSession();
 					break;
 			}

@@ -92,7 +92,6 @@ namespace SfTcp.TcpMessage
 		/// 订单已下单成功的回调
 		/// </summary>
 		public const string RpBillSubmited = "rpBillSubmited";
-
 		/// <summary>
 		/// 浏览器进程将自己Session同步到服务器
 		/// </summary>
@@ -102,20 +101,12 @@ namespace SfTcp.TcpMessage
 		/// </summary>
 		public const string RpPayAuthKey = "rpPayAuthKey";
 		/// <summary>
-		/// 报告下单失败信息
-		/// </summary>
-		public const string RpFailBill = "rpFailBill";
-		/// <summary>
-		/// 报告下单成功信息
-		/// </summary>
-		public const string RpSuccessBill = "rpSuccessBill";
-		/// <summary>
-		/// 报告开始下单的信息
-		/// </summary>
-		public const string RpBuildBill = "rpBuildBill";
-		/// <summary>
 		/// vps终端处理商品详情发生异常
 		/// </summary>
-		public static string RpGoodDetailFail = "rpGoodDetailFail";
+		public const string RpGoodDetailFail = "rpGoodDetailFail";
+		/// <summary>
+		/// 命令浏览器对指定链接进行操纵
+		/// </summary>
+		public const string CmdCheckBillUrl="";
 	}
 }
