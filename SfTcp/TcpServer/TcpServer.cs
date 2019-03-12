@@ -2,6 +2,7 @@
 using Cowboy.Sockets;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,7 @@ namespace SfTcp.TcpServer
 		public event ClientDisconnect OnDisconnect;
 		public event ClientMessage OnMessage;
 		private Dictionary<string, TcpConnection> list=new Dictionary<string, TcpConnection>();
-		private Dictionary<string, int> lastMessageStamp=new Dictionary<string, int>();
+		private ConcurrentDictionary<string, int> lastMessageStamp=new ConcurrentDictionary<string, int>();
 		private bool isListening;
 		/// <summary>
 		/// 用于定时检查终端，并释放长时间无通讯的终端
@@ -34,7 +35,9 @@ namespace SfTcp.TcpServer
 				OnConnect = (s) => {
 					var connection = new TcpConnection(s, s.RemoteEndPoint.ToString(), "null");
 					list.Add(connection.Ip, connection);
-					lastMessageStamp.Add(connection.Ip, Environment.TickCount);
+					lastMessageStamp.AddOrUpdate(connection.Ip, Environment.TickCount,(key,value)=> {
+						return Environment.TickCount;
+					});
 					OnConnect?.Invoke(connection, new ClientConnectEventArgs());
 				},
 				OnMessage = RaiseOnMessage,
@@ -49,7 +52,7 @@ namespace SfTcp.TcpServer
 			if (!list.ContainsKey(s)) return;
 			var connection = this[s];
 			list.Remove(s);
-			lastMessageStamp.Remove(s);
+			lastMessageStamp.TryRemove(s,out int value);
 			OnDisconnect?.Invoke(connection, new ClientDisconnectEventArgs());
 		}
 		private void RaiseOnMessage(string s,ClientMessageEventArgs e)
@@ -67,16 +70,17 @@ namespace SfTcp.TcpServer
 				Thread.Sleep(1000);
 				if (count++ > 20)
 				{
+					count = 0;
 					int nowTime = Environment.TickCount;
 					foreach(var c in list)
 					{
-						if (nowTime - lastMessageStamp[c.Key] > 20000)
+						if (nowTime - lastMessageStamp[c.Value.Ip] > 20000)
 						{
 							c.Value.Disconnect();
 							RaiseOnDisconnect(c.Key);
+							continue;
 						}
 					}
-					count = 0;
 				}
 			}
 		}
