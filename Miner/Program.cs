@@ -217,7 +217,7 @@ namespace Miner
 			}
 			catch (ActionNotRegException ex)
 			{
-				Console.WriteLine(e.RawString);
+				Console.WriteLine($"读取数据发生异常:{ex.Message}\n{e.RawString}");
 			}
 		}
 
@@ -470,8 +470,8 @@ namespace Miner
 					
 					var ticker = new Win32.HiperTicker();
 					ticker.Record();
-					int hdlGoodNum = 0;// servers.ServerRun();
-					var avgInterval = Program.setting.threadSetting.RefreshRunTime((int)(ticker.Duration / 1000));
+					int hdlGoodNum =  servers.ServerRun();
+					var avgInterval = (int)(ticker.Duration / 1000);// Program.setting.threadSetting.RefreshRunTime((int)(ticker.Duration / 1000));
 					//TODO 此处估价似乎也有延迟
 					Program.Tcp?.Send(new RpClientWaitMessage(avgInterval, hdlGoodNum, 0));
 				}
