@@ -15,6 +15,11 @@ namespace SfTcp
 		private string payLoad;
 		private string httpVersion;
 		private Dictionary<string, string> headers;
+		/// <summary>
+		/// 检查字符串是否是Http请求
+		/// </summary>
+		/// <param name="info"></param>
+		/// <returns></returns>
 		public static TcpHttpMessage CheckTcpHttpMessage(string info)
 		{
 			var firstLineIndex = info.IndexOf("\n");

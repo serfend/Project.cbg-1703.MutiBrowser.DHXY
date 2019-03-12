@@ -12,9 +12,9 @@ namespace SfTcp.TcpServer
 {
 	public class TcpConnection
 	{
-		private AsyncTcpSocketSession client;
+		private TcpSocketSession client;
 		private string aliasName;
-		public TcpConnection(AsyncTcpSocketSession client, string ip, string name)
+		public TcpConnection(TcpSocketSession client, string ip, string name)
 		{
 			this.Client = client;
 			this.AliasName = name;
@@ -54,14 +54,15 @@ namespace SfTcp.TcpServer
 		/// <returns></returns>
 		public bool Send(byte[] data)
 		{
-			client.SendAsync(data);
+			if(client.State==TcpSocketConnectionState.Connected)
+				client.Send(data);
 			return true;
 		}
 		public void Disconnect()
 		{
 			client.Close();
 		}
-		public AsyncTcpSocketSession Client { get => client; set => client = value; }
+		public TcpSocketSession Client { get => client; set => client = value; }
 		public string Ip { get => client.RemoteEndPoint.ToString(); }
 		public string AliasName { get => aliasName; set => aliasName = value; }
 		public string ID { get; set; }
