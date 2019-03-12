@@ -113,5 +113,9 @@ namespace SfTcp.TcpMessage
 		/// 报告开始下单的信息
 		/// </summary>
 		public const string RpBuildBill = "rpBuildBill";
+		/// <summary>
+		/// vps终端处理商品详情发生异常
+		/// </summary>
+		public static string RpGoodDetailFail = "rpGoodDetailFail";
 	}
 }
