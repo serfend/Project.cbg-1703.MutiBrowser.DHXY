@@ -11,7 +11,7 @@ namespace SfTcp.TcpServer
 	public class ClientMessageEventArgs : EventArgs
 	{
 		private byte[] data;
-
+		private bool isHttp;
 		public ClientMessageEventArgs(byte[] data)
 		{
 			this.data = data;
@@ -24,16 +24,10 @@ namespace SfTcp.TcpServer
 		{
 			if (analysed) return;
 			analysed = true;
-			try
-			{
-				rawString = Encoding.UTF8.GetString(data);
-				dic = JToken.Parse(rawString);
-				title = dic["Title"].ToString();
-			}
-			catch (Exception ex)
-			{
-				title = ex.Message;
-			}
+			rawString = Encoding.UTF8.GetString(data);
+			dic = JToken.Parse(rawString);
+			title = dic["Title"].ToString();
+			
 		}
 		private JToken dic;
 		public string Title
@@ -60,6 +54,9 @@ namespace SfTcp.TcpServer
 				return rawString;
 			}
 		}
+
+		public bool IsHttp { get => isHttp; private set => isHttp = value; }
+
 		private string rawString;
 	}
 }
