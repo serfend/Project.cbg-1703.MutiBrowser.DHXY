@@ -44,22 +44,23 @@ namespace SfTcp.TcpServer
 		public void AnalysisRaw()
 		{
 			if (analysed) return;
+			analysed = true;
+			rawString = Encoding.UTF8.GetString(data);
+			HandleRaw();
+		}
+
+		private void HandleRaw()
+		{
 			try
 			{
-				analysed = true;
-				rawString = Encoding.UTF8.GetString(data);
-				HandleRaw();
+
+				dic = JToken.Parse(rawString);
+				title = dic["Title"].ToString();
 			}
 			catch (Exception)
 			{
 				error = true;
 			}
-		}
-
-		private void HandleRaw()
-		{
-			dic = JToken.Parse(rawString);
-			title = dic["Title"].ToString();
 		}
 		private JToken dic;
 		public string Title

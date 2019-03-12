@@ -62,9 +62,128 @@ namespace 订单信息服务器
 			server.OnConnect += Server_OnTcpConnect;
 			server.OnDisconnect += Server_OnTcpDisconnect;
 			server.OnMessage += Server_OnTcpMessage;
+			server.OnHttpMessage += Server_OnHttpMessage;
 			ServerCallBackStatic.Init(this);
 		}
 
+		private void Server_OnHttpMessage(object sender, ClientHttpMessageEventArgs e)
+		{
+			Server_OnHttpMessageResponse(e.Message, e.Response);
+		}
+		private void Server_OnHttpMessageResponse(TcpHttpMessage x,TcpHttpResponse s)
+		{
+			var cst = new StringBuilder();
+			cst.AppendLine($"<h1>Hey,测试服务器已开启</h1><br><p>当前连接数:{LstConnection.Items.Count }</p>");
+			cst.AppendLine($"<p>request: {x.Param}</p>");
+			var checkIfHaveValue = x.Param.IndexOf(':');
+			string requestPage, requestParam;
+			if (checkIfHaveValue > 0)
+			{
+				requestPage = x.Param.Substring(0, checkIfHaveValue);
+				requestParam = x.Param.Substring(checkIfHaveValue + 1);
+				requestParam = requestParam.Replace("%3C", "<").Replace("%3E", ">");
+			}
+			else
+			{
+				requestPage = x.Param;
+				requestParam = string.Empty;
+			}
+			switch (requestPage)
+			{
+				case "Status":
+					{
+						this.Invoke((EventHandler)delegate {
+							var clientNum = this.LstConnection.Items.Count;
+							var columnsNum = LstConnection.Columns.Count;
+							cst.AppendLine($"<p>当前状态共有{clientNum}个连接</p><br>");
+							cst.AppendLine($"<p>authKey:{AuthKey}</p>");
+							cst.AppendLine($"打开网页次数: 手动:{ManagerHttpBase.UserWebShowTime}  自动:{ManagerHttpBase.FitWebShowTime}<br>");
+							cst.AppendLine($"profit:{ManagerHttpBase.RecordMoneyGet}  times:{ManagerHttpBase.RecordMoneyGetTime}");
+							for (int i = 0; i < ManagerHttpBase.RecordMoneyGetTime; i++)
+							{
+								var info = ManagerHttpBase.GetBillInfo(i);
+								if (info.Length == 0) continue;
+								cst.AppendLine($"{i}:{info}<br>");
+							}
+							cst.AppendLine("<table border=\"1\">");
+							cst.AppendLine("<tr>");
+							for (int i = 0; i < columnsNum; i++)
+								cst.Append($"<th>{LstConnection.Columns[i].Text}</th>");
+
+							cst.AppendLine("</tr>");
+							var clientTypeCounter = new Dictionary<string, int>();
+							for (int i = 0; i < clientNum; i++)
+							{
+								var clientTypeName = LstConnection.Items[i].SubItems[1].Text;
+								if (!clientTypeCounter.ContainsKey(clientTypeName)) clientTypeCounter.Add(clientTypeName, 1);
+								else clientTypeCounter[clientTypeName]++;
+								cst.AppendLine("<tr>");
+								for (int j = 0; j < columnsNum; j++)
+								{
+									cst.Append($"<td>{LstConnection.Items[i].SubItems[j].Text}</td>");
+								}
+								cst.Append($"<td><a href=\"/CmdInfo:{LstConnection.Items[i].SubItems[2].Text}:{{\"Title\":\"{TcpMessageEnum.CmdSubClose}\"}}\">关闭</td>");
+								cst.Append($"<td><a href=\"/CmdInfo:{LstConnection.Items[i].SubItems[2].Text}:{{\"Title\":\"{TcpMessageEnum.CmdStartNewProgram}\"}}\">新增</td>");
+								cst.Append($"<td><a href=\"/CmdInfo:{LstConnection.Items[i].SubItems[2].Text}:{{\"Title\":\"{TcpMessageEnum.CmdReRasdial}\"}}\">重连</td>");
+								cst.AppendLine("</tr>");
+							}
+							cst.Append("</table>");
+							cst.AppendLine("<div id=\"clientTypeCount\">");
+							foreach (var item in clientTypeCounter)
+							{
+								cst.AppendLine($"{item.Key}:{item.Value}");
+							}
+							cst.AppendLine("</div>");
+							cst.AppendLine($"<div>{OpLog.Text}</div>");
+						});
+						break;
+					}
+				case "targetUrl":
+					{
+						var nowTargetUrl = ManagerHttpBase.TargetUrl;
+						if (checkIfHaveValue > 0)
+						{
+							ManagerHttpBase.TargetUrl = requestParam;
+						}
+						cst.AppendLine($"targetPrevious: {nowTargetUrl}");
+						cst.AppendLine($"targetNew: {ManagerHttpBase.TargetUrl}");
+						break;
+					}
+				case "CmdInfo":
+					{
+						var cmdInfo = requestParam.Split(':');
+						if (cmdInfo.Length < 2)
+						{
+							cst.AppendLine($"无效的指令{requestParam},指令格式:CmdInfo:target#cmd\n命令须为包含Title的json格式");
+							break;
+						}
+						var targetClient = server[cmdInfo[0]];
+						if (targetClient == null)
+						{
+							cst.AppendLine("无效的IP");
+						}
+						else
+						{
+							targetClient.Send(cmdInfo[1],0);
+							cst.AppendLine($"已向终端{targetClient.AliasName}发送指令{cmdInfo[1]}");
+						}
+						break;
+					}
+				case "ip":
+					{
+						var message = new Dictionary<string, string>(x.Headers)
+						{
+							["user-ip"] = s.Server.Ip,
+							["user-method"] = x.Method,
+							["user-ver"] = x.HttpVersion,
+							["user-payload"] = x.PayLoad
+						};
+						s.ResponseRaw(JsonConvert.SerializeObject(message), 200, "text/plain");
+						return;
+					}
+			}
+			s.Response(cst.ToString());
+		}
 
 		private void Server_OnTcpMessage(object sender, ClientMessageEventArgs e)
 		{
