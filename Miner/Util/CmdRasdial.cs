@@ -27,8 +27,8 @@ namespace Miner
 			userPsw = info[2];
 		}
 
-		public string UserName { get => userName; set => userName = value; }
-		public string UserPsw { get => userPsw; set => userPsw = value; }
+		public string UserName { get => userName; set => userName = value.Replace("此处填写账号",""); }
+		public string UserPsw { get => userPsw; set => userPsw = value.Replace("此处填写密码",""); }
 		public string RasName { get => rasName; set => rasName = value; }
 
 		public void DisRasdial()
@@ -37,7 +37,7 @@ namespace Miner
 		}
 		public void Rasdial()
 		{
-			CmdRun("Rasdial " + rasName + " " + userName + " " + userPsw);
+			CmdRun("Rasdial " + rasName + " " + UserName + " " + UserPsw);
 		}
 		public void CmdRun(string str)
 		{
