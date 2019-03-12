@@ -74,7 +74,11 @@ namespace 订单信息服务器
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show($"在主线程接收发生异常:{ex.Message}\n{ex.StackTrace}");
+				new Thread(()=> {
+					var info = $"在主线程接收发生异常:{ex.Message}\n{e.RawString}";
+					Console.WriteLine(info);
+					MessageBox.Show(info);
+				}).Start();
 				return;
 			}
 		}

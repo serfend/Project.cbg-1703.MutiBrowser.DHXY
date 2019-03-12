@@ -142,17 +142,16 @@ namespace Server
 		public const string DefaultCallBack = "DefaultCallBack";
 		private static Dictionary<string, Action<ClientMessageEventArgs>> dic;
 		public static void Exec(object sender,ClientMessageEventArgs e) {
-			dic.TryGetValue(e.Title, out Action<ClientMessageEventArgs> action);
+			var title = e.Title;
+			dic.TryGetValue(title, out Action<ClientMessageEventArgs> action);
 			if (action == null)
 			{
 				dic.TryGetValue(DefaultCallBack,out action);
-				if(action==null) throw new ActionNotRegException($"命令[{e.Title}]未被注册");
+				if(action==null) throw new ActionNotRegException($"命令[{title}]未被注册");
 			}
-			else
-			{
-				ServerCallBackStatic.s = sender as TcpConnection;
-				frm.Invoke(action,new object[] {e});
-			}
+			ServerCallBackStatic.s = sender as TcpConnection;
+			frm.Invoke(action, new object[] { e });
+		
 		}
 		static ServerCallBack()
 		{
