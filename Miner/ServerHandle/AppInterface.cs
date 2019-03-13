@@ -42,7 +42,6 @@ namespace Miner.ServerHandle
 			var info = HttpUtil.DecodeUnicode(rawInfo);
 			try
 			{
-
 				data = Json.JsonDeserializeBySingleData<GoodList>(info);
 			}
 			catch (Exception ex)

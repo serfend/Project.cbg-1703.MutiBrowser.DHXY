@@ -27,7 +27,7 @@ namespace Miner
 	{
 		public static Setting setting;
 		public static ServerList servers;
-		public static SfTcp.TcpClient.TcpClient Tcp;
+		public static TcpClient Tcp;
 		private static void StartNewProgram()
 		{
 			new Thread(() =>
@@ -215,6 +215,7 @@ namespace Miner
 			//Logger.SysLog(e.RawString, "通讯记录");
 			try
 			{
+				Console.WriteLine($"来自服务器:{e.RawString}");
 				MinerCallBack.Exec(e);
 			}
 			catch (ActionNotRegException ex)
@@ -381,7 +382,7 @@ namespace Miner
 
 		private static void MinerCallBack_CmdSetClientName(ClientMessageEventArgs e)
 		{
-			var ClientName = e.Message["NewName"].ToString();
+			var ClientName = e.Message["NewName"]?.ToString();
 			setting = new Setting(ClientName);
 			clientId.SetInfo("VpsClientId", ClientName);
 			Tcp.Send(new RpNameModefiedMessage(ClientName, true));
@@ -389,7 +390,14 @@ namespace Miner
 
 		private static void MinerCallBack_CmdSynInit(ClientMessageEventArgs e)
 		{
-			InitSetting(Convert.ToInt32(e.Message["Interval"].ToString()), Convert.ToDouble(e.Message["AssumePriceRate"].ToString()));
+			var interval = e.Message["Interval"];
+			var assumePriceRate = e.Message["AssumePriceRate"];
+			if (interval == null || assumePriceRate == null)
+			{
+				Tcp.Send(new RpMsgInvalidMessage("synInit"));
+				return;
+			}
+			InitSetting(Convert.ToInt32(interval), Convert.ToDouble(assumePriceRate));
 			Program.vpsStatus = VpsStatus.Syning;
 			Tcp.Send(new RpInitCompletedMessage());
 		}
@@ -405,8 +413,8 @@ namespace Miner
 			foreach (var item in rawList)
 			{
 				list.Add(new SynSingleFile() {
-					Name= item["Name"].ToString(),
-					Version= item["Version"].ToString()
+					Name= item["Name"]?.ToString(),
+					Version= item["Version"]?.ToString()
 				});
 			}
 			
@@ -419,7 +427,7 @@ namespace Miner
 		}
 		private static void MinerCallBack_CmdModefyTargetUrl(ClientMessageEventArgs e)
 		{
-			InnerTargetUrl = e.Message["NewUrl"].ToString();
+			InnerTargetUrl = e.Message["NewUrl"]?.ToString();
 		}
 		private static void MinerCallBack_CmdReRasdial(ClientMessageEventArgs e)
 		{
@@ -458,7 +466,7 @@ namespace Miner
 				try
 			{
 					
-					var nextRuntimeStamp = Convert.ToInt32(e.Message["TaskStamp"].ToString());
+					var nextRuntimeStamp = Convert.ToInt32(e.Message["TaskStamp"]?.ToString());
 
 					if (nextRuntimeStamp > 499) Tcp.Send(new RpClientWaitMessage(0, 0, 101));//开始等待
 						Thread.Sleep(nextRuntimeStamp);

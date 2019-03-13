@@ -103,14 +103,7 @@ namespace Miner
 					
 					
 				}
-				//catch (GoodListNoDataException ex)
-				//{
-				//	Program.Tcp?.Send("clientWait", "-1");
-				//	Server.ExitAftert ( $"#:{ex.Message}");
-				//	Program.anyTaskWorking = false;
-				//	return;
-				//}
-				catch (Exception ex)
+				catch (GoodListNoDataException ex)
 				{
 					Server.ExitAftert($"#:{ex.Message}");
 					Program.anyTaskWorking = false;
