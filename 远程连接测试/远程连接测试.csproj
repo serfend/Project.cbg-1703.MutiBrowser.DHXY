@@ -115,9 +115,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SfTcp\SfTcp.csproj">
-      <Project>{9353a91a-9e77-4de2-86c4-cad144665db4}</Project>
-      <Name>SfTcp</Name>
+    <ProjectReference Include="..\..\..\..\Sf.Base.Net\Util.NET.netBase.CSsys.1903\SfBaseTcp.csproj">
+      <Project>{a52e8ac5-2b3d-4518-8e52-d2bb688a66d8}</Project>
+      <Name>SfBaseTcp</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
