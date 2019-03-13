@@ -17,7 +17,11 @@ namespace SfTcp.TcpClient
 		{
 			this.ip = ip;
 			this.port = port;
-			Connect();
+			this.client = new TCPClient();
+
+			client.ConnectCompleted += Client_ConnectCompleted;
+			client.DisconnectCompleted += Client_DisconnectCompleted;
+			client.ReceiveCompleted += Client_ReceiveCompleted;
 		}
 
 		private void Client_ReceiveCompleted(object sender, SocketEventArgs e)
@@ -49,11 +53,6 @@ namespace SfTcp.TcpClient
 		public bool Connect()
 		{
 			if (client!=null&&client.IsConnected) Disconnect();
-			this.client = new TCPClient();
-			
-			client.ConnectCompleted += Client_ConnectCompleted;
-			client.DisconnectCompleted += Client_DisconnectCompleted;
-			client.ReceiveCompleted += Client_ReceiveCompleted;
 			client.Connect(new IPEndPoint(IPAddress.Parse(ip), port));
 			return true;
 		}

@@ -187,20 +187,23 @@ namespace 订单信息服务器
 
 		private void Server_OnTcpMessage(object sender, ClientMessageEventArgs e)
 		{
-			try
+			lock (this)
 			{
-				ServerCallBack.Exec(sender,e);
-			}
-			catch (Exception ex)
-			{
-				new Thread(()=> {
-					var info = $"接收发生异常:{ex.Message}\n{e.RawString}";
-					Console.WriteLine(info);
-					this.Invoke((EventHandler)delegate {
-						AppendLog(info);
-					});
-				}).Start();
-				return;
+				try
+				{
+					ServerCallBack.Exec(sender, e);
+				}
+				catch (Exception ex)
+				{
+					new Thread(() => {
+						var info = $"接收发生异常:{ex.Message}\n{e.RawString}";
+						Console.WriteLine(info);
+						this.Invoke((EventHandler)delegate {
+							AppendLog(info);
+						});
+					}).Start();
+					return;
+				}
 			}
 		}
 		
@@ -210,54 +213,60 @@ namespace 订单信息服务器
 		{
 			var x = sender as TcpConnection;
 			this?.Invoke((EventHandler)delegate {
-				AppendLog("已断开:" + x.Ip);
-				LstConnection.Items.Remove(_ConnectVpsClientLstViewItem[x.Ip]);
-				_ConnectVpsClientLstViewItem.Remove(x.Ip);
-				_dicVpsWorkBeginTime.Remove(x.Ip);
-				_clientPayUser.Remove(x.Ip);
-				AvailableVps[x.Ip] = false;
-				if (allocVps.ContainsKey(x.Ip))
+				lock (this)
 				{
-					var vps = allocVps[x.Ip];
-					foreach (var server in vps.HdlServer)
+					AppendLog("已断开:" + x.Ip);
+					LstConnection.Items.Remove(_ConnectVpsClientLstViewItem[x.Ip]);
+					_ConnectVpsClientLstViewItem.Remove(x.Ip);
+					_dicVpsWorkBeginTime.Remove(x.Ip);
+					_clientPayUser.Remove(x.Ip);
+					AvailableVps[x.Ip] = false;
+					if (allocVps.ContainsKey(x.Ip))
 					{
-						serverInfoList[server].NowNum++;
+						var vps = allocVps[x.Ip];
+						foreach (var server in vps.HdlServer)
+						{
+							serverInfoList[server].NowNum++;
+						}
+						allocVps.Remove(x.Ip);
 					}
-					allocVps.Remove(x.Ip);
 				}
 			});
 		}
 
 		private void Server_OnTcpConnect(object sender, ClientConnectEventArgs e)
 		{
-			try
+			lock (this)
 			{
-				var x = sender as TcpConnection;
-				this.Invoke((EventHandler)delegate {
-					AppendLog("已连接:" + x.Ip);
-					var info = new string[7];
-					info[1] = x.IsLocal ? "主机" : "终端";
-					info[2] = x.Ip;
-					info[0] = x.AliasName;
-					info[3] = "新建状态";
-					info[4] = "未开始采集";//延迟
-					info[5] = "暂无";//任务
-					info[6] = "未知";//版本
-					var item = new ListViewItem(info);
-					_ConnectVpsClientLstViewItem.Add(x.Ip, item);
-					_dicVpsWorkBeginTime.Add(x.Ip, new TimeTicker());
-					LstConnection.Items.Add(item);
-					_clientPayUser.Add(x.Ip, "...");
-					var welcome = new Task(() => {
-						Thread.Sleep(3000);
-						x.Send("welcome", DateTime.Now.ToString());
+				try
+				{
+					var x = sender as TcpConnection;
+					this.Invoke((EventHandler)delegate {
+						AppendLog("已连接:" + x.Ip);
+						var info = new string[7];
+						info[1] = x.IsLocal ? "主机" : "终端";
+						info[2] = x.Ip;
+						info[0] = x.AliasName;
+						info[3] = "新建状态";
+						info[4] = "未开始采集";//延迟
+						info[5] = "暂无";//任务
+						info[6] = "未知";//版本
+						var item = new ListViewItem(info);
+						_ConnectVpsClientLstViewItem.Add(x.Ip, item);
+						_dicVpsWorkBeginTime.Add(x.Ip, new TimeTicker());
+						LstConnection.Items.Add(item);
+						_clientPayUser.Add(x.Ip, "...");
+						var welcome = new Task(() => {
+							Thread.Sleep(3000);
+							x.Send("welcome", DateTime.Now.ToString());
+						});
+						welcome.Start();
 					});
-					welcome.Start();
-				});
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show($"连接终端发生异常{ex.Message}");
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show($"连接终端发生异常{ex.Message}");
+				}
 			}
 		}
 

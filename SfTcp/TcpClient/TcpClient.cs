@@ -29,7 +29,7 @@ namespace SfTcp.TcpClient
 			};
 			Client.OnMessaged += (x, xx) =>
 			{
-				//Console.WriteLine($"clientReceive:{xx.RawString}");
+				Console.WriteLine($"clientReceive:{xx.RawString}");
 				OnMessage?.Invoke(this, xx);
 			};
 		}
@@ -87,7 +87,7 @@ namespace SfTcp.TcpClient
 			{
 				if (disposing)
 				{
-					if(Client!=null)Client.Disconnect();
+					if(Client!=null)Client.Dispose();
 				}
 				Client = null;
 				disposedValue = true;
