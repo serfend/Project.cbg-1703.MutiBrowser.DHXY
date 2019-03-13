@@ -57,7 +57,7 @@ namespace Server
 		}
 		private static void ServerCallBack_RpBillSubmited(ClientMessageEventArgs e)
 		{
-			switch (e.Message["Status"].ToString())
+			switch (e.Message["Status"]?.ToString())
 			{
 				case "New":
 					ServerCallBack_RpBuildBill(e);
@@ -93,15 +93,18 @@ namespace Server
 		}
 		private static void ServerCallBack_RpStatus(ClientMessageEventArgs e)
 		{
-			targetItem.SubItems[3].Text = e.Message["Status"].ToString();
-			if (e.Message["Status"].ToString().Contains(" 失败"))
+			
+			var status = e.Message["Status"]?.ToString();
+			status = status ?? "未知";
+			targetItem.SubItems[3].Text = status;
+			if (status.Contains(" 失败"))
 			{
 				s.Send(new CmdReRasdialMessage());
 			}
 		}
 		private static void ServerCallBack_RpCheckBill(ClientMessageEventArgs e)
 		{
-			frm.HdlNewCheckBill(s, targetItem, e.Message["BillInfo"].ToString()); 
+			frm.HdlNewCheckBill(s, targetItem, e.Message["BillInfo"]?.ToString()); 
 		}
 		private static void ServerCallBack_RpReRasdial(ClientMessageEventArgs e)
 		{
@@ -120,7 +123,7 @@ namespace Server
 
 		private static void ServerCallBack_RpPayAuthKey(ClientMessageEventArgs e)
 		{
-			frm.AuthKey = e.Message["content"].ToString();
+			frm.AuthKey = e.Message["AuthKey"]?.ToString();
 		}
 		private static void ServerCallBack_RpBuildBill(ClientMessageEventArgs e)
 		{
@@ -128,14 +131,14 @@ namespace Server
 		}
 		private static void ServerCallBack_RpFailBill(ClientMessageEventArgs e)
 		{
-			targetItem.SubItems[3].Text = $"下单无效:{e.Message["Content"].ToString()}";
+			targetItem.SubItems[3].Text = $"下单无效:{e.Message["Content"]?.ToString()}";
 		}
 		private static void ServerCallBack_RpSuccessBill(ClientMessageEventArgs e)
 		{
 			targetItem.SubItems[3].Text = "成功下单,即将付款";
 			new Thread(() =>
 			{
-				frm.PayCurrentBill(frm._clientPayUser[s.Ip], e.Message["Content"].ToString(), (msg) =>
+				frm.PayCurrentBill(frm._clientPayUser[s.Ip], e.Message["Content"]?.ToString(), (msg) =>
 				{
 					frm.Invoke((EventHandler)delegate
 					{
@@ -163,7 +166,8 @@ namespace Server
 				if(action==null) throw new ActionNotRegException($"命令[{title}]未被注册");
 			}
 			ServerCallBackStatic.s = sender as TcpConnection;
-			frm.Invoke(action, new object[] { e });
+			frm.BeginInvoke(action, new object[] { e });
+			
 		
 		}
 		static ServerCallBack()

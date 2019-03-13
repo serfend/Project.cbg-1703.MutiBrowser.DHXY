@@ -234,7 +234,7 @@ namespace 订单信息服务器
 			{
 				var x = sender as TcpConnection;
 				this.Invoke((EventHandler)delegate {
-					//AppendLog("已连接:" + x.Ip);
+					AppendLog("已连接:" + x.Ip);
 					var info = new string[7];
 					info[1] = x.IsLocal ? "主机" : "终端";
 					info[2] = x.Ip;
@@ -291,7 +291,7 @@ namespace 订单信息服务器
 
 		public void NameModefied(JToken InnerInfo, ListViewItem targetItem, TcpConnection s)
 		{
-			targetItem.SubItems[0].Text = InnerInfo["NewName"].ToString();
+			targetItem.SubItems[0].Text = InnerInfo["NewName"]?.ToString();
 			bool flag = (s.AliasName == "null" && InnerInfo["AskForSynInit"]!=null);//首次初始化时尝试发送vps终端初始化
 
 			s.AliasName = targetItem.SubItems[0].Text;
@@ -329,10 +329,10 @@ namespace 订单信息服务器
 
 		public void ClientConnect(JToken InnerInfo,ListViewItem targetItem,TcpConnection s)
 		{
-			var hdlServerName = InnerInfo["Name"].ToString();
-			var version = InnerInfo["Version"].ToString();
-			var clientType = InnerInfo["Type"].ToString();
-			version = version.Length > 0 ? version : "未知";
+			var hdlServerName = InnerInfo["Name"]?.ToString();
+			var version = InnerInfo["Version"]?.ToString();
+			var clientType = InnerInfo["Type"]?.ToString();
+			version = version?.Length > 0 ? version : "未知";
 			targetItem.SubItems[6].Text = version;
 			targetItem.SubItems[0].Text = hdlServerName;
 			targetItem.SubItems[1].Text = clientType;
@@ -356,7 +356,7 @@ namespace 订单信息服务器
 					{
 						
 						targetItem.SubItems[3].Text = "初始化";
-						s.ID = InnerInfo["DeviceId"].ToString();
+						s.ID = InnerInfo["DeviceId"]?.ToString();
 						var clientName = regSettingVps.In(s.ID).GetInfo("Name", targetItem.SubItems[0].Text);
 						s.Send(new CmdSetClientNameMessage(clientName));//用于确认当前名称并初始化
 						break;

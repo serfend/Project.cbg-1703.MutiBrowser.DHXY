@@ -84,7 +84,8 @@ namespace 订单信息服务器
 				waittingFileInfo = new List<string>();
 				foreach (var item in transferFileList)
 				{
-					waittingFileInfo.Add(item["Name"].ToString());
+					var itemName = item["Name"];
+					if(itemName!=null)waittingFileInfo.Add(itemName.ToString());
 				}
 
 				this.Invoke((EventHandler)delegate { AppendLog("准备向终端" + s.AliasName + " 传输文件"); });
