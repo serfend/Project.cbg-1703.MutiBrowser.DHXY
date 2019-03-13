@@ -107,6 +107,10 @@ namespace SfTcp.TcpMessage
 		/// <summary>
 		/// 命令浏览器对指定链接进行操纵
 		/// </summary>
-		public const string CmdCheckBillUrl="";
+		public const string CmdCheckBillUrl="cmdCheckBillUrl";
+		/// <summary>
+		/// 反馈本次通信无效的信息
+		/// </summary>
+		public static string RpMsgInvalid = "rpMsgInvalid";
 	}
 }

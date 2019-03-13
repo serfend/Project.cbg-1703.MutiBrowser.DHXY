@@ -1,4 +1,5 @@
-﻿using Cowboy.Sockets;
+﻿
+using SfBaseTcp.Net.Sockets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,39 +12,35 @@ namespace SfTcp.TcpClient
 	{
 		private readonly string ip;
 		private readonly int port;
-		TcpSocketClient client;
+		SfBaseTcp.Net.Sockets.TCPClient client;
 		public TcpClientConnection(string ip,int port)
 		{
 			this.ip = ip;
 			this.port = port;
-			this.client = new TcpSocketClient(IPAddress.Parse(ip), port);
-			client.ServerConnected += Client_ServerConnected;
-			client.ServerDataReceived += Client_ServerDataReceived;
-			client.ServerDisconnected += Client_ServerDisconnected;
+			Connect();
 		}
 
-		private void Client_ServerDisconnected(object sender, TcpServerDisconnectedEventArgs e)
+		private void Client_ReceiveCompleted(object sender, SocketEventArgs e)
+		{
+			OnMessaged?.Invoke(sender, new ClientMessageEventArgs(e.Data));
+		}
+
+		private void Client_DisconnectCompleted(object sender, SocketEventArgs e)
 		{
 			OnDisconnected?.Invoke(sender, new ServerDisconnectEventArgs());
 		}
 
-		private void Client_ServerDataReceived(object sender, TcpServerDataReceivedEventArgs e)
-		{
-			var data = new byte[e.DataLength];
-			Buffer.BlockCopy(e.Data, e.DataOffset, data, 0, e.DataLength);
-			OnMessaged?.Invoke(sender, new ClientMessageEventArgs(data));
-		}
-
-		private void Client_ServerConnected(object sender, TcpServerConnectedEventArgs e)
+		private void Client_ConnectCompleted(object sender, SocketEventArgs e)
 		{
 			OnConnected?.Invoke(sender, new ServerConnectEventArgs());
 		}
 
 
 
+
 		public string IP => "to server";
 
-		public bool Connected => client.State==TcpSocketConnectionState.Connected;
+		public bool Connected => client.IsConnected;
 
 		public event ServerMessage OnMessaged;
 		public event ConnectToServer OnConnected;
@@ -51,13 +48,19 @@ namespace SfTcp.TcpClient
 
 		public bool Connect()
 		{
-			client.Connect();
+			if (client!=null&&client.IsConnected) Disconnect();
+			this.client = new TCPClient();
+			
+			client.ConnectCompleted += Client_ConnectCompleted;
+			client.DisconnectCompleted += Client_DisconnectCompleted;
+			client.ReceiveCompleted += Client_ReceiveCompleted;
+			client.Connect(new IPEndPoint(IPAddress.Parse(ip), port));
 			return true;
 		}
 
 		public void Disconnect()
 		{
-			client.Close();
+			client.Disconnect();
 		}
 
 		public bool Send(byte[] data)

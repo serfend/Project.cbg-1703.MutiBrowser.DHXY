@@ -25,7 +25,6 @@ namespace SfTcp.TcpServer
 	public class ClientMessageEventArgs : EventArgs
 	{
 		private byte[] data;
-		private bool isHttp;
 		public ClientMessageEventArgs(byte[] data)
 		{
 			this.data = data;
@@ -51,16 +50,19 @@ namespace SfTcp.TcpServer
 
 		private void HandleRaw()
 		{
+			if (data.Length == 0) {//空数据是想干嘛哦~
+				error = true;
+				return;
+			}
 			try
 			{
-				if (rawString.StartsWith("{"))
-					dic = JToken.Parse(rawString);
-				else
-					dic = JToken.Parse(rawString.Substring(1));
-				title = dic["Title"].ToString();
+				dic = JToken.Parse(rawString);
+				title = dic["Title"]?.ToString();
+				if (title == null) error = true;
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				Console.WriteLine($"处理数据异常:{ex.Message}\n{rawString}");
 				error = true;
 			}
 		}
@@ -90,7 +92,6 @@ namespace SfTcp.TcpServer
 			}
 		}
 
-		public bool IsHttp { get => isHttp; private set => isHttp = value; }
 		public bool Error { get => error; set => error = value; }
 
 		private string rawString;

@@ -23,6 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,12 +35,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Cowboy.Sockets, Version=1.3.14.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Cowboy.Sockets.1.3.14.0\lib\net46\Cowboy.Sockets.dll</HintPath>
-    </Reference>
-    <Reference Include="Logrila.Logging, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Logrila.Logging.1.0.3.0\lib\net46\Logrila.Logging.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -74,6 +69,7 @@
     <Compile Include="TcpMessage\RpClientWaitMessage.cs" />
     <Compile Include="TcpMessage\RpGoodDetailFailMessage.cs" />
     <Compile Include="TcpMessage\RpInitCompletedMessage.cs" />
+    <Compile Include="TcpMessage\RpMsgInvalidMessage.cs" />
     <Compile Include="TcpMessage\RpNameModefiedMessage.cs" />
     <Compile Include="TcpMessage\ReRasdialMessage.cs" />
     <Compile Include="TcpMessage\CmdServerRunMessage.cs" />
@@ -96,6 +92,11 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Sf.Base.Net\Util.NET.netBase.CSsys.1903\SfBaseTcp.csproj">
+      <Project>{a52e8ac5-2b3d-4518-8e52-d2bb688a66d8}</Project>
+      <Name>SfBaseTcp</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,5 +1,4 @@
 ﻿
-using Cowboy.Sockets;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -13,135 +12,118 @@ namespace SfTcp.TcpServer
 {
 	public class TcpServer:IDisposable
 	{
-		private Cowboy.Sockets.TcpSocketServer server;
+		private SfBaseTcp.Net.Sockets.TCPListener server;
 		public ILog Log { set; get; }
 		public int Port { get => port; set => port = value; }
 
-		public TcpConnection this[string key] { get => list[key];set => list[key] = value; }
+		public TcpConnection this[string key] { get {
+				list.TryGetValue(key,out TcpConnection result);
+				return result;
+			} set => list[key] = value; }
 		private int port;
 		public event ClientConnect OnConnect;
 		public event ClientDisconnect OnDisconnect;
 		public event ClientMessage OnMessage;
 		public event ClientHttpMessage OnHttpMessage;
-		private Dictionary<string, TcpConnection> list=new Dictionary<string, TcpConnection>();
+		private ConcurrentDictionary<string, TcpConnection> list;
 		private ConcurrentDictionary<string, int> lastMessageStamp=new ConcurrentDictionary<string, int>();
 		private bool isListening;
 		/// <summary>
 		/// 用于定时检查终端，并释放长时间无通讯的终端
 		/// </summary>
-		private Thread checkClientAlive;
+		//private Thread checkClientAlive;
 		public TcpServer(int port)
 		{
-			var cfg = new TcpSocketServerConfiguration() {
-				ReceiveBufferSize=1024000
+			list = new ConcurrentDictionary<string, TcpConnection>();
+			server = new SfBaseTcp.Net.Sockets.TCPListener() {
+				Port=port
 			};
-			server = new TcpSocketServer(port, cfg);
-			server.ClientConnected += Server_ClientConnected;
-			server.ClientDataReceived += Server_ClientDataReceived;
-			server.ClientDisconnected += Server_ClientDisconnected;
+			server.DisconnectCompleted += Server_DisconnectCompleted; ;
+			server.ReceiveCompleted += Server_ReceiveCompleted; ;
+			server.AcceptCompleted += Server_AcceptCompleted; ;
 
-			checkClientAlive = new Thread(CheckClientAlive) { IsBackground=true};
-			checkClientAlive.Start();
-			server.Listen();
+			//checkClientAlive = new Thread(CheckClientAlive) { IsBackground=true};
+			//checkClientAlive.Start(); 此处自动检测活性暂不可用
+			server.Start();
 		}
 
-		private void Server_ClientDisconnected(object sender, TcpClientDisconnectedEventArgs e)
+		private void Server_AcceptCompleted(object sender, SfBaseTcp.Net.Sockets.SocketEventArgs e)
 		{
-			RaiseOnDisconnect(e.Session.RemoteEndPoint.ToString());
-		}
-		private volatile int anyClientMessage=0;
-		private readonly ConcurrentDictionary<string, StringBuilder> clientMessageCache = new ConcurrentDictionary<string, StringBuilder>();
-		private void Server_ClientDataReceived(object sender, TcpClientDataReceivedEventArgs e)
-		{
-			while (anyClientMessage < 0)
+			lock (list)
 			{
-				Thread.Sleep(0);
+				var ip = e.Socket.RemoteEndPoint.ToString();
+				TcpConnection connection;
+				connection = new TcpConnection(e.Socket, "null");
+				if (list == null)
+				{
+					throw new Exception("list is not init");
+				}
+				list.AddOrUpdate(ip, connection,(clientIp,clientConnect)=>clientConnect);
+				//lastMessageStamp.AddOrUpdate(connection.Ip, Environment.TickCount, (key, value) =>
+				//{
+				//	return Environment.TickCount;
+				//});
+				OnConnect?.BeginInvoke(connection, new ClientConnectEventArgs(), (x) => { }, null);
 			}
-			anyClientMessage = 10;//用于当消息未能正常处置时，等待交由回收线程处理
-			var clientIp = e.Session.RemoteEndPoint.ToString();
-			bool haveCache = clientMessageCache.ContainsKey(clientIp);
+		}
 
-			byte[] raw = new byte[e.DataLength + 1];
-			Buffer.BlockCopy(e.Data, e.DataOffset-1, raw, 0, e.DataLength+1);
-			ClientMessageEventArgs msg;
-			if (haveCache) msg = new ClientMessageEventArgs(clientMessageCache[clientIp], raw);
-			else
-				msg = new ClientMessageEventArgs(raw);
-			msg.AnalysisRaw();//立即解析，若解析失败，表示为部分消息，则继续等待
+		private void Server_DisconnectCompleted(object sender, SfBaseTcp.Net.Sockets.SocketEventArgs e)
+		{
+			RaiseOnDisconnect(e.Socket.RemoteEndPoint.ToString());
+		}
+
+		private void Server_ReceiveCompleted(object sender, SfBaseTcp.Net.Sockets.SocketEventArgs e)
+		{
+			string ip = e.Socket.RemoteEndPoint.ToString();
+			
+			
+			var msg = new ClientMessageEventArgs(e.Data);
+			Console.WriteLine($"{ip}->{msg.RawString}");
 			if (msg.Error)
 			{
-				clientMessageCache[clientIp] = new StringBuilder(msg.RawString);//消息处理无效，则建立缓存
+				var httpMsg = TcpHttpMessage.CheckTcpHttpMessage(msg.RawString);
+				if (httpMsg != null)
+				{
+					list.TryGetValue(ip, out TcpConnection connection);
+					if(connection!=null&& connection.Client.IsConnected) OnHttpMessage?.Invoke(sender, new ClientHttpMessageEventArgs(httpMsg, connection));
+					return;
+				}
+				else
+				{
+					//throw new MsgInvalidException(msg.RawString);
+					return;
+				}
 			}
-			else
-			{
-				RaiseOnMessage(clientIp, msg);
-				if(haveCache)clientMessageCache.TryRemove(clientIp,out StringBuilder x);//消息处理无误，则消化缓存
-			}
-			
+			RaiseOnMessage(ip, msg);
 		}
 
-		private void Server_ClientConnected(object sender, TcpClientConnectedEventArgs e)
-		{
-			var ip = e.Session.RemoteEndPoint.ToString();
-			var connection = new TcpConnection(e.Session, ip, "null");
-			list.Add(connection.Ip, connection);
-			lastMessageStamp.AddOrUpdate(connection.Ip, Environment.TickCount, (key, value) =>
-			{
-				return Environment.TickCount;
-			});
-			OnConnect?.Invoke(connection, new ClientConnectEventArgs());
-		}
 
 		private void RaiseOnDisconnect(string s)
 		{
-			if (!list.ContainsKey(s)) return;
-			var connection = this[s];
-			list.Remove(s);
-			lastMessageStamp.TryRemove(s,out int value);
-			OnDisconnect?.Invoke(connection, new ClientDisconnectEventArgs());
+			lock (list)
+			{
+				if (!list.ContainsKey(s)) return;
+				var connection = this[s];
+				list.TryRemove(s,out TcpConnection removeConnection);
+				//lastMessageStamp.TryRemove(s,out int value);
+				OnDisconnect?.BeginInvoke(connection, new ClientDisconnectEventArgs(),(x)=> { },null);
+			}
 		}
 		private void RaiseOnMessage(string s,ClientMessageEventArgs e)
 		{
-			var connection = this[s];
-			//Console.WriteLine($"message {connection.AliasName}->{d.RawString}");
-			lastMessageStamp[s] = Environment.TickCount;
-			OnMessage?.Invoke(connection, e);
-		}
-		/// <summary>
-		/// 检查所有消息中是否有http消息
-		/// </summary>
-		private void CheckAnyMessageUnhandle()
-		{
-			anyClientMessage = -1;
-			foreach (var msg in clientMessageCache)
+			lock (list)
 			{
-				if (list.ContainsKey(msg.Key))
-				{
-					var hdlMsg = TcpHttpMessage.CheckTcpHttpMessage(msg.Value.ToString());
-					if (hdlMsg != null)
-					{
-						var connection = list[msg.Key];
-						OnHttpMessage?.BeginInvoke(connection, new ClientHttpMessageEventArgs(hdlMsg, connection), (x) => { }, null);
-					}
-				}
+				var connection = this[s];
+				//Console.WriteLine($"message {connection.AliasName}->{d.RawString}");
+				//lastMessageStamp[s] = Environment.TickCount;
+				OnMessage?.BeginInvoke(connection, e, (x) => { }, null);
 			}
-			clientMessageCache.Clear();
-			anyClientMessage = 10;
 		}
 		private void CheckClientAlive()
 		{
 			int count = 0;
 			while (true)
 			{
-				Thread.Sleep(100);
-				if (anyClientMessage>0)
-				{
-					anyClientMessage--;
-				}
-				else
-				{
-					CheckAnyMessageUnhandle();
-				}
 				if (count++ > 100)
 				{
 					count = 0;
@@ -155,8 +137,8 @@ namespace SfTcp.TcpServer
 						}
 						if (nowTime - lastMessageStamp[connection.Ip] > 20000)
 						{
-							connection.Client.Shutdown();
-							RaiseOnDisconnect(connection.Ip);
+							connection.Client.Disconnect();
+							//当上一行代码实现了关闭，则注释此行 RaiseOnDisconnect(connection.Ip);
 							break;
 						}
 					}
@@ -174,13 +156,13 @@ namespace SfTcp.TcpServer
 		public void StartListening()
 		{
 			isListening = true;
-			server.Listen();
+			server.Start();
 		}
 		public void StopListening()
 		{
 			if (!isListening) return;
 			isListening = false;
-			server.Shutdown();
+			server.Stop();
 		}
 
 		#region IDisposable Support
@@ -208,31 +190,15 @@ namespace SfTcp.TcpServer
 		#endregion
 
 	}
-	public class AsyncServerMessageDispatcher :IAsyncTcpSocketServerMessageDispatcher
+
+	[Serializable]
+	public class MsgInvalidException : Exception
 	{
-		public Action<AsyncTcpSocketSession> OnConnect;
-		public Action<string, ClientMessageEventArgs> OnMessage;
-		public Action<string> OnDisconnect;
-		public async Task OnSessionStarted(AsyncTcpSocketSession session)
-		{
-			//Console.WriteLine(string.Format("TCP session has connected {0}.", session));
-			OnConnect?.Invoke(session);
-			await Task.CompletedTask;
-		}
-
-		public async Task OnSessionDataReceived(AsyncTcpSocketSession session, byte[] data, int offset, int count)
-		{
-			var raw = new byte[count];
-			Buffer.BlockCopy(data, offset, raw, 0, count);
-			OnMessage?.Invoke(session.RemoteEndPoint.ToString(), new ClientMessageEventArgs(raw));
-			await Task.CompletedTask;
-		}
-
-		public async Task OnSessionClosed(AsyncTcpSocketSession session)
-		{
-			//Console.WriteLine(string.Format("TCP session {0} has disconnected.", session));
-			OnDisconnect?.Invoke(session.RemoteEndPoint.ToString());
-			await Task.CompletedTask;
-		}
+		public MsgInvalidException() { }
+		public MsgInvalidException(string message) : base(message) { }
+		public MsgInvalidException(string message, Exception inner) : base(message, inner) { }
+		protected MsgInvalidException(
+		  System.Runtime.Serialization.SerializationInfo info,
+		  System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 	}
 }

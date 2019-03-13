@@ -1,6 +1,6 @@
 ﻿
-using Cowboy.Sockets;
 using Newtonsoft.Json;
+using SfBaseTcp.Net.Sockets;
 using SfTcp.TcpMessage;
 using System;
 using System.Collections.Generic;
@@ -12,9 +12,9 @@ namespace SfTcp.TcpServer
 {
 	public class TcpConnection
 	{
-		private TcpSocketSession client;
+		private ISocket client;
 		private string aliasName;
-		public TcpConnection(TcpSocketSession client, string ip, string name)
+		public TcpConnection(ISocket client,  string name)
 		{
 			this.Client = client;
 			this.AliasName = name;
@@ -54,15 +54,17 @@ namespace SfTcp.TcpServer
 		/// <returns></returns>
 		public bool Send(byte[] data)
 		{
-			if(client.State==TcpSocketConnectionState.Connected)
+			if (client.IsConnected) {
+				Console.WriteLine($"send->{this.Ip} byte[{data.Length}]");
 				client.Send(data);
+			}
 			return true;
 		}
 		public void Disconnect()
 		{
-			client.Close();
+			client.Disconnect();
 		}
-		public TcpSocketSession Client { get => client; set => client = value; }
+		public ISocket Client { get => client; set => client = value; }
 		public string Ip { get => client.RemoteEndPoint.ToString(); }
 		public string AliasName { get => aliasName; set => aliasName = value; }
 		public string ID { get; set; }
