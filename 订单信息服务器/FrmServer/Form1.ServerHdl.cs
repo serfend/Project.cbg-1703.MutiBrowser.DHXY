@@ -213,8 +213,6 @@ namespace 订单信息服务器
 		{
 			var x = sender as TcpConnection;
 			this?.Invoke((EventHandler)delegate {
-				lock (this)
-				{
 					AppendLog("已断开:" + x.Ip);
 					LstConnection.Items.Remove(_ConnectVpsClientLstViewItem[x.Ip]);
 					_ConnectVpsClientLstViewItem.Remove(x.Ip);
@@ -230,7 +228,7 @@ namespace 订单信息服务器
 						}
 						allocVps.Remove(x.Ip);
 					}
-				}
+				
 			});
 		}
 

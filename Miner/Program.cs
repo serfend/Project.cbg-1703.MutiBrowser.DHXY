@@ -486,7 +486,7 @@ namespace Miner
 					
 					var ticker = new Win32.HiperTicker();
 					ticker.Record();
-					int hdlGoodNum =  servers.ServerRun();
+					int hdlGoodNum = 0;// servers.ServerRun();
 					var avgInterval = (int)(ticker.Duration / 1000);// Program.setting.threadSetting.RefreshRunTime((int)(ticker.Duration / 1000));
 					//TODO 此处估价似乎也有延迟
 					Program.Tcp?.Send(new RpClientWaitMessage(avgInterval, hdlGoodNum, 0));
