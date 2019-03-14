@@ -35,7 +35,7 @@ namespace 订单信息服务器
 
 		private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
 		{
-			MessageBox.Show(e.Exception.Message, "线程错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			MessageBox.Show($"{e.Exception.Message}\n{e.Exception.StackTrace}", "线程错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
 		}
 
 		private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)

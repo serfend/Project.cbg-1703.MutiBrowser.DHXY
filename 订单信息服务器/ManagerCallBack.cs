@@ -17,21 +17,31 @@ namespace Server
 		
 		
 		private static ListViewItem item;
-		private static ListViewItem targetItem
+		private static ListViewItem TargetItem
 		{
 			get
 			{
-				return s == null ? null : Item;
+				if (S == null)
+				{
+					MessageBox.Show("禁止在Connection初始化前使用实例");
+					return null;
+				}
+				return Item;
 			}
 		}
 		private static TcpConnection connection;
-		public static TcpConnection s { set {
+		public static TcpConnection S { set {
 				Item = null;
 				connection = value;
 			} get => connection; }
 
 		public static ListViewItem Item { get {
-				if (item == null) item = frm.GetItem(s.Ip);
+				if (item == null) item = frm.GetItem(S.Ip);
+				if (item == null)
+				{
+					MessageBox.Show($"未能找到{S.Ip}对应的实例");
+					return null;
+				}
 				return item;
 			} set => item = value; }
 		public static void Init(Form1 invoker)
@@ -72,53 +82,53 @@ namespace Server
 		}
 		private static void ServerCallBack_MsgHeartBeat(ClientMessageEventArgs e)
 		{
-			s.Send(new MsgHeartBeatMessage());
+			S.Send(new MsgHeartBeatMessage());
 		}
 		private static void ServerCallBack_RpClientConnect(ClientMessageEventArgs e)
 		{
-			frm.ClientConnect(e.Message, targetItem, s);
+			frm.ClientConnect(e.Message, TargetItem, S);
 		}
 		private static void ServerCallBack_RpNameModefied(ClientMessageEventArgs e)
 		{
-			frm.NameModefied(e.Message, targetItem, s);
+			frm.NameModefied(e.Message, TargetItem, S);
 		}
 		private static void ServerCallBack_RpInitCompleted(ClientMessageEventArgs e)
 		{
-			frm.InitComplete(e.Message, targetItem, s);
+			frm.InitComplete(e.Message, TargetItem, S);
 		}
 		private static void ServerCallBack_MsgSynFileList(ClientMessageEventArgs e)
 		{
-			frm.AppendLog("vps" + s.AliasName + "请求获取文件");
-			frm.HdlVpsFileSynRequest(e.Message["List"], s);
+			frm.AppendLog("vps" + S.AliasName + "请求获取文件");
+			frm.HdlVpsFileSynRequest(e.Message["List"], S);
 		}
 		private static void ServerCallBack_RpStatus(ClientMessageEventArgs e)
 		{
 			
 			var status = e.Message["Status"]?.ToString();
 			status = status ?? "未知";
-			targetItem.SubItems[3].Text = status;
+			TargetItem.SubItems[3].Text = status;
 			if (status.Contains(" 失败"))
 			{
-				s.Send(new CmdReRasdialMessage());
+				S.Send(new CmdReRasdialMessage());
 			}
 		}
 		private static void ServerCallBack_RpCheckBill(ClientMessageEventArgs e)
 		{
-			frm.HdlNewCheckBill(s, targetItem, e.Message["BillInfo"]?.ToString()); 
+			frm.HdlNewCheckBill(S, TargetItem, e.Message["BillInfo"]?.ToString()); 
 		}
 		private static void ServerCallBack_RpReRasdial(ClientMessageEventArgs e)
 		{
-			targetItem.SubItems[3].Text = "VPS重拨号中";
-			s.Disconnect();
+			TargetItem.SubItems[3].Text = "VPS重拨号中";
+			S.Disconnect();
 		}
 		private static void ServerCallBack_RpClientWait(ClientMessageEventArgs e)
 		{
-			frm.ClientWaiting(e.Message, targetItem, s);
+			frm.ClientWaiting(e.Message, TargetItem, S);
 		}
 		private static void ServerCallBack_RpClientRunReady(ClientMessageEventArgs e)
 		{
-			targetItem.SubItems[3].Text = "初始化完成";
-			frm.NewVpsAvailable(s.Ip);
+			TargetItem.SubItems[3].Text = "初始化完成";
+			frm.NewVpsAvailable(S.Ip);
 		}
 
 		private static void ServerCallBack_RpPayAuthKey(ClientMessageEventArgs e)
@@ -127,30 +137,30 @@ namespace Server
 		}
 		private static void ServerCallBack_RpBuildBill(ClientMessageEventArgs e)
 		{
-			targetItem.SubItems[3].Text = "开始下单";
+			TargetItem.SubItems[3].Text = "开始下单";
 		}
 		private static void ServerCallBack_RpFailBill(ClientMessageEventArgs e)
 		{
-			targetItem.SubItems[3].Text = $"下单无效:{e.Message["Content"]?.ToString()}";
+			TargetItem.SubItems[3].Text = $"下单无效:{e.Message["Content"]?.ToString()}";
 		}
 		private static void ServerCallBack_RpSuccessBill(ClientMessageEventArgs e)
 		{
-			targetItem.SubItems[3].Text = "成功下单,即将付款";
+			TargetItem.SubItems[3].Text = "成功下单,即将付款";
 			new Thread(() =>
 			{
-				frm.PayCurrentBill(frm._clientPayUser[s.Ip], e.Message["Content"]?.ToString(), (msg) =>
+				frm.PayCurrentBill(frm._clientPayUser[S.Ip], e.Message["Content"]?.ToString(), (msg) =>
 				{
 					frm.Invoke((EventHandler)delegate
 					{
-						targetItem.SubItems[3].Text = msg;
+						TargetItem.SubItems[3].Text = msg;
 					});
 				});
 			}).Start();
 		}
 		private static void ServerCallBack_Default(ClientMessageEventArgs e)
 		{
-			frm.AppendLog($"新消息[{s.AliasName}] {e.Title}:{e.Message["Content"]}");
-			targetItem.SubItems[3].Text = e.Title;
+			frm.AppendLog($"新消息[{S.AliasName}] {e.Title}:{e.Message["Content"]}");
+			TargetItem.SubItems[3].Text = e.Title;
 		}
 	}
 	public static class ServerCallBack
@@ -158,17 +168,23 @@ namespace Server
 		public const string DefaultCallBack = "DefaultCallBack";
 		private static Dictionary<string, Action<ClientMessageEventArgs>> dic;
 		public static void Exec(object sender,ClientMessageEventArgs e) {
-			var title = e.Title;
-			dic.TryGetValue(title, out Action<ClientMessageEventArgs> action);
-			if (action == null)
+			lock (dic)
 			{
-				dic.TryGetValue(DefaultCallBack,out action);
-				if(action==null) throw new ActionNotRegException($"命令[{title}]未被注册");
+				var title = e.Title;
+				dic.TryGetValue(title, out Action<ClientMessageEventArgs> action);
+				if (action == null)
+				{
+					dic.TryGetValue(DefaultCallBack, out action);
+					if (action == null) throw new ActionNotRegException($"命令[{title}]未被注册");
+				}
+				ServerCallBackStatic.S = sender as TcpConnection;
+				if (ServerCallBackStatic.S == null)
+				{
+					MessageBox.Show($"CallBack.Exec发现无效的执行,Conncetion未实例\n{e.RawString}");
+					return;
+				}
+				frm.Invoke(action, new object[] { e });
 			}
-			ServerCallBackStatic.s = sender as TcpConnection;
-			frm.BeginInvoke(action, new object[] { e });
-			
-		
 		}
 		static ServerCallBack()
 		{

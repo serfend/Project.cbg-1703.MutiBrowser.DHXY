@@ -214,8 +214,12 @@ namespace 订单信息服务器
 			var x = sender as TcpConnection;
 			this?.Invoke((EventHandler)delegate {
 					AppendLog("已断开:" + x.Ip);
+				lock (_ConnectVpsClientLstViewItem)
+				{
 					LstConnection.Items.Remove(_ConnectVpsClientLstViewItem[x.Ip]);
 					_ConnectVpsClientLstViewItem.Remove(x.Ip);
+				}
+					
 					_dicVpsWorkBeginTime.Remove(x.Ip);
 					_clientPayUser.Remove(x.Ip);
 					AvailableVps[x.Ip] = false;
@@ -250,6 +254,7 @@ namespace 订单信息服务器
 						info[5] = "暂无";//任务
 						info[6] = "未知";//版本
 						var item = new ListViewItem(info);
+						lock(_ConnectVpsClientLstViewItem)
 						_ConnectVpsClientLstViewItem.Add(x.Ip, item);
 						_dicVpsWorkBeginTime.Add(x.Ip, new TimeTicker());
 						LstConnection.Items.Add(item);
@@ -340,6 +345,16 @@ namespace 订单信息服务器
 			var version = InnerInfo["Version"]?.ToString();
 			var clientType = InnerInfo["Type"]?.ToString();
 			version = version?.Length > 0 ? version : "未知";
+			if (targetItem == null)
+			{
+				MessageBox.Show($"ClientConnect.targetItem为空：\n{InnerInfo.ToString()}");
+				return;
+			}
+			if (s == null)
+			{
+				MessageBox.Show($"ClientConnect.TcpConnection为空:\n{InnerInfo.ToString()}");
+				return;
+			}
 			targetItem.SubItems[6].Text = version;
 			targetItem.SubItems[0].Text = hdlServerName;
 			targetItem.SubItems[1].Text = clientType;
@@ -365,6 +380,7 @@ namespace 订单信息服务器
 						targetItem.SubItems[3].Text = "初始化";
 						s.ID = InnerInfo["DeviceId"]?.ToString();
 						var clientName = regSettingVps.In(s.ID).GetInfo("Name", targetItem.SubItems[0].Text);
+						targetItem.SubItems[0].Text = clientName;
 						s.Send(new CmdSetClientNameMessage(clientName));//用于确认当前名称并初始化
 						break;
 					}

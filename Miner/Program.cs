@@ -100,8 +100,12 @@ namespace Miner
 					{
 						case VpsStatus.Connecting:
 							{
-								vpsStatus = VpsStatus.Connecting;
-								InitTcp();
+								if (disconnectTime++ > 5 && anyTaskWorking==false)
+								{
+									disconnectTime = 0;
+									vpsStatus = VpsStatus.Connecting;
+									InitTcp();
+								}
 								break;
 							}
 						case VpsStatus.WaitConnect:
@@ -116,6 +120,7 @@ namespace Miner
 
 									}
 									else {
+										disconnectTime = 0;
 										vpsStatus = VpsStatus.Connecting;
 										InitTcp();
 									};//尝试连接次数过多，则重连宽带
@@ -486,7 +491,7 @@ namespace Miner
 					
 					var ticker = new Win32.HiperTicker();
 					ticker.Record();
-					int hdlGoodNum = 0;// servers.ServerRun();
+					int hdlGoodNum =  servers.ServerRun();
 					var avgInterval = (int)(ticker.Duration / 1000);// Program.setting.threadSetting.RefreshRunTime((int)(ticker.Duration / 1000));
 					//TODO 此处估价似乎也有延迟
 					Program.Tcp?.Send(new RpClientWaitMessage(avgInterval, hdlGoodNum, 0));

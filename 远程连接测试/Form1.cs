@@ -75,7 +75,7 @@ namespace 远程连接测试
 		private  void Server_ReceiveCompleted(object sender, SocketEventArgs e)
 		{
 			var raw = Encoding.UTF8.GetString(e.Data);
-			//AppendText($"ReceiveComplete:{e.Socket.RemoteEndPoint.ToString()}\n{raw}");
+			AppendText($"ReceiveComplete:{e.Socket.RemoteEndPoint.ToString()}\n{raw}");
 			e.Socket.Send(Encoding.UTF8.GetBytes("cmd"));
 		}
 
@@ -108,8 +108,10 @@ namespace 远程连接测试
 		{
 			var raw = Encoding.UTF8.GetString(e.Data);
 			AppendText($"接收信息:{raw}");
-			Thread.Sleep(1000);
-			e.Socket.Send(Encoding.UTF8.GetBytes(textBox3.Text));
+			new Thread(()=> {
+				Thread.Sleep(100);
+				e.Socket.Send(Encoding.UTF8.GetBytes(textBox3.Text));
+			}).Start();
 		}
 
 		private void button1_Click(object sender, EventArgs e)
