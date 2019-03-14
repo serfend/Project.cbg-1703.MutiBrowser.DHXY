@@ -29,7 +29,7 @@ namespace SfTcp.TcpClient
 			};
 			Client.OnMessaged += (x, xx) =>
 			{
-				Console.WriteLine($"clientReceive:{xx.RawString}");
+				//Console.WriteLine($"clientReceive:{xx.RawString}");
 				OnMessage?.Invoke(this, xx);
 			};
 		}

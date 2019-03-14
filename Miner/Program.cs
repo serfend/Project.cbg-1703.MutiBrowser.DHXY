@@ -98,6 +98,12 @@ namespace Miner
 						Console.WriteLine(vpsStatus);
 					switch (vpsStatus)
 					{
+						case VpsStatus.Connecting:
+							{
+								vpsStatus = VpsStatus.Connecting;
+								InitTcp();
+								break;
+							}
 						case VpsStatus.WaitConnect:
 							{
 								if (disconnectTime++ > 5 && anyTaskWorking == false)
