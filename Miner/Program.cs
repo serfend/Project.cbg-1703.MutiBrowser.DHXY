@@ -209,6 +209,8 @@ namespace Miner
 
 		private static void Tcp_OnConnected(object sender, ServerConnectEventArgs e)
 		{
+			vpsStatus = VpsStatus.Syning;
+			Thread.Sleep(1000);
 			HelloToServer();
 		}
 
@@ -442,7 +444,7 @@ namespace Miner
 		}
 		private static void MinerCallBack_CmdReRasdial(ClientMessageEventArgs e)
 		{
-			Tcp.Send(new RpReRasdialMessage());
+			Tcp.Send(new RpReRasdialMessage("cmd"));
 			RedialToInternet();
 		}
 		private static void MinerCallBack_CmdStartNewProgram(ClientMessageEventArgs e)
@@ -479,19 +481,20 @@ namespace Miner
 					
 					var nextRuntimeStamp = Convert.ToInt32(e.Message["TaskStamp"]?.ToString());
 
-					if (nextRuntimeStamp > 499) Tcp.Send(new RpClientWaitMessage(0, 0, 101));//开始等待
-						Thread.Sleep(nextRuntimeStamp);
-					if (nextRuntimeStamp > 499) Tcp.Send(new RpClientWaitMessage(0, 0, -101));//结束等待
-						if (servers == null)
-						{
-							Console.WriteLine("servers未初始化");
-							return;
-						}
+					//if (nextRuntimeStamp > 499) Tcp.Send(new RpClientWaitMessage(0, 0, 101));//开始等待
+					Thread.Sleep(nextRuntimeStamp);
+					//if (nextRuntimeStamp > 499) Tcp.Send(new RpClientWaitMessage(0, 0, -101));//结束等待
+					//	if (servers == null)
+					//	{
+					//		Console.WriteLine("servers未初始化");
+					//		return;
+					//	}
 					
 					
 					var ticker = new Win32.HiperTicker();
 					ticker.Record();
-					int hdlGoodNum =  servers.ServerRun();
+					//Thread.Sleep(60);
+					int hdlGoodNum = servers.ServerRun();
 					var avgInterval = (int)(ticker.Duration / 1000);// Program.setting.threadSetting.RefreshRunTime((int)(ticker.Duration / 1000));
 					//TODO 此处估价似乎也有延迟
 					Program.Tcp?.Send(new RpClientWaitMessage(avgInterval, hdlGoodNum, 0));

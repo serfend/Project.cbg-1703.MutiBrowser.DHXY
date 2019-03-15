@@ -58,6 +58,7 @@ namespace Server
 			ServerCallBack.RegCallback(TcpMessageEnum.RpInitCompleted, ServerCallBack_RpInitCompleted);
 			ServerCallBack.RegCallback(TcpMessageEnum.MsgSynFileList, ServerCallBack_MsgSynFileList);
 			ServerCallBack.RegCallback(TcpMessageEnum.RpStatus, ServerCallBack_RpStatus);
+			ServerCallBack.RegCallback(TcpMessageEnum.RpReRasdial, ServerCallBack_RpReRasdial);
 			ServerCallBack.RegCallback(TcpMessageEnum.RpCheckBill, ServerCallBack_RpCheckBill);
 			ServerCallBack.RegCallback(TcpMessageEnum.RpClientWait, ServerCallBack_RpClientWait);
 			ServerCallBack.RegCallback(TcpMessageEnum.RpClientRunReady, ServerCallBack_RpClientRunReady);
@@ -118,8 +119,7 @@ namespace Server
 		}
 		private static void ServerCallBack_RpReRasdial(ClientMessageEventArgs e)
 		{
-			TargetItem.SubItems[3].Text = "VPS重拨号中";
-			S.Disconnect();
+			TargetItem.SubItems[3].Text = $"重启:{e.Message["Reason"]?.ToString()}";
 		}
 		private static void ServerCallBack_RpClientWait(ClientMessageEventArgs e)
 		{
@@ -183,7 +183,7 @@ namespace Server
 					MessageBox.Show($"CallBack.Exec发现无效的执行,Conncetion未实例\n{e.RawString}");
 					return;
 				}
-				frm.Invoke(action, new object[] { e });
+				frm.BeginInvoke(action, new object[] { e });
 			}
 		}
 		static ServerCallBack()

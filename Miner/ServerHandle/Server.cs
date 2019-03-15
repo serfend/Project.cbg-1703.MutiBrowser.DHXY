@@ -48,7 +48,7 @@ namespace Miner
 			}
 			public static void ExitAftert(string info)
 			{
-				Program.setting.threadSetting.Status =info;
+				Program.Tcp?.Send(new RpReRasdialMessage(info));
 				var logInfo = $"{info}->进程关闭";
 				Console.WriteLine(logInfo);
 				Program.setting.LogInfo(info + "进程关闭","主记录");

@@ -3,7 +3,6 @@ D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Miner.pdb
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Interop.MSScriptControl.dll
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Newtonsoft.Json.dll
-D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\protobuf-net.dll
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\SfTcp.dll
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\System.Net.Http.dll
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\TcpFiletransfer.dll
@@ -11,7 +10,6 @@ D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\SfTcp.pdb
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Newtonsoft.Json.pdb
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Newtonsoft.Json.xml
-D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\protobuf-net.xml
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\System.Net.Http.xml
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\bin\Debug\Interop.WinHttp.dll
 D:\aserfend\workSpace\repos\projects\大话西游藏宝阁\Project.1703.DHXY-cbg\多开浏览器子线程\Miner\obj\Debug\Miner.csprojAssemblyReference.cache

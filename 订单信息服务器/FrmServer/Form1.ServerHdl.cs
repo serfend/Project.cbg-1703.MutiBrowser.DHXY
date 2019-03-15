@@ -187,23 +187,20 @@ namespace 订单信息服务器
 
 		private void Server_OnTcpMessage(object sender, ClientMessageEventArgs e)
 		{
-			lock (this)
+			try
 			{
-				try
-				{
-					ServerCallBack.Exec(sender, e);
-				}
-				catch (Exception ex)
-				{
-					new Thread(() => {
-						var info = $"接收发生异常:{ex.Message}\n{e.RawString}";
-						Console.WriteLine(info);
-						this.Invoke((EventHandler)delegate {
-							AppendLog(info);
-						});
-					}).Start();
-					return;
-				}
+				ServerCallBack.Exec(sender, e);
+			}
+			catch (Exception ex)
+			{
+				new Thread(() => {
+					var info = $"接收发生异常:{ex.Message}\n{e.RawString}";
+					Console.WriteLine(info);
+					this.Invoke((EventHandler)delegate {
+						AppendLog(info);
+					});
+				}).Start();
+				return;
 			}
 		}
 		
@@ -213,9 +210,10 @@ namespace 订单信息服务器
 		{
 			var x = sender as TcpConnection;
 			this?.Invoke((EventHandler)delegate {
-					AppendLog("已断开:" + x.Ip);
+				AppendLog("已断开:" + x.Ip);
 				lock (_ConnectVpsClientLstViewItem)
 				{
+					if (!_ConnectVpsClientLstViewItem.ContainsKey(x.Ip)) return;
 					LstConnection.Items.Remove(_ConnectVpsClientLstViewItem[x.Ip]);
 					_ConnectVpsClientLstViewItem.Remove(x.Ip);
 				}
@@ -238,38 +236,35 @@ namespace 订单信息服务器
 
 		private void Server_OnTcpConnect(object sender, ClientConnectEventArgs e)
 		{
-			lock (this)
+			try
 			{
-				try
-				{
-					var x = sender as TcpConnection;
-					this.Invoke((EventHandler)delegate {
-						AppendLog("已连接:" + x.Ip);
-						var info = new string[7];
-						info[1] = x.IsLocal ? "主机" : "终端";
-						info[2] = x.Ip;
-						info[0] = x.AliasName;
-						info[3] = "新建状态";
-						info[4] = "未开始采集";//延迟
-						info[5] = "暂无";//任务
-						info[6] = "未知";//版本
-						var item = new ListViewItem(info);
-						lock(_ConnectVpsClientLstViewItem)
-						_ConnectVpsClientLstViewItem.Add(x.Ip, item);
-						_dicVpsWorkBeginTime.Add(x.Ip, new TimeTicker());
-						LstConnection.Items.Add(item);
-						_clientPayUser.Add(x.Ip, "...");
-						var welcome = new Task(() => {
-							Thread.Sleep(3000);
-							x.Send("welcome", DateTime.Now.ToString());
-						});
-						welcome.Start();
+				var x = sender as TcpConnection;
+				this.Invoke((EventHandler)delegate {
+					AppendLog("已连接:" + x.Ip);
+					var info = new string[7];
+					info[1] = x.IsLocal ? "主机" : "终端";
+					info[2] = x.Ip;
+					info[0] = x.AliasName;
+					info[3] = "新建状态";
+					info[4] = "未开始采集";//延迟
+					info[5] = "暂无";//任务
+					info[6] = "未知";//版本
+					var item = new ListViewItem(info);
+					lock(_ConnectVpsClientLstViewItem)
+					_ConnectVpsClientLstViewItem.Add(x.Ip, item);
+					_dicVpsWorkBeginTime.Add(x.Ip, new TimeTicker());
+					LstConnection.Items.Add(item);
+					_clientPayUser.Add(x.Ip, "...");
+					var welcome = new Task(() => {
+						Thread.Sleep(3000);
+						x.Send("welcome", DateTime.Now.ToString());
 					});
-				}
-				catch (Exception ex)
-				{
-					MessageBox.Show($"连接终端发生异常{ex.Message}");
-				}
+					welcome.Start();
+				});
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show($"连接终端发生异常{ex.Message}");
 			}
 		}
 
@@ -282,7 +277,7 @@ namespace 订单信息服务器
 				var hdlNum = Convert.ToInt32(InnerInfo["H"]);
 				var intervals = _dicVpsWorkBeginTime[s.Ip].RecordEnd();
 				targetItem.SubItems[4].Text = $"{intervals}/{vpsInterval}";
-				targetItem.SubItems[3].Text = $"已处理:{hdlNum},等待下次分配";
+				targetItem.SubItems[3].Text = $"已处理:{hdlNum}";
 				NewVpsAvailable(s.Ip);
 				return;
 			}
