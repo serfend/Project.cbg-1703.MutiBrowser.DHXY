@@ -18,6 +18,8 @@
 				components.Dispose();
 				if(transferFileEngine!=null)transferFileEngine.Dispose();
 				transferFileEngine = null;
+				if (server != null) server.Dispose();
+				server = null;
 			}
 			base.Dispose(disposing);
 		}
@@ -30,6 +32,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
 			this.TabMain = new System.Windows.Forms.TabControl();
 			this.TabMain_VpsManager = new System.Windows.Forms.TabPage();
 			this.LstBrowserClient = new System.Windows.Forms.ListView();
@@ -53,7 +56,6 @@
 			this.IpSender = new System.Windows.Forms.TextBox();
 			this.CmdDisconnect = new System.Windows.Forms.Button();
 			this.CmdServerOn = new System.Windows.Forms.Button();
-			this.OpLog = new System.Windows.Forms.TextBox();
 			this.OpConnectionCount = new System.Windows.Forms.Label();
 			this.LstConnection = new System.Windows.Forms.ListView();
 			this.LstConnection_ClientName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -85,6 +87,9 @@
 			this.Verify = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.ServerHdl = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.Psw = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.OpLog = new System.Windows.Forms.ListView();
+			this.OpLog_Time = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.OpLog_Content = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.TabMain.SuspendLayout();
 			this.TabMain_VpsManager.SuspendLayout();
 			this.TabMain_Setting.SuspendLayout();
@@ -104,6 +109,7 @@
 			// 
 			// TabMain_VpsManager
 			// 
+			this.TabMain_VpsManager.Controls.Add(this.OpLog);
 			this.TabMain_VpsManager.Controls.Add(this.LstBrowserClient);
 			this.TabMain_VpsManager.Controls.Add(this.CmdPayBill);
 			this.TabMain_VpsManager.Controls.Add(this.CmdPauseTaskAllocate);
@@ -113,7 +119,6 @@
 			this.TabMain_VpsManager.Controls.Add(this.IpSender);
 			this.TabMain_VpsManager.Controls.Add(this.CmdDisconnect);
 			this.TabMain_VpsManager.Controls.Add(this.CmdServerOn);
-			this.TabMain_VpsManager.Controls.Add(this.OpLog);
 			this.TabMain_VpsManager.Controls.Add(this.OpConnectionCount);
 			this.TabMain_VpsManager.Controls.Add(this.LstConnection);
 			this.TabMain_VpsManager.Location = new System.Drawing.Point(4, 22);
@@ -278,14 +283,6 @@
 			this.CmdServerOn.Text = "发送";
 			this.CmdServerOn.UseVisualStyleBackColor = true;
 			this.CmdServerOn.Click += new System.EventHandler(this.CmdServerOn_Click);
-			// 
-			// OpLog
-			// 
-			this.OpLog.Location = new System.Drawing.Point(539, 26);
-			this.OpLog.Multiline = true;
-			this.OpLog.Name = "OpLog";
-			this.OpLog.Size = new System.Drawing.Size(366, 359);
-			this.OpLog.TabIndex = 20;
 			// 
 			// OpConnectionCount
 			// 
@@ -557,12 +554,35 @@
 			this.Psw.Text = "密码";
 			this.Psw.Width = 150;
 			// 
+			// OpLog
+			// 
+			this.OpLog.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.OpLog_Time,
+            this.OpLog_Content});
+			this.OpLog.Location = new System.Drawing.Point(540, 26);
+			this.OpLog.Name = "OpLog";
+			this.OpLog.Size = new System.Drawing.Size(361, 358);
+			this.OpLog.TabIndex = 41;
+			this.OpLog.UseCompatibleStateImageBehavior = false;
+			this.OpLog.View = System.Windows.Forms.View.Details;
+			// 
+			// OpLog_Time
+			// 
+			this.OpLog_Time.Text = "时间";
+			this.OpLog_Time.Width = 80;
+			// 
+			// OpLog_Content
+			// 
+			this.OpLog_Content.Text = "内容";
+			this.OpLog_Content.Width = 280;
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(920, 1031);
 			this.Controls.Add(this.TabMain);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "Form1";
 			this.Text = "服务器";
 			this.TabMain.ResumeLayout(false);
@@ -594,7 +614,6 @@
 		private System.Windows.Forms.TextBox IpSender;
 		private System.Windows.Forms.Button CmdDisconnect;
 		private System.Windows.Forms.Button CmdServerOn;
-		private System.Windows.Forms.TextBox OpLog;
 		private System.Windows.Forms.Label OpConnectionCount;
 		private System.Windows.Forms.ListView LstConnection;
 		private System.Windows.Forms.ColumnHeader LstConnection_ClientName;
@@ -633,6 +652,9 @@
 		private System.Windows.Forms.ColumnHeader BrowserClient_Status;
 		private System.Windows.Forms.CheckBox IpCheckBeforePay;
 		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.ListView OpLog;
+		private System.Windows.Forms.ColumnHeader OpLog_Time;
+		private System.Windows.Forms.ColumnHeader OpLog_Content;
 	}
 }
 

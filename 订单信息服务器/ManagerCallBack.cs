@@ -70,19 +70,24 @@ namespace Server
 		{
 			switch (e.Message["Status"]?.ToString())
 			{
-				case "New":
+				case "0":
 					ServerCallBack_RpBuildBill(e);
 					break;
-				case "Fail":
+				case "2":
 					ServerCallBack_RpFailBill(e);
 					break;
-				case "Success":
+				case "1":
 					ServerCallBack_RpSuccessBill(e);
 					break;
 			}
 		}
 		private static void ServerCallBack_MsgHeartBeat(ClientMessageEventArgs e)
 		{
+			if(!TargetItem.SubItems[3].Text.Contains("心跳")) TargetItem.SubItems[3].Text += "心跳";
+			else
+			{
+				TargetItem.SubItems[3].Text=TargetItem.SubItems[3].Text.Replace("心跳", "");
+			}
 			S.Send(new MsgHeartBeatMessage());
 		}
 		private static void ServerCallBack_RpClientConnect(ClientMessageEventArgs e)
@@ -120,6 +125,7 @@ namespace Server
 		private static void ServerCallBack_RpReRasdial(ClientMessageEventArgs e)
 		{
 			TargetItem.SubItems[3].Text = $"重启:{e.Message["Reason"]?.ToString()}";
+			S.Disconnect();
 		}
 		private static void ServerCallBack_RpClientWait(ClientMessageEventArgs e)
 		{
@@ -141,7 +147,7 @@ namespace Server
 		}
 		private static void ServerCallBack_RpFailBill(ClientMessageEventArgs e)
 		{
-			TargetItem.SubItems[3].Text = $"下单无效:{e.Message["Content"]?.ToString()}";
+			TargetItem.SubItems[3].Text = $"{e.Message["R"]?.ToString()}";
 		}
 		private static void ServerCallBack_RpSuccessBill(ClientMessageEventArgs e)
 		{
@@ -168,10 +174,11 @@ namespace Server
 		public const string DefaultCallBack = "DefaultCallBack";
 		private static Dictionary<string, Action<ClientMessageEventArgs>> dic;
 		public static void Exec(object sender,ClientMessageEventArgs e) {
+			Action<ClientMessageEventArgs> action;
 			lock (dic)
 			{
 				var title = e.Title;
-				dic.TryGetValue(title, out Action<ClientMessageEventArgs> action);
+				dic.TryGetValue(title, out  action);
 				if (action == null)
 				{
 					dic.TryGetValue(DefaultCallBack, out action);
@@ -183,8 +190,8 @@ namespace Server
 					MessageBox.Show($"CallBack.Exec发现无效的执行,Conncetion未实例\n{e.RawString}");
 					return;
 				}
-				frm.BeginInvoke(action, new object[] { e });
 			}
+			frm.Invoke(action, new object[] { e });
 		}
 		static ServerCallBack()
 		{

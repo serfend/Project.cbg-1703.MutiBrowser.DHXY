@@ -196,9 +196,16 @@ namespace 订单信息服务器
 				new Thread(() => {
 					var info = $"接收发生异常:{ex.Message}\n{e.RawString}";
 					Console.WriteLine(info);
-					this.Invoke((EventHandler)delegate {
-						AppendLog(info);
-					});
+					try
+					{
+						this.Invoke((EventHandler)delegate {
+							AppendLog(info);
+						});
+					}
+					catch 
+					{
+
+					}
 				}).Start();
 				return;
 			}
@@ -250,16 +257,11 @@ namespace 订单信息服务器
 					info[5] = "暂无";//任务
 					info[6] = "未知";//版本
 					var item = new ListViewItem(info);
-					lock(_ConnectVpsClientLstViewItem)
-					_ConnectVpsClientLstViewItem.Add(x.Ip, item);
+					lock (_ConnectVpsClientLstViewItem)
+						_ConnectVpsClientLstViewItem.Add(x.Ip, item);
 					_dicVpsWorkBeginTime.Add(x.Ip, new TimeTicker());
 					LstConnection.Items.Add(item);
 					_clientPayUser.Add(x.Ip, "...");
-					var welcome = new Task(() => {
-						Thread.Sleep(3000);
-						x.Send("welcome", DateTime.Now.ToString());
-					});
-					welcome.Start();
 				});
 			}
 			catch (Exception ex)

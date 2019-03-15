@@ -8,6 +8,8 @@ namespace 多开浏览器子线程
 {
 	public class TcpBrowserClient:SfTcp.TcpClient.TcpClient
 	{
-		public TcpBrowserClient():base("127.0.0.1",8009) { }
+		public TcpBrowserClient():base("127.0.0.1",8009) {
+			
+		}
 	}
 }

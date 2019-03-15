@@ -78,7 +78,7 @@
 			this.textBox3.Name = "textBox3";
 			this.textBox3.Size = new System.Drawing.Size(347, 173);
 			this.textBox3.TabIndex = 4;
-			this.textBox3.Text = "{\"Title\":\"rpClientConnect\",\"Name\":\"null\",\"Type\":\"vps\",}";
+			this.textBox3.Text = "<jsonMsg>{\"Title\":\"rpClientConnect\",\"Name\":\"null\",\"Type\":\"vps\",}</jsonMsg>";
 			// 
 			// button3
 			// 

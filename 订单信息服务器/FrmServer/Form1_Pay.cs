@@ -320,15 +320,15 @@ namespace 订单信息服务器
 						ManagerHttpBase.RecordMoneyGetTime++;
 						ManagerHttpBase.RecordBill(goodName,priceNum,priceNumAssume);
 					}
-					PayCurrentBill(serverNum, InnerInfo,
-						(x)=> { targetItem.SubItems[3].Text = x; }
-					);
+					//PayCurrentBill(serverNum, InnerInfo,
+					//	(x)=> { targetItem.SubItems[3].Text = x; }
+					//);
 				}
 				ManagerHttpBase.FitWebShowTime++;
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show($"订单处理异常:{ex.Message}\n\n{ex.StackTrace}");
+				new Thread(() => { MessageBox.Show($"订单处理异常:{ex.Message}\n\n{ex.StackTrace}"); }).Start();
 			}
 		}
 		/// <summary>

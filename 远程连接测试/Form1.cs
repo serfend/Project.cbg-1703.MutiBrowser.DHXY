@@ -63,6 +63,7 @@ namespace 远程连接测试
 		{
 			this.Invoke((EventHandler)delegate {
 				textBox2.Text = $"{raw}\r\n{textBox2.Text}";
+				if (textBox2.Text.Length > 10000) textBox2.Text = "";
 			});
 		}
 
@@ -93,10 +94,19 @@ namespace 远程连接测试
 		{
 			AppendText("断开连接完成");
 		}
-
+		private Thread clientMsg;
 		private  void Client_ConnectCompleted(object sender, SocketEventArgs e)
 		{
 			AppendText("连接完成");
+			clientMsg= new Thread(() => {
+				while (true)
+				{
+					client.Send(Encoding.UTF8.GetBytes(textBox3.Text));
+					Thread.Sleep(200);
+				}
+			});
+			clientMsg.IsBackground = true;
+			clientMsg.Start();
 		}
 
 		private  void Client_SendCompleted(object sender, SocketEventArgs e)
