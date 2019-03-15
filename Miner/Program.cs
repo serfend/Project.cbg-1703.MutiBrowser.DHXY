@@ -103,8 +103,7 @@ namespace Miner
 								if (disconnectTime++ > 5 && anyTaskWorking==false)
 								{
 									disconnectTime = 0;
-									vpsStatus = VpsStatus.Connecting;
-									InitTcp();
+									vpsStatus = VpsStatus.WaitConnect;
 								}
 								break;
 							}
@@ -140,6 +139,14 @@ namespace Miner
 								break;
 							}
 						case VpsStatus.Running:
+							{
+								if(Environment.TickCount- servers.LastServerRunTime > 10000 )
+								{
+									vpsIsDigging = false;
+									ServerBeginRun(0);
+								}
+								break;
+							}
 						case VpsStatus.Syning:
 							{
 								
@@ -149,7 +156,11 @@ namespace Miner
 								}
 								else
 								{
-									connectFailTime =0;
+									if (disconnectTime++ > 15 && anyTaskWorking == false)
+									{
+										disconnectTime = 0;
+										vpsStatus = VpsStatus.WaitConnect;
+									}
 								}
 								break;
 							}
@@ -254,9 +265,11 @@ namespace Miner
 		public static void RedialToInternet()
 		{
 			//Program.Tcp?.Dispose();
-			var p = new CmdRasdial();
-			p.DisRasdial();
+			
 			var t = new Task(() => {
+				Thread.Sleep(1000);
+				var p = new CmdRasdial();
+				p.DisRasdial();
 				Thread.Sleep(1000);
 				p.Rasdial();
 				Program.vpsStatus = VpsStatus.WaitConnect;
@@ -463,6 +476,18 @@ namespace Miner
 		}
 		private static void MinerCallBack_CmdServerRunSchedule(ClientMessageEventArgs e)
 		{
+			
+			var s = new Thread(() =>
+			{
+				var nextRuntimeStamp = Convert.ToInt32(e.Message["TaskStamp"]?.ToString());
+				ServerBeginRun(nextRuntimeStamp);
+			})
+			{ IsBackground = true };
+			s.Start();
+		}
+
+		private static void ServerBeginRun(int nextRuntimeStamp)
+		{
 			vpsStatus = VpsStatus.Running;
 			if (vpsIsDigging)
 			{
@@ -470,46 +495,32 @@ namespace Miner
 				return;
 			}
 			vpsIsDigging = true;
-			//TODO 此处实现时统无效，待以后修正
-			//var sendStamp =Convert.ToInt64( HttpUtil.GetElementInItem(xx,"sendStamp"));
-			//var sendStampStruct =SystemTimeWin32.FromStamp(sendStamp);
-			//var result = SystemTimeWin32.SetSystemTime(ref sendStampStruct);
-			var s = new Thread(() =>
+			try
 			{
-				try
+				//if (nextRuntimeStamp > 499) Tcp.Send(new RpClientWaitMessage(0, 0, 101));//开始等待
+				Thread.Sleep(nextRuntimeStamp);
+				//if (nextRuntimeStamp > 499) Tcp.Send(new RpClientWaitMessage(0, 0, -101));//结束等待
+				//	if (servers == null)
+				//	{
+				//		Console.WriteLine("servers未初始化");
+				//		return;
+				//	}
+				var ticker = new Win32.HiperTicker();
+				ticker.Record();
+				//Thread.Sleep(60);
+				int hdlGoodNum = servers.ServerRun();
+				var avgInterval = (int)(ticker.Duration / 1000);// Program.setting.threadSetting.RefreshRunTime((int)(ticker.Duration / 1000));
+				//TODO 此处估价似乎也有延迟
+				Program.Tcp?.Send(new RpClientWaitMessage(avgInterval, hdlGoodNum, 0));
+			}
+			catch (Exception ex)
 			{
-					
-					var nextRuntimeStamp = Convert.ToInt32(e.Message["TaskStamp"]?.ToString());
-
-					//if (nextRuntimeStamp > 499) Tcp.Send(new RpClientWaitMessage(0, 0, 101));//开始等待
-					Thread.Sleep(nextRuntimeStamp);
-					//if (nextRuntimeStamp > 499) Tcp.Send(new RpClientWaitMessage(0, 0, -101));//结束等待
-					//	if (servers == null)
-					//	{
-					//		Console.WriteLine("servers未初始化");
-					//		return;
-					//	}
-					
-					
-					var ticker = new Win32.HiperTicker();
-					ticker.Record();
-					//Thread.Sleep(60);
-					int hdlGoodNum = servers.ServerRun();
-					var avgInterval = (int)(ticker.Duration / 1000);// Program.setting.threadSetting.RefreshRunTime((int)(ticker.Duration / 1000));
-					//TODO 此处估价似乎也有延迟
-					Program.Tcp?.Send(new RpClientWaitMessage(avgInterval, hdlGoodNum, 0));
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine($"处理日程失败;{ex.Message}");
-				}
-				finally
-				{
-					vpsIsDigging = false;
-				}
-			})
-			{ IsBackground = true };
-			s.Start();
+				Console.WriteLine($"处理日程失败;{ex.Message}");
+			}
+			finally
+			{
+				vpsIsDigging = false;
+			}
 		}
 
 		#endregion

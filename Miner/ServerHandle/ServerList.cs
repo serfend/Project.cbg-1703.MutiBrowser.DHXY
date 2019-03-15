@@ -49,7 +49,7 @@ namespace Miner
 				}
 				Program.setting.threadSetting.Status = string.Format("目标服务器加载完成,共计{0}个", HdlServer.Count);
 			}
-			private int runTimeRecord = 0;
+			private int lastServerRunTime = 0;
 			
 			#region checkip
 			//private bool isUseSelfIp=true;
@@ -78,7 +78,7 @@ namespace Miner
 
 			public int ServerRun()
 			{
-				runTimeRecord++;
+				LastServerRunTime=Environment.TickCount;
 				int hdlGoodNum = 0;
 				try
 				{
@@ -100,8 +100,6 @@ namespace Miner
 							hdlGoodNum++;
 						}
 					}
-					
-					
 				}
 				catch (GoodListNoDataException ex)
 				{
@@ -133,6 +131,7 @@ namespace Miner
 			}
 
 			public List<Server> HdlServer { get => hdlServer; set => hdlServer = value; }
+			public int LastServerRunTime { get => lastServerRunTime; set => lastServerRunTime = value; }
 
 			#region IDisposable Support
 			private bool disposedValue = false; // 要检测冗余调用
