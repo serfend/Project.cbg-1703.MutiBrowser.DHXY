@@ -24,16 +24,35 @@ namespace 多开浏览器子线程
 	{
 		private  void InitTcp()
 		{
+			this.Invoke((EventHandler)delegate {
+				this.Text = $"尝试连接到服务器{DateTime.Now}";
+			});
+			Program.Tcp?.Dispose();
+			
 			Program.Tcp = new TcpBrowserClient();
-			Program.Tcp.OnMessage += ReceiveMessage; ;
+			Program.Tcp.OnMessage += ReceiveMessage; 
 			Program.Tcp.OnDisconnected += (x,xx) => {
-				Thread.Sleep(500);
 				InitTcp();
 			};
-			Thread.Sleep(500);
-			Program.Tcp?.Send(new RpClientConnectMessage("browser", Assembly.GetExecutingAssembly().GetName().Version.ToString(),Program.reg.In("Setting").GetInfo("deviceId", HttpUtil.UUID), CCmd.GetWebInfo("server")));
+			Program.Tcp.OnConnected += (x, xx) =>
+			{
+				if (xx.Operation == System.Net.Sockets.SocketAsyncOperation.Connect)
+					Program.Tcp?.Send(new RpClientConnectMessage("browser", Assembly.GetExecutingAssembly().GetName().Version.ToString(), DeviceId, CCmd.GetWebInfo("server")));
+				else
+					InitTcp();
+			};
+			new Thread(() => {
+				Thread.Sleep(5000);
+				Program.Tcp.Client.Connect();
+			}).Start();
+			
 		}
-
+		
+		private string deviceId=null;
+		private string DeviceId { get {
+				if (deviceId != null) return deviceId;
+				else return deviceId = Program.reg.In("Setting").GetInfo("deviceId", HttpUtil.UUID);
+			} }
 
 		private bool frmClosing = false;
 		Thread ThreadMonitor;
@@ -64,7 +83,9 @@ namespace 多开浏览器子线程
 					heartBeatCount++;
 					if (heartBeatCount > 10)
 					{
+						
 						Program.Tcp?.Send(new MsgHeartBeatMessage());
+						heartBeatCount = 0;
 					}
 				}
 			}) { IsBackground = true };
@@ -86,39 +107,44 @@ namespace 多开浏览器子线程
 		private double price, assumePrice;
 		private void ReceiveMessage(object sender, ClientMessageEventArgs e)
 		{
-
-			switch (e.Title)
+			this.Invoke((EventHandler)delegate
 			{
-				case TcpMessageEnum.CmdCheckBillUrl:
-					{
-
-						//<newCheckBill><targetUrl>baidu.com</targetUrl><price>999</price><assumePrice>0</assumePrice></newCheckBill>
-						var targetUrl = e.Message["Url"].ToString();
-						price = Convert.ToDouble(e.Message["Price"]);
-						assumePrice = Convert.ToDouble(e.Message["AssumePrice"]);
-						switch (e.Message["Act"].ToString())
+				this.Invoke((EventHandler)delegate {
+					this.Text = CCmd.GetWebInfo("server") + ":" + e.RawString;
+				});
+				switch (e.Title)
+				{
+					case TcpMessageEnum.CmdCheckBillUrl:
 						{
-							case "submit":
-								{ 
-									CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
-									break;
-								}
-							case "show":
-								{
-									if (assumePrice > price)
-										CheckNewCmd(CmdInfo.SubmitBill, targetUrl);
-									else CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
-									break;
-								}
+
+							//<newCheckBill><targetUrl>baidu.com</targetUrl><price>999</price><assumePrice>0</assumePrice></newCheckBill>
+							var targetUrl = e.Message["Url"].ToString();
+							price = Convert.ToDouble(e.Message["Price"]);
+							assumePrice = Convert.ToDouble(e.Message["AssumePrice"]);
+							switch (e.Message["Act"].ToString())
+							{
+								case "0":
+									{
+										CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
+										break;
+									}
+								case "1":
+									{
+										if (assumePrice > price)
+											CheckNewCmd(CmdInfo.SubmitBill, targetUrl);
+										else CheckNewCmd(CmdInfo.ShowWeb, targetUrl);
+										break;
+									}
+							}
+
+
+							break;
 						}
-						
-						
+					case TcpMessageEnum.MsgSynSession:
+						SynLoginSession();
 						break;
-					}
-				case TcpMessageEnum.MsgSynSession:
-					SynLoginSession();
-					break;
-			}
+				}
+			});
 		}
 
 		private void SynLoginSession()
