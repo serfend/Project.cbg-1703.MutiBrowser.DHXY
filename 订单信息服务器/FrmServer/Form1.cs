@@ -95,11 +95,13 @@ namespace 订单信息服务器
 		}
 		public void AppendLog(string info)
 		{
-			OpLog.AppendText("\n");
-			OpLog.AppendText(string.Format("{0}>>{1}",DateTime.Now,info));
-			if (OpLog.Text.Length > 1000)
+			var data = new string[2] {
+				DateTime.Now.ToString("hh:mm:ss"),info
+			};
+			OpLog.Items.Insert(0, new ListViewItem(data));
+			if (OpLog.Items.Count > 50)
 			{
-				OpLog.Clear();
+				OpLog.Items.RemoveAt(49);
 			}
 		}
 		public ListViewItem GetItem(string ip)
